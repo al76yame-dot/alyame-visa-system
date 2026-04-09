@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اليامي - إدارة العملاء CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D1B3E;--navy2:#1A2F5A;
+  --gold:#C49A3C;--gold-l:#F5E8C0;--gold-d:#8B6914;
+  --green:#1D9E75;--green-l:#E1F5EE;
+  --red:#A32D2D;--red-l:#FCEBEB;
+  --blue:#185FA5;--blue-l:#E6F1FB;
+  --amber:#BA7517;--amber-l:#FEF3DC;
+  --border:#E5E0D5;--bg:#F8F7F3;--bg2:#FFFFFF;
+  --text:#1A1A1A;--text2:#5A5A5A;--text3:#9A9A9A;
+}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--navy);color:white;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto;z-index:100}
+.main{margin-right:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* SIDEBAR */
+.sb-head{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.sb-logo{width:40px;height:40px;border-radius:8px;object-fit:contain;background:white;flex-shrink:0;padding:3px}
+.sb-name{font-size:14px;font-weight:700;color:var(--gold-l)}
+.sb-sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+.sb-badge{background:rgba(196,154,60,0.25);color:var(--gold-l);font-size:10px;padding:1px 8px;border-radius:10px;margin-top:4px;display:inline-block;font-weight:600}
+.ns{padding:6px 16px;font-size:10px;color:rgba(255,255,255,.3);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+.ni{padding:9px 16px;display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.75);border-right:3px solid transparent;transition:.15s}
+.ni:hover{background:rgba(255,255,255,.07);color:white}
+.ni.on{background:rgba(196,154,60,.15);color:var(--gold-l);border-right-color:var(--gold)}
+.ni span{font-size:16px}
+.ni-link{padding:8px 16px;display:flex;align-items:center;gap:9px;cursor:pointer;font-size:11px;color:rgba(255,255,255,.5);text-decoration:none;transition:.15s}
+.ni-link:hover{color:var(--gold-l)}
+
+/* TOPBAR */
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tb-title{font-size:16px;font-weight:700;color:var(--navy)}
+.tb-right{display:flex;align-items:center;gap:10px}
+
+/* CONTENT */
+.content{padding:20px;flex:1}
+.pg{display:none}.pg.on{display:block}
+
+/* CARDS */
+.card{background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+.ch{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.ct{font-size:14px;font-weight:600;color:var(--navy)}
+.cb{padding:14px 16px}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.sc2{background:white;border-radius:10px;border:1px solid var(--border);padding:14px;display:flex;align-items:center;gap:12px}
+.si{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sn{font-size:22px;font-weight:700;color:var(--navy)}
+.sl{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--bg);color:var(--navy);font-weight:600;padding:9px 10px;text-align:right;font-size:11px;border-bottom:2px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#FAFAF8}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+.ba2{background:var(--green-l);color:var(--green)}
+.bx{background:var(--red-l);color:var(--red)}
+.bp{background:var(--amber-l);color:var(--amber)}
+.br2{background:var(--blue-l);color:var(--blue)}
+.bg3{background:#F0EDFF;color:#5B4FCC}
+.gold-badge{background:var(--gold-l);color:var(--gold-d)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.btn:hover{opacity:.88}
+.bg2{background:var(--navy);color:white}
+.bn2{background:var(--gold);color:white}
+.bs3{background:var(--green);color:white}
+.bd2{background:var(--red);color:white}
+.bo2{background:var(--bg);color:var(--text);border:1px solid var(--border)}
+.bsm{padding:5px 10px;font-size:11px}
+.btn-out{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:7px;font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer}
+
+/* SEARCH */
+.sr{padding:7px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;min-width:160px}
+.sr:focus{border-color:var(--gold)}
+.fl{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'Cairo',sans-serif;font-size:12px;outline:none;background:white}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+.ov.open{display:flex}
+.modal{background:white;border-radius:13px;width:100%;overflow:hidden;max-height:90vh;overflow-y:auto}
+.mh{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--navy)}
+.mt2{font-size:14px;font-weight:600;color:var(--gold-l)}
+.xb{background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;line-height:1}
+.mb2{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.mf{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:12px;font-weight:600;color:var(--text2)}
+.fg input,.fg select,.fg textarea{padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'Cairo',sans-serif;font-size:13px;outline:none;width:100%;background:white}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fgrid .full{grid-column:1/-1}
+
+/* CLIENT CARD */
+.client-card{background:white;border-radius:10px;border:1px solid var(--border);padding:16px;cursor:pointer;transition:.15s}
+.client-card:hover{border-color:var(--gold);box-shadow:0 3px 12px rgba(196,154,60,.15)}
+.client-card.selected{border-color:var(--gold);background:var(--gold-l)}
+.cc-avatar{width:44px;height:44px;border-radius:50%;background:var(--navy);color:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+
+/* PROFILE PANEL */
+.profile-panel{background:white;border-radius:10px;border:1px solid var(--border);overflow:hidden;position:sticky;top:72px}
+.profile-header{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:20px;text-align:center}
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:rgba(196,154,60,.3);color:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;margin:0 auto 10px}
+
+/* TAG */
+.tag{display:inline-block;background:var(--blue-l);color:var(--blue);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600;margin:2px}
+.tag.vip{background:var(--gold-l);color:var(--gold-d)}
+.tag.agency{background:var(--green-l);color:var(--green)}
+
+/* TIMELINE */
+.tl-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.tl-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.tl-content{flex:1}
+.tl-title{font-size:12px;font-weight:600;color:var(--navy)}
+.tl-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+@media(max-width:768px){.sidebar{display:none}.main{margin-right:0}.sg{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-head">
+    <img class="sb-logo" id="sb-logo" src="" alt="اليامي">
+    <div>
+      <div class="sb-name">اليامي للسفر</div>
+      <div class="sb-sub">إدارة العملاء CRM</div>
+      <div class="sb-badge" id="crm-role-badge">مدير</div>
+    </div>
+  </div>
+  <div id="crm-nav">
+    <div class="ns">الرئيسية</div>
+    <div class="ni on" onclick="goP('dash',this)"><span>📊</span>لوحة التحكم</div>
+    <div class="ns">العملاء</div>
+    <div class="ni" onclick="goP('clients',this)"><span>👥</span>قائمة العملاء</div>
+    <div class="ni" onclick="goP('add-client',this)"><span>➕</span>إضافة عميل</div>
+    <div class="ns">التقارير</div>
+    <div class="ni" onclick="goP('reports',this)"><span>📈</span>التقارير</div>
+    <div class="ns">روابط</div>
+    <a class='ni-link' href='/'>🔗 نظام التأشيرات</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title" id="crm-tb-title">لوحة التحكم</div>
+    <div class="tb-right">
+      <input class="sr" id="global-search" placeholder="🔍 بحث عن عميل..." oninput="globalSearch(this.value)" style="min-width:220px">
+      <span class="uname" id="crm-uname">مدير</span>
+      <button class="btn-out" onclick="location.href='index.html'">← نظام التأشيرات</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="pg on" id="pg-dash">
+      <div class="sg">
+        <div class="sc2"><div class="si" style="background:#eef2ff">👥</div><div><div class="sn" id="d-total">0</div><div class="sl">إجمالي العملاء</div></div></div>
+        <div class="sc2"><div class="si" style="background:var(--gold-l)">⭐</div><div><div class="sn" style="color:var(--gold-d)" id="d-vip">0</div><div class="sl">عملاء VIP</div></div></div>
+        <div class="sc2"><div class="si" style="background:var(--green-l)">📋</div><div><div class="sn" style="color:var(--green)" id="d-reqs">0</div><div class="sl">إجمالي الطلبات</div></div></div>
+        <div class="sc2"><div class="si" style="background:var(--blue-l)">🏢</div><div><div class="sn" style="color:var(--blue)" id="d-agencies">0</div><div class="sl">الوكالات</div></div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <!-- Top clients -->
+        <div class="card">
+          <div class="ch"><span class="ct">🏆 أكثر العملاء طلبات</span></div>
+          <div class="cb" id="top-clients" style="padding:0">
+            <div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">جاري التحميل...</div>
+          </div>
+        </div>
+        <!-- Recent activity -->
+        <div class="card">
+          <div class="ch"><span class="ct">🕐 آخر النشاطات</span></div>
+          <div class="cb" id="recent-activity" style="max-height:300px;overflow-y:auto;padding:0">
+            <div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">جاري التحميل...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status breakdown -->
+      <div class="card">
+        <div class="ch"><span class="ct">📊 توزيع الطلبات حسب الحالة</span></div>
+        <div class="cb" id="status-breakdown"></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS LIST -->
+    <div class="pg" id="pg-clients">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <input class="sr" id="client-search" placeholder="🔍 بحث..." oninput="filterClients()" style="min-width:200px">
+        <select class="fl" id="client-filter-type" onchange="filterClients()">
+          <option value="">كل الأنواع</option>
+          <option value="vip">VIP</option>
+          <option value="agency">وكالة</option>
+          <option value="regular">عادي</option>
+        </select>
+        <select class="fl" id="client-sort" onchange="filterClients()">
+          <option value="name">ترتيب: الاسم</option>
+          <option value="reqs">ترتيب: الطلبات</option>
+          <option value="bal">ترتيب: الرصيد</option>
+        </select>
+        <span style="font-size:12px;color:var(--text2);margin-right:auto" id="clients-count">0 عميل</span>
+        <button class="btn bn2 bsm" onclick="goP('add-client',document.querySelector('.ni:nth-child(4)'))">+ إضافة عميل</button>
+      </div>
+      <div class="clients-grid" id="clients-grid"></div>
+    </div>
+
+    <!-- CLIENT PROFILE -->
+    <div class="pg" id="pg-profile">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px">
+        <!-- Profile sidebar -->
+        <div>
+          <div class="profile-panel">
+            <div class="profile-header">
+              <div class="profile-avatar" id="prof-avatar">م</div>
+              <div style="color:white;font-size:16px;font-weight:700" id="prof-name">-</div>
+              <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:3px" id="prof-phone">-</div>
+              <div style="margin-top:8px" id="prof-badges"></div>
+            </div>
+            <div class="cb">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div class="tl-item" style="border:none;padding:4px 0">
+                  <div style="font-size:11px;color:var(--text2);width:80px;flex-shrink:0">الوكالة</div>
+                  <div style="font-size:12px;font-weight:600" id="prof-agency">-</div>
+                </div>
+                <div class="tl-item" style="border:none;padding:4px 0">
+                  <div style="font-size:11px;color:var(--text2);width:80px;flex-shrink:0">الرصيد</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--gold-d)" id="prof-bal">$0</div>
+                </div>
+                <div class="tl-item" style="border:none;padding:4px 0">
+                  <div style="font-size:11px;color:var(--text2);width:80px;flex-shrink:0">الطلبات</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--navy)" id="prof-reqs-count">0</div>
+                </div>
+                <div class="tl-item" style="border:none;padding:4px 0">
+                  <div style="font-size:11px;color:var(--text2);width:80px;flex-shrink:0">أول طلب</div>
+                  <div style="font-size:12px" id="prof-first-req">-</div>
+                </div>
+              </div>
+              <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+                <button class="btn bs3" style="width:100%;justify-content:center" onclick="waClient()">📱 واتساب</button>
+                <button class="btn bg2" style="width:100%;justify-content:center" onclick="editCurrentClient()">✏️ تعديل</button>
+                <button class="btn bo2" style="width:100%;justify-content:center" onclick="goP('clients')">← العودة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile content -->
+        <div>
+          <!-- Notes -->
+          <div class="card">
+            <div class="ch">
+              <span class="ct">📝 الملاحظات</span>
+              <button class="btn bn2 bsm" onclick="addNote()">+ ملاحظة</button>
+            </div>
+            <div class="cb" id="prof-notes-list">
+              <div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات</div>
+            </div>
+          </div>
+
+          <!-- Requests history -->
+          <div class="card">
+            <div class="ch"><span class="ct">📋 سجل طلبات التأشيرة</span></div>
+            <div style="overflow-x:auto">
+              <table><thead><tr><th>الرقم</th><th>نوع التأشيرة</th><th>الجواز</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead>
+              <tbody id="prof-reqs-tb"></tbody></table>
+            </div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="card">
+            <div class="ch"><span class="ct">🕐 سجل النشاط</span></div>
+            <div class="cb" id="prof-timeline"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD CLIENT -->
+    <div class="pg" id="pg-add-client">
+      <div class="card" style="max-width:580px;margin:0 auto">
+        <div class="mh" style="border-radius:0"><span class="mt2" id="add-client-title">إضافة عميل جديد</span></div>
+        <div class="mb2">
+          <!-- Type -->
+          <div class="fg">
+            <label>تصنيف العميل</label>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <div onclick="setClientType('regular',this)" class="type-btn on" style="padding:10px;border-radius:8px;border:2px solid var(--gold);background:var(--gold-l);text-align:center;cursor:pointer;font-size:12px;font-weight:600">👤<br>عادي</div>
+              <div onclick="setClientType('vip',this)" class="type-btn" style="padding:10px;border-radius:8px;border:2px solid var(--border);text-align:center;cursor:pointer;font-size:12px;font-weight:600">⭐<br>VIP</div>
+              <div onclick="setClientType('agency',this)" class="type-btn" style="padding:10px;border-radius:8px;border:2px solid var(--border);text-align:center;cursor:pointer;font-size:12px;font-weight:600">🏢<br>وكالة</div>
+            </div>
+            <input type="hidden" id="cl-type" value="regular">
+          </div>
+          <div class="fgrid">
+            <div class="fg full"><label>الاسم الكامل *</label><input type="text" id="cl-name" placeholder="الاسم الكامل"></div>
+            <div class="fg"><label>رقم الهاتف / واتساب *</label><input type="tel" id="cl-phone" dir="ltr" placeholder="+218 91 XXX XXXX"></div>
+            <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="cl-email" dir="ltr" placeholder="example@email.com"></div>
+            <div class="fg"><label>اسم الوكالة</label><input type="text" id="cl-agency" placeholder="اسم الوكالة أو الشركة"></div>
+            <div class="fg"><label>الجنسية</label><select id="cl-nat"><option value="">اختر الجنسية</option></select></div>
+            <div class="fg"><label>المدينة</label><input type="text" id="cl-city" placeholder="المدينة"></div>
+            <div class="fg full"><label>ملاحظات أولية</label><textarea id="cl-notes" style="height:70px;resize:vertical" placeholder="أي ملاحظات عن العميل..."></textarea></div>
+          </div>
+        </div>
+        <div class="mf">
+          <button class="btn bo2" onclick="goP('clients')">إلغاء</button>
+          <button class="btn bn2" onclick="saveClient()">💾 حفظ العميل</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="pg" id="pg-reports">
+      <div class="sg">
+        <div class="sc2"><div class="si" style="background:var(--green-l)">✅</div><div><div class="sn" style="color:var(--green)" id="r-approved">0</div><div class="sl">طلبات موافق عليها</div></div></div>
+        <div class="sc2"><div class="si" style="background:var(--amber-l)">⏳</div><div><div class="sn" style="color:var(--amber)" id="r-pending">0</div><div class="sl">طلبات معلقة</div></div></div>
+        <div class="sc2"><div class="si" style="background:var(--red-l)">❌</div><div><div class="sn" style="color:var(--red)" id="r-rejected">0</div><div class="sl">طلبات مرفوضة</div></div></div>
+        <div class="sc2"><div class="si" style="background:var(--blue-l)">💰</div><div><div class="sn" style="color:var(--blue)" id="r-paid">0</div><div class="sl">طلبات مدفوعة</div></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="card">
+          <div class="ch"><span class="ct">📊 الطلبات حسب نوع التأشيرة</span></div>
+          <div class="cb" id="visa-breakdown"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct">🌍 العملاء حسب الجنسية</span></div>
+          <div class="cb" id="nat-breakdown"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- EDIT CLIENT MODAL -->
+<div class="ov" id="ov-edit-client">
+<div class="modal" style="max-width:500px">
+  <div class="mh"><span class="mt2">تعديل بيانات العميل</span><button class="xb" onclick="closeModal('ov-edit-client')">×</button></div>
+  <div class="mb2">
+    <div class="fg"><label>تصنيف العميل</label>
+      <select id="ec-type"><option value="regular">عادي</option><option value="vip">VIP ⭐</option><option value="agency">وكالة 🏢</option></select>
+    </div>
+    <div class="fgrid">
+      <div class="fg full"><label>الاسم الكامل</label><input type="text" id="ec-name"></div>
+      <div class="fg"><label>رقم الهاتف</label><input type="tel" id="ec-phone" dir="ltr"></div>
+      <div class="fg"><label>البريد الإلكتروني</label><input type="email" id="ec-email" dir="ltr"></div>
+      <div class="fg"><label>الوكالة</label><input type="text" id="ec-agency"></div>
+      <div class="fg"><label>المدينة</label><input type="text" id="ec-city"></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn bd2 bsm" onclick="deleteClient()">حذف</button>
+    <button class="btn bo2" onclick="closeModal('ov-edit-client')">إلغاء</button>
+    <button class="btn bn2" onclick="updateClient()">حفظ</button>
+  </div>
+</div>
+</div>
+
+<!-- ADD NOTE MODAL -->
+<div class="ov" id="ov-note">
+<div class="modal" style="max-width:420px">
+  <div class="mh"><span class="mt2">إضافة ملاحظة</span><button class="xb" onclick="closeModal('ov-note')">×</button></div>
+  <div class="mb2">
+    <div class="fg"><label>نوع الملاحظة</label>
+      <select id="note-type">
+        <option value="general">عامة 📝</option>
+        <option value="call">مكالمة 📞</option>
+        <option value="whatsapp">واتساب 📱</option>
+        <option value="meeting">اجتماع 🤝</option>
+        <option value="complaint">شكوى ⚠️</option>
+      </select>
+    </div>
+    <div class="fg"><label>الملاحظة</label><textarea id="note-text" style="height:100px;resize:vertical" placeholder="اكتب الملاحظة هنا..."></textarea></div>
+  </div>
+  <div class="mf">
+    <button class="btn bo2" onclick="closeModal('ov-note')">إلغاء</button>
+    <button class="btn bn2" onclick="saveNote()">حفظ</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SB='https://fsiprpuhmrhjuyskwtcz.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaXBycHVobXJoanV5c2t3dGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM1NDIsImV4cCI6MjA5MDYzOTU0Mn0._xu47dZ1kdAbYTJdKbakphpB9is71uGBraXKGFIYWFw';
+const HDR={'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK};
+
+// ===== DATA =====
+var clients=[];
+var reqs=[];
+var visas=[];
+var currentClient=null;
+var editingClientId=null;
+var clientType='regular';
+
+var nats=['أفغانية','ألبانية','جزائرية','أردنية','إماراتية','بحرينية','تونسية','تركية','سعودية','سودانية','سورية','صومالية','عراقية','عمانية','فلسطينية','قطرية','كويتية','لبنانية','ليبية','مصرية','مغربية','موريتانية','يمنية','إيرانية','باكستانية','بنغلاديشية','هندية','إندونيسية','ماليزية','نيجيرية','كينية','أمريكية','بريطانية','فرنسية','ألمانية','إيطالية','إسبانية','أخرى'];
+
+// Fill nationality selects
+function fillNatSelects(){
+  ['cl-nat'].forEach(function(id){
+    var sel=document.getElementById(id);
+    if(!sel)return;
+    nats.forEach(function(n){var o=document.createElement('option');o.textContent=n;o.value=n;sel.appendChild(o);});
+  });
+}
+
+// Load logo from main app localStorage
+function loadLogo(){
+  var img=document.getElementById('sb-logo');
+  // Try to get logo from localStorage saved by main app
+  try{
+    var keys=Object.keys(localStorage);
+    for(var i=0;i<keys.length;i++){
+      if(keys[i].indexOf('logo')>-1){
+        var val=localStorage.getItem(keys[i]);
+        if(val&&val.startsWith('data:image')){img.src=val;return;}
+      }
+    }
+  }catch(e){}
+}
+
+// ===== SUPABASE =====
+async function sbGet(table,filter){
+  try{
+    var url=SB+'/rest/v1/'+table+'?select=*'+(filter?'&'+filter:'')+'&order=created_at.desc';
+    var r=await fetch(url,{headers:HDR});
+    if(r.ok)return await r.json();
+  }catch(e){}
+  return [];
+}
+
+async function sbInsert(table,data){
+  try{
+    var r=await fetch(SB+'/rest/v1/'+table,{method:'POST',headers:Object.assign({},HDR,{'Prefer':'return=representation'}),body:JSON.stringify(data)});
+    if(r.ok)return await r.json();
+  }catch(e){}
+  return null;
+}
+
+async function sbUpdate(table,id,data){
+  try{
+    var r=await fetch(SB+'/rest/v1/'+table+'?id=eq.'+id,{method:'PATCH',headers:Object.assign({},HDR,{'Prefer':'return=representation'}),body:JSON.stringify(data)});
+    if(r.ok)return await r.json();
+  }catch(e){}
+  return null;
+}
+
+async function sbDelete(table,id){
+  try{
+    var r=await fetch(SB+'/rest/v1/'+table+'?id=eq.'+id,{method:'DELETE',headers:HDR});
+    return r.ok;
+  }catch(e){}
+  return false;
+}
+
+// ===== LOAD DATA =====
+async function loadAll(){
+  // Load from localStorage first (fast)
+  try{
+    var lc=localStorage.getItem('alyami_crm_clients');
+    if(lc)clients=JSON.parse(lc);
+    var lw=localStorage.getItem('alyami_wcs');
+    // Merge wallet clients into CRM clients
+    if(lw){
+      var wcs=JSON.parse(lw);
+      wcs.forEach(function(wc){
+        if(!clients.find(function(c){return c.phone===wc.phone;})){
+          clients.push({id:'w'+wc.id,name:wc.name,phone:wc.phone,agency:wc.agency||'',bal:wc.bal||0,type:'regular',notes:[],city:'',email:'',nat:'',timeline:[]});
+        } else {
+          var c=clients.find(function(c){return c.phone===wc.phone;});
+          c.bal=wc.bal;
+        }
+      });
+    }
+    var lr=localStorage.getItem('alyami_reqs');
+    if(lr)reqs=JSON.parse(lr);
+    var lv=localStorage.getItem('alyami_visas');
+    if(lv)visas=JSON.parse(lv);
+  }catch(e){}
+
+  // Load from Supabase
+  try{
+    var wRes=await sbGet('wallet_clients');
+    if(wRes&&wRes.length){
+      wRes.forEach(function(wc){
+        var existing=clients.find(function(c){return c.phone===wc.phone;});
+        if(!existing){
+          clients.push({id:'w'+wc.id,name:wc.name,phone:wc.phone,agency:wc.agency||'',bal:wc.balance||0,type:'regular',notes:[],city:'',email:'',nat:'',timeline:[]});
+        } else {
+          existing.bal=wc.balance||0;
+        }
+      });
+    }
+    var rRes=await sbGet('visa_requests');
+    if(rRes&&rRes.length){
+      reqs=rRes.map(function(r){return {id:r.id,name:r.client_name,phone:r.client_phone,passport:r.passport_number,type:r.visa_type,amt:r.amount,paid:r.paid,status:r.status,date:r.created_at?r.created_at.slice(0,10):'',notes:r.notes||''};});
+    }
+    var vRes=await sbGet('visa_types');
+    if(vRes&&vRes.length)visas=vRes.map(function(v){return {id:v.id,n:v.name,i:v.icon||'✈️'};});
+  }catch(e){}
+
+  // Load saved CRM clients
+  try{
+    var saved=localStorage.getItem('alyami_crm_clients');
+    if(saved){
+      var savedArr=JSON.parse(saved);
+      savedArr.forEach(function(sc){
+        var existing=clients.find(function(c){return c.phone===sc.phone;});
+        if(existing){
+          existing.type=sc.type||existing.type;
+          existing.notes=sc.notes||[];
+          existing.city=sc.city||'';
+          existing.email=sc.email||'';
+          existing.nat=sc.nat||'';
+          existing.timeline=sc.timeline||[];
+        } else {
+          clients.push(sc);
+        }
+      });
+    }
+  }catch(e){}
+
+  renderDash();
+  renderClients();
+  renderReports();
+}
+
+function saveClientsLocal(){
+  try{localStorage.setItem('alyami_crm_clients',JSON.stringify(clients));}catch(e){}
+}
+
+// ===== NAV =====
+function goP(id,el){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  var pg=document.getElementById('pg-'+id);
+  if(pg)pg.classList.add('on');
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
+  if(el)el.classList.add('on');
+  var titles={dash:'لوحة التحكم',clients:'قائمة العملاء','add-client':'إضافة عميل',profile:'ملف العميل',reports:'التقارير'};
+  document.getElementById('crm-tb-title').textContent=titles[id]||id;
+  if(id==='clients')renderClients();
+  if(id==='reports')renderReports();
+}
+
+// ===== DASHBOARD =====
+function renderDash(){
+  document.getElementById('d-total').textContent=clients.length;
+  document.getElementById('d-vip').textContent=clients.filter(function(c){return c.type==='vip';}).length;
+  document.getElementById('d-agencies').textContent=clients.filter(function(c){return c.type==='agency';}).length;
+  document.getElementById('d-reqs').textContent=reqs.length;
+
+  // Top clients
+  var clientReqs={};
+  reqs.forEach(function(r){
+    var key=r.phone||r.name;
+    clientReqs[key]=(clientReqs[key]||0)+1;
+  });
+  var top=clients.map(function(c){return {c:c,count:clientReqs[c.phone]||0};})
+    .sort(function(a,b){return b.count-a.count;}).slice(0,5);
+
+  var tcEl=document.getElementById('top-clients');
+  if(!top.length){tcEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد بيانات</div>';return;}
+  tcEl.innerHTML=top.map(function(t,i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)">'
+      +'<div style="width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">'+(i+1)+'</div>'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:'+(t.c.type==='vip'?'var(--gold-l)':t.c.type==='agency'?'var(--blue-l)':'var(--bg)')+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">'+t.c.name.charAt(0)+'</div>'
+      +'<div style="flex:1"><div style="font-size:12px;font-weight:600">'+t.c.name+'</div><div style="font-size:11px;color:var(--text2)">'+(t.c.agency||t.c.phone)+'</div></div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--navy)">'+t.count+' طلب</div>'
+      +'</div>';
+  }).join('');
+
+  // Recent activity
+  var recentReqs=reqs.slice(0,8);
+  var raEl=document.getElementById('recent-activity');
+  raEl.innerHTML=recentReqs.map(function(r){
+    var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+    var v=vmap[r.type]||{};
+    var stc=r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp';
+    return '<div class="tl-item" style="padding:10px 14px">'
+      +'<div class="tl-icon" style="background:'+(r.status==='approved'?'var(--green-l)':r.status==='rejected'?'var(--red-l)':'var(--amber-l)')+'">'+( v.i||'✈️')+'</div>'
+      +'<div class="tl-content"><div class="tl-title">'+r.name+'</div><div class="tl-sub">'+(v.n||r.type)+' <span class="badge '+stc+'" style="font-size:10px">'+(r.status==='approved'?'موافق':r.status==='rejected'?'مرفوض':'معلق')+'</span></div></div>'
+      +'<div style="font-size:10px;color:var(--text3)">'+(r.date||'')+'</div>'
+      +'</div>';
+  }).join('')||'<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد بيانات</div>';
+
+  // Status breakdown
+  var statuses={pending:0,review:0,approved:0,rejected:0};
+  reqs.forEach(function(r){if(statuses[r.status]!==undefined)statuses[r.status]++;});
+  var total=reqs.length||1;
+  var sbEl=document.getElementById('status-breakdown');
+  sbEl.innerHTML='<div style="display:flex;gap:16px;flex-wrap:wrap">'
+    +barItem('معلقة',statuses.pending,total,'var(--amber)','⏳')
+    +barItem('مراجعة',statuses.review,total,'var(--blue)','👁️')
+    +barItem('موافق',statuses.approved,total,'var(--green)','✅')
+    +barItem('مرفوض',statuses.rejected,total,'var(--red)','❌')
+    +'</div>';
+}
+
+function barItem(label,count,total,color,icon){
+  var pct=Math.round(count/total*100);
+  return '<div style="flex:1;min-width:120px"><div style="font-size:11px;color:var(--text2);margin-bottom:5px">'+icon+' '+label+'</div>'
+    +'<div style="background:var(--bg);border-radius:6px;height:8px;overflow:hidden;margin-bottom:4px"><div style="background:'+color+';height:100%;width:'+pct+'%;border-radius:6px;transition:.4s"></div></div>'
+    +'<div style="font-size:12px;font-weight:700;color:var(--navy)">'+count+' <span style="font-size:10px;color:var(--text3);">('+pct+'%)</span></div></div>';
+}
+
+// ===== CLIENTS LIST =====
+function renderClients(){
+  var search=(document.getElementById('client-search')||{}).value||'';
+  var filterType=(document.getElementById('client-filter-type')||{}).value||'';
+  var sort=(document.getElementById('client-sort')||{}).value||'name';
+
+  var list=clients.filter(function(c){
+    var matchSearch=!search||(c.name+c.phone+(c.agency||'')).includes(search);
+    var matchType=!filterType||c.type===filterType;
+    return matchSearch&&matchType;
+  });
+
+  if(sort==='reqs'){
+    var cmap={};reqs.forEach(function(r){cmap[r.phone]=(cmap[r.phone]||0)+1;});
+    list.sort(function(a,b){return (cmap[b.phone]||0)-(cmap[a.phone]||0);});
+  } else if(sort==='bal'){
+    list.sort(function(a,b){return (b.bal||0)-(a.bal||0);});
+  } else {
+    list.sort(function(a,b){return a.name.localeCompare(b.name,'ar');});
+  }
+
+  var cnt=document.getElementById('clients-count');
+  if(cnt)cnt.textContent=list.length+' عميل';
+
+  var grid=document.getElementById('clients-grid');
+  if(!list.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);grid-column:1/-1"><div style="font-size:48px;margin-bottom:12px">👥</div><div style="font-size:14px;font-weight:600">لا يوجد عملاء</div><div style="font-size:12px;margin-top:6px">أضف عميلاً جديداً للبدء</div></div>';return;}
+  grid.innerHTML='';
+  var cmap2={};reqs.forEach(function(r){cmap2[r.phone]=(cmap2[r.phone]||0)+1;});
+
+  list.forEach(function(c){
+    var card=document.createElement('div');
+    card.className='client-card';
+    var typeIcon=c.type==='vip'?'⭐':c.type==='agency'?'🏢':'👤';
+    var typeBadge=c.type==='vip'?'<span class="tag vip">VIP ⭐</span>':c.type==='agency'?'<span class="tag agency">وكالة 🏢</span>':'';
+    var reqCount=cmap2[c.phone]||0;
+    card.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
+      +'<div class="cc-avatar" style="background:'+(c.type==='vip'?'var(--gold-d)':c.type==='agency'?'var(--blue)':'var(--navy)')+'">'+c.name.charAt(0)+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+'</div>'
+      +(c.agency?'<div style="font-size:11px;color:var(--text2)">'+c.agency+'</div>':'')
+      +'<div style="font-size:11px;color:var(--text3)" dir="ltr">'+c.phone+'</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'
+      +'<div>'+typeBadge+'</div>'
+      +'<div style="display:flex;gap:10px;font-size:11px">'
+      +(c.bal?'<span style="color:var(--gold-d);font-weight:700">$'+c.bal+'</span>':'')
+      +'<span style="color:var(--text2)">'+reqCount+' طلب</span>'
+      +'</div>'
+      +'</div>';
+    card.addEventListener('click',function(){openProfile(c);});
+    grid.appendChild(card);
+  });
+}
+
+function filterClients(){renderClients();}
+
+function globalSearch(q){
+  if(!q)return;
+  goP('clients',document.querySelectorAll('.ni')[1]);
+  document.getElementById('client-search').value=q;
+  filterClients();
+}
+
+// ===== PROFILE =====
+function openProfile(c){
+  currentClient=c;
+  document.getElementById('prof-avatar').textContent=c.name.charAt(0);
+  document.getElementById('prof-name').textContent=c.name;
+  document.getElementById('prof-phone').textContent=c.phone;
+  document.getElementById('prof-agency').textContent=c.agency||'-';
+  document.getElementById('prof-bal').textContent=c.bal?'$'+c.bal:'-';
+
+  var badges='';
+  if(c.type==='vip')badges='<span class="badge gold-badge">VIP ⭐</span> ';
+  if(c.type==='agency')badges+='<span class="badge br2">وكالة 🏢</span>';
+  document.getElementById('prof-badges').innerHTML=badges;
+
+  // Requests
+  var clientReqs=reqs.filter(function(r){return r.phone===c.phone||r.name===c.name;});
+  document.getElementById('prof-reqs-count').textContent=clientReqs.length;
+
+  if(clientReqs.length){
+    var sorted=clientReqs.slice().sort(function(a,b){return a.date<b.date?-1:1;});
+    document.getElementById('prof-first-req').textContent=sorted[0].date||'-';
+  } else {
+    document.getElementById('prof-first-req').textContent='-';
+  }
+
+  var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+  var rtb=document.getElementById('prof-reqs-tb');
+  rtb.innerHTML='';
+  if(!clientReqs.length){
+    rtb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--text3)">لا توجد طلبات</td></tr>';
+  } else {
+    clientReqs.forEach(function(r){
+      var v=vmap[r.type]||{};
+      var row=document.createElement('tr');
+      var stc=r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp';
+      row.innerHTML='<td style="font-family:monospace;font-size:11px;color:var(--gold-d)">'+r.id+'</td>'
+        +'<td>'+(v.i||'✈️')+' '+(v.n||r.type)+'</td>'
+        +'<td style="font-family:monospace;font-size:11px">'+(r.passport||'-')+'</td>'
+        +'<td><span class="badge '+stc+'">'+(r.status==='approved'?'موافق':r.status==='rejected'?'مرفوض':'معلق')+'</span></td>'
+        +'<td style="font-size:11px">'+(r.date||'-')+'</td>'
+        +'<td></td>';
+      var btnP=document.createElement('button');btnP.className='btn bg2 bsm';btnP.textContent='طباعة';
+      btnP.addEventListener('click',function(){printReq(r);});
+      row.lastElementChild.appendChild(btnP);
+      rtb.appendChild(row);
+    });
+  }
+
+  // Notes
+  renderNotes(c);
+
+  // Timeline
+  renderTimeline(c);
+
+  goP('profile');
+}
+
+function renderNotes(c){
+  var el=document.getElementById('prof-notes-list');
+  var notes=c.notes||[];
+  if(!notes.length){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد ملاحظات — أضف ملاحظة جديدة</div>';return;}
+  var icons={general:'📝',call:'📞',whatsapp:'📱',meeting:'🤝',complaint:'⚠️'};
+  el.innerHTML=notes.slice().reverse().map(function(n,i){
+    return '<div class="tl-item" style="padding:10px 14px">'
+      +'<div class="tl-icon" style="background:var(--bg)">'+(icons[n.type]||'📝')+'</div>'
+      +'<div class="tl-content"><div class="tl-title">'+n.text+'</div><div class="tl-sub">'+(n.type||'عامة')+' — '+n.date+'</div></div>'
+      +'<button onclick="deleteNote('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">×</button>'
+      +'</div>';
+  }).join('');
+}
+
+function renderTimeline(c){
+  var el=document.getElementById('prof-timeline');
+  var timeline=c.timeline||[];
+  var clientReqs=reqs.filter(function(r){return r.phone===c.phone;});
+  // Add reqs to timeline
+  var items=timeline.concat(clientReqs.map(function(r){
+    return {type:'req',text:'طلب تأشيرة: '+r.id,date:r.date,status:r.status};
+  })).sort(function(a,b){return b.date<a.date?-1:1;});
+
+  if(!items.length){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">لا توجد سجلات</div>';return;}
+  el.innerHTML=items.slice(0,10).map(function(t){
+    var icon=t.type==='req'?(t.status==='approved'?'✅':t.status==='rejected'?'❌':'📋'):'📌';
+    return '<div class="tl-item">'
+      +'<div class="tl-icon" style="background:var(--bg)">'+icon+'</div>'
+      +'<div class="tl-content"><div class="tl-title">'+t.text+'</div><div class="tl-sub">'+(t.date||'')+'</div></div>'
+      +'</div>';
+  }).join('');
+}
+
+function addNote(){
+  if(!currentClient)return;
+  document.getElementById('note-text').value='';
+  document.getElementById('note-type').value='general';
+  document.getElementById('ov-note').classList.add('open');
+}
+
+function saveNote(){
+  if(!currentClient)return;
+  var text=document.getElementById('note-text').value.trim();
+  if(!text){alert('اكتب الملاحظة');return;}
+  var type=document.getElementById('note-type').value;
+  if(!currentClient.notes)currentClient.notes=[];
+  currentClient.notes.push({text:text,type:type,date:new Date().toLocaleDateString('ar-SA')});
+  saveClientsLocal();
+  closeModal('ov-note');
+  renderNotes(currentClient);
+}
+
+function deleteNote(idx){
+  if(!currentClient||!currentClient.notes)return;
+  var realIdx=currentClient.notes.length-1-idx;
+  currentClient.notes.splice(realIdx,1);
+  saveClientsLocal();
+  renderNotes(currentClient);
+}
+
+// ===== ADD CLIENT =====
+function setClientType(type,el){
+  clientType=type;
+  document.getElementById('cl-type').value=type;
+  document.querySelectorAll('.type-btn').forEach(function(b){
+    b.style.border='2px solid var(--border)';b.style.background='white';
+  });
+  el.style.border='2px solid var(--gold)';el.style.background='var(--gold-l)';
+}
+
+function saveClient(){
+  var name=document.getElementById('cl-name').value.trim();
+  var phone=document.getElementById('cl-phone').value.trim();
+  if(!name||!phone){alert('أدخل الاسم ورقم الهاتف');return;}
+
+  if(editingClientId){
+    var c=clients.find(function(x){return x.id===editingClientId;});
+    if(c){
+      c.name=name;c.phone=phone;c.type=clientType;
+      c.agency=document.getElementById('cl-agency').value.trim();
+      c.email=document.getElementById('cl-email').value.trim();
+      c.city=document.getElementById('cl-city').value.trim();
+      c.nat=document.getElementById('cl-nat').value;
+      if(document.getElementById('cl-notes').value.trim()){
+        if(!c.notes)c.notes=[];
+        c.notes.push({text:document.getElementById('cl-notes').value.trim(),type:'general',date:new Date().toLocaleDateString('ar-SA')});
+      }
+    }
+    editingClientId=null;
+  } else {
+    var newC={
+      id:'crm'+Date.now(),name:name,phone:phone,type:clientType,
+      agency:document.getElementById('cl-agency').value.trim(),
+      email:document.getElementById('cl-email').value.trim(),
+      city:document.getElementById('cl-city').value.trim(),
+      nat:document.getElementById('cl-nat').value,
+      bal:0,notes:[],timeline:[],
+      created:new Date().toLocaleDateString('ar-SA')
+    };
+    var initNote=document.getElementById('cl-notes').value.trim();
+    if(initNote)newC.notes.push({text:initNote,type:'general',date:newC.created});
+    clients.push(newC);
+  }
+
+  saveClientsLocal();
+  // Reset form
+  ['cl-name','cl-phone','cl-agency','cl-email','cl-city','cl-notes'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  setClientType('regular',document.querySelector('.type-btn'));
+  renderDash();
+  goP('clients',document.querySelectorAll('.ni')[1]);
+}
+
+// ===== EDIT CLIENT =====
+function editCurrentClient(){
+  if(!currentClient)return;
+  document.getElementById('ec-name').value=currentClient.name||'';
+  document.getElementById('ec-phone').value=currentClient.phone||'';
+  document.getElementById('ec-type').value=currentClient.type||'regular';
+  document.getElementById('ec-agency').value=currentClient.agency||'';
+  document.getElementById('ec-email').value=currentClient.email||'';
+  document.getElementById('ec-city').value=currentClient.city||'';
+  editingClientId=currentClient.id;
+  document.getElementById('ov-edit-client').classList.add('open');
+}
+
+function updateClient(){
+  if(!editingClientId)return;
+  var c=clients.find(function(x){return x.id===editingClientId;});
+  if(c){
+    c.name=document.getElementById('ec-name').value.trim();
+    c.phone=document.getElementById('ec-phone').value.trim();
+    c.type=document.getElementById('ec-type').value;
+    c.agency=document.getElementById('ec-agency').value.trim();
+    c.email=document.getElementById('ec-email').value.trim();
+    c.city=document.getElementById('ec-city').value.trim();
+    currentClient=c;
+    saveClientsLocal();
+    openProfile(c);
+  }
+  closeModal('ov-edit-client');
+}
+
+function deleteClient(){
+  if(!currentClient)return;
+  if(!confirm('حذف العميل "'+currentClient.name+'" نهائياً؟'))return;
+  clients=clients.filter(function(c){return c.id!==currentClient.id;});
+  saveClientsLocal();
+  closeModal('ov-edit-client');
+  goP('clients',document.querySelectorAll('.ni')[1]);
+  renderClients();
+}
+
+// ===== WHATSAPP =====
+function waClient(){
+  if(!currentClient)return;
+  var phone=currentClient.phone.replace(/\+/g,'').replace(/\s/g,'');
+  var msg='مرحباً '+currentClient.name+' 👋\n\nمن اليامي للسفر والسياحة\n\nكيف يمكننا مساعدتك؟';
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ===== REPORTS =====
+function renderReports(){
+  var approved=reqs.filter(function(r){return r.status==='approved';}).length;
+  var pending=reqs.filter(function(r){return r.status==='pending'||r.status==='review';}).length;
+  var rejected=reqs.filter(function(r){return r.status==='rejected';}).length;
+  var paid=reqs.filter(function(r){return r.paid;}).length;
+  document.getElementById('r-approved').textContent=approved;
+  document.getElementById('r-pending').textContent=pending;
+  document.getElementById('r-rejected').textContent=rejected;
+  document.getElementById('r-paid').textContent=paid;
+
+  // Visa breakdown
+  var vbreakdown={};
+  var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+  reqs.forEach(function(r){
+    var n=(vmap[r.type]&&vmap[r.type].n)||r.type||'أخرى';
+    vbreakdown[n]=(vbreakdown[n]||0)+1;
+  });
+  var vbEl=document.getElementById('visa-breakdown');
+  var vtotal=reqs.length||1;
+  vbEl.innerHTML=Object.keys(vbreakdown).sort(function(a,b){return vbreakdown[b]-vbreakdown[a];}).map(function(k){
+    var pct=Math.round(vbreakdown[k]/vtotal*100);
+    return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+k+'</span><span style="font-weight:700">'+vbreakdown[k]+' ('+pct+'%)</span></div>'
+      +'<div style="background:var(--bg);border-radius:6px;height:8px"><div style="background:var(--navy);height:100%;width:'+pct+'%;border-radius:6px"></div></div></div>';
+  }).join('')||'<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">لا توجد بيانات</div>';
+
+  // Nationality breakdown
+  var nbreakdown={};
+  clients.forEach(function(c){if(c.nat)nbreakdown[c.nat]=(nbreakdown[c.nat]||0)+1;});
+  var nbEl=document.getElementById('nat-breakdown');
+  var ntotal=clients.length||1;
+  nbEl.innerHTML=Object.keys(nbreakdown).sort(function(a,b){return nbreakdown[b]-nbreakdown[a];}).slice(0,8).map(function(k){
+    var pct=Math.round(nbreakdown[k]/ntotal*100);
+    return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+k+'</span><span style="font-weight:700">'+nbreakdown[k]+'</span></div>'
+      +'<div style="background:var(--bg);border-radius:6px;height:7px"><div style="background:var(--blue);height:100%;width:'+pct+'%;border-radius:6px"></div></div></div>';
+  }).join('')||'<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">لا توجد بيانات عن الجنسيات</div>';
+}
+
+// ===== PRINT =====
+function printReq(r){
+  var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+  var v=vmap[r.type]||{};
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>طلب '+r.id+'</title><style>body{font-family:Arial;padding:20px;direction:rtl}table{width:100%;border-collapse:collapse}td{padding:8px;border:1px solid #ddd}@media print{button{display:none}}</style></head><body>');
+  win.document.write('<h2 style="color:#0D1B3E">اليامي للسفر والسياحة</h2>');
+  win.document.write('<p>رقم الطلب: <strong>'+r.id+'</strong></p>');
+  win.document.write('<table><tr><td>العميل</td><td>'+r.name+'</td></tr><tr><td>الهاتف</td><td>'+r.phone+'</td></tr><tr><td>رقم الجواز</td><td>'+(r.passport||'-')+'</td></tr><tr><td>نوع التأشيرة</td><td>'+(v.n||r.type)+'</td></tr><tr><td>الحالة</td><td>'+(r.status==='approved'?'موافق عليه':r.status==='rejected'?'مرفوض':'معلق')+'</td></tr><tr><td>التاريخ</td><td>'+(r.date||'-')+'</td></tr></table>');
+  win.document.write('<br><button onclick="window.print()" style="padding:8px 20px;background:#0D1B3E;color:white;border:none;border-radius:6px;cursor:pointer">طباعة</button>');
+  win.document.write('</body></html>');win.document.close();
+}
+
+// ===== MODAL =====
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',function(e){if(e.target.classList.contains('ov'))e.target.classList.remove('open');});
+
+// ===== INIT =====
+fillNatSelects();
+loadLogo();
+loadAll();
+</script>
+</body>
+</html>
