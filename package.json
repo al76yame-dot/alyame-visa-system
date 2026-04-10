@@ -1,0 +1,14 @@
+{
+  "name": "alyame-visa-system",
+  "version": "1.0.0",
+  "description": "Al-Yami Visa Management System",
+  "scripts": {
+    "dev": "npx http-server . -p 3000 -c-1 -o",
+    "deploy": "netlify deploy --prod --dir .",
+    "deploy:preview": "netlify deploy --dir .",
+    "status": "netlify status",
+    "open": "netlify open"
+  },
+  "author": "Ghith Alyame",
+  "license": "PRIVATE"
+}

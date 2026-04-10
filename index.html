@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://api.qrserver.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src * data: blob:; connect-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://api.qrserver.com; font-src https://fonts.gstatic.com;">
+<meta name="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>اليامي - نظام التأشيرات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -362,6 +365,41 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
           <div class="sc2"><div class="si" style="background:var(--green-l)">✅</div><div><div class="sn" style="color:var(--green)" id="st-apr">0</div><div class="sl">موافق عليها</div></div></div>
           <div class="sc2"><div class="si" style="background:var(--blue-l)">👥</div><div><div class="sn" style="color:var(--blue)" id="st-usr">1</div><div class="sl">المستخدمون</div></div></div>
         </div>
+
+        <!-- ADVANCED STATS DASHBOARD -->
+        <div class="sg" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="sc2"><div class="si" style="background:var(--red-l)">❌</div><div><div class="sn" style="color:var(--red)" id="st-rej">0</div><div class="sl">مرفوضة</div></div></div>
+          <div class="sc2"><div class="si" style="background:var(--gold-l)">💰</div><div><div class="sn" style="color:var(--gold-d)" id="st-rev">$0</div><div class="sl">إجمالي الإيرادات</div></div></div>
+          <div class="sc2"><div class="si" style="background:var(--green-l)">💵</div><div><div class="sn" style="color:var(--green)" id="st-paid">0</div><div class="sl">مدفوعة</div></div></div>
+          <div class="sc2"><div class="si" style="background:var(--purple-l)">🏢</div><div><div class="sn" style="color:var(--purple)" id="st-prov">0</div><div class="sl">المزودون</div></div></div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <!-- Visa Types Chart -->
+          <div class="card">
+            <div class="ch"><span class="ct">📊 توزيع التأشيرات حسب النوع</span></div>
+            <div class="cb" id="chart-visa-types" style="min-height:160px;display:flex;align-items:flex-end;gap:8px;padding-bottom:8px"></div>
+          </div>
+          <!-- Status Chart -->
+          <div class="card">
+            <div class="ch"><span class="ct">📈 حالة الطلبات</span></div>
+            <div class="cb" id="chart-status" style="min-height:160px;display:flex;align-items:center;justify-content:center;gap:20px"></div>
+          </div>
+        </div>
+
+        <!-- Revenue & Clients Summary -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card">
+            <div class="ch"><span class="ct">💰 ملخص الإيرادات</span></div>
+            <div class="cb" id="revenue-summary" style="font-size:12px;line-height:2"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><span class="ct">🕐 آخر النشاطات</span></div>
+            <div class="cb" id="recent-activity" style="font-size:12px;max-height:160px;overflow-y:auto"></div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="ch">
             <span class="ct">الطلبات</span>
@@ -942,6 +980,9 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
 </div>
 
 <script>
+// ===== SECURITY: HTML Escape =====
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
 const SB='https://fsiprpuhmrhjuyskwtcz.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaXBycHVobXJoanV5c2t3dGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM1NDIsImV4cCI6MjA5MDYzOTU0Mn0._xu47dZ1kdAbYTJdKbakphpB9is71uGBraXKGFIYWFw';
 const APP='https://evisa-alyame-travel-system2026.netlify.app';
@@ -1283,7 +1324,11 @@ function initCCs(){
       d.className='cc-item';
       d.dataset.name=c.n;
       d.dataset.code=c.c;
-      d.innerHTML=c.f+' <span style="flex:1">'+c.n+'</span> <span style="color:var(--text3);font-family:monospace;font-size:11px">'+c.c+'</span>';
+      d.textContent='';
+    var flag=document.createTextNode(c.f+' ');
+    var span1=document.createElement('span');span1.style.flex='1';span1.textContent=c.n;
+    var span2=document.createElement('span');span2.style.cssText='color:var(--text3);font-family:monospace;font-size:11px';span2.textContent=c.c;
+    d.appendChild(flag);d.appendChild(span1);d.appendChild(span2);
       d.addEventListener('click',function(){selectCC(id,c.c,c.f+' '+c.c);});
       el.appendChild(d);
     });
@@ -1434,7 +1479,7 @@ function showSReg(){document.getElementById('s-reg').classList.toggle('hidden');
 function showCReg(){document.getElementById('c-login').classList.add('hidden');document.getElementById('c-reg').classList.remove('hidden');}
 function showCLogin(){document.getElementById('c-reg').classList.add('hidden');document.getElementById('c-login').classList.remove('hidden');}
 
-function logout(){tok=null;cu=null;document.getElementById('auth').style.display='flex';document.getElementById('app').style.display='none';}
+function logout(){tok=null;cu=null;stopRealtime();document.getElementById('auth').style.display='flex';document.getElementById('app').style.display='none';}
 
 // APP
 function startApp(){
@@ -1467,7 +1512,7 @@ function setupNav(){
     document.getElementById('btn-new').style.display='inline-flex';
     document.getElementById('bal-pill').classList.add('hidden');
     nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div>';
-    goP('dash');renderReqs();renderUsers();renderVisas();
+    goP('dash');renderReqs();renderUsers();renderVisas();renderAdvancedStats();startRealtime();
   }else if(cr==='assistant'){
     // مساعد المدير - صلاحيات: الطلبات + الأسعار + الأرصدة
     rb.className='sb-badge' ;rb.style.cssText='background:rgba(83,74,183,0.2);color:#c0b0ff;font-size:10px;padding:1px 7px;border-radius:10px;margin-top:2px;display:inline-block;font-weight:600';rb.textContent='مساعد مدير';
@@ -1512,6 +1557,7 @@ function renderReqs(){
   document.getElementById('st-pen').textContent=reqs.filter(function(r){return r.status==='pending';}).length;
   document.getElementById('st-apr').textContent=reqs.filter(function(r){return r.status==='approved';}).length;
   document.getElementById('st-usr').textContent=users.length;
+  if(typeof renderAdvancedStats==='function')renderAdvancedStats();
   var tb=document.getElementById('req-tb');
   if(!reqs.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">لا توجد طلبات</td></tr>';return;}
   var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
@@ -1595,7 +1641,7 @@ function rejectR(id){
     renderReqs();renderStaff();
   }
 }
-function rejectR(id){var r=reqs.find(function(x){return x.id===id;});if(r){r.status='rejected';sbUpdateReqStatus(id,'rejected');renderReqs();renderStaff();}}
+// duplicate rejectR removed
 
 function renderStaff(){
   document.getElementById('sp-pen').textContent=reqs.filter(function(r){return r.status==='pending';}).length;
@@ -2995,6 +3041,147 @@ try{var st=localStorage.getItem('alyami_transports');if(st)transports=JSON.parse
 function closeOv(id){var el=document.getElementById(id);if(el)el.classList.remove('open');}
 document.addEventListener('click',function(e){if(e.target.classList.contains('ov'))e.target.classList.remove('open');});
 
+// ===== ADVANCED STATS & CHARTS =====
+function renderAdvancedStats(){
+  // Extra stat cards
+  var rej=reqs.filter(function(r){return r.status==='rejected';}).length;
+  var totalRev=reqs.filter(function(r){return r.paid;}).reduce(function(s,r){return s+(r.amt||0);},0);
+  var paidCount=reqs.filter(function(r){return r.paid;}).length;
+  var el;
+  el=document.getElementById('st-rej');if(el)el.textContent=rej;
+  el=document.getElementById('st-rev');if(el)el.textContent=formatMoney(totalRev);
+  el=document.getElementById('st-paid');if(el)el.textContent=paidCount;
+  el=document.getElementById('st-prov');if(el)el.textContent=providers.length;
+
+  renderVisaChart();
+  renderStatusChart();
+  renderRevenueSummary();
+  renderRecentActivity();
+}
+
+function renderVisaChart(){
+  var el=document.getElementById('chart-visa-types');if(!el)return;
+  var vmap={};visas.forEach(function(v){vmap[v.id]={n:v.n,i:v.i,count:0};});
+  reqs.forEach(function(r){if(vmap[r.type])vmap[r.type].count++;});
+  var items=Object.values(vmap).filter(function(v){return v.count>0;}).sort(function(a,b){return b.count-a.count;});
+  var max=items.length?items[0].count:1;
+  if(!items.length){el.innerHTML='<div style="text-align:center;width:100%;color:var(--text3);font-size:12px">لا توجد بيانات بعد</div>';return;}
+  el.innerHTML=items.map(function(v){
+    var h=Math.max(20,Math.round((v.count/max)*130));
+    var colors=['var(--navy)','var(--gold-d)','var(--blue)','var(--green)','var(--purple)','var(--amber)','var(--red)'];
+    var c=colors[items.indexOf(v)%colors.length];
+    return '<div style="flex:1;text-align:center;min-width:40px"><div style="background:'+c+';height:'+h+'px;border-radius:6px 6px 0 0;margin:0 2px;transition:height .3s;display:flex;align-items:flex-start;justify-content:center;padding-top:4px"><span style="color:white;font-size:11px;font-weight:700">'+v.count+'</span></div><div style="font-size:10px;color:var(--text2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.i)+' '+esc(v.n)+'</div></div>';
+  }).join('');
+}
+
+function renderStatusChart(){
+  var el=document.getElementById('chart-status');if(!el)return;
+  var total=reqs.length||1;
+  var counts={pending:0,approved:0,rejected:0,review:0};
+  reqs.forEach(function(r){if(counts[r.status]!==undefined)counts[r.status]++;});
+  var data=[
+    {label:'قيد المراجعة',count:counts.pending+counts.review,color:'var(--amber)'},
+    {label:'موافق عليها',count:counts.approved,color:'var(--green)'},
+    {label:'مرفوضة',count:counts.rejected,color:'var(--red)'}
+  ];
+  if(!reqs.length){el.innerHTML='<div style="color:var(--text3);font-size:12px">لا توجد بيانات</div>';return;}
+  el.innerHTML='<div style="position:relative;width:130px;height:130px">'
+    +'<svg viewBox="0 0 36 36" style="width:130px;height:130px;transform:rotate(-90deg)">'
+    +buildDonut(data,total)
+    +'</svg>'
+    +'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:22px;font-weight:700;color:var(--navy)">'+reqs.length+'</div><div style="font-size:10px;color:var(--text2)">طلب</div></div>'
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +data.map(function(d){return '<div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:'+d.color+'"></div><span style="font-size:12px;color:var(--text)">'+d.label+'</span><span style="font-size:12px;font-weight:700;color:var(--navy);margin-right:auto">'+d.count+'</span></div>';}).join('')
+    +'</div>';
+}
+
+function buildDonut(data,total){
+  var offset=0;var svg='';
+  data.forEach(function(d){
+    var pct=(d.count/total)*100;
+    var dash=pct;var gap=100-pct;
+    svg+='<circle cx="18" cy="18" r="15.9" fill="none" stroke="'+d.color+'" stroke-width="3.2" stroke-dasharray="'+dash+' '+gap+'" stroke-dashoffset="-'+offset+'" />';
+    offset+=pct;
+  });
+  return svg;
+}
+
+function renderRevenueSummary(){
+  var el=document.getElementById('revenue-summary');if(!el)return;
+  var totalRev=reqs.filter(function(r){return r.paid;}).reduce(function(s,r){return s+(r.amt||0);},0);
+  var unpaid=reqs.filter(function(r){return !r.paid;}).reduce(function(s,r){return s+(r.amt||0);},0);
+  var walletTotal=wcs.reduce(function(s,c){return s+c.bal;},0);
+  el.innerHTML=''
+    +'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>إجمالي المحصّل</span><span style="font-weight:700;color:var(--green)">'+formatMoney(totalRev)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>مبالغ غير محصّلة</span><span style="font-weight:700;color:var(--red)">'+formatMoney(unpaid)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>رصيد العملاء الإجمالي</span><span style="font-weight:700;color:var(--blue)">'+formatMoney(walletTotal)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;padding:6px 0"><span>عدد العملاء</span><span style="font-weight:700;color:var(--navy)">'+wcs.length+'</span></div>';
+}
+
+function renderRecentActivity(){
+  var el=document.getElementById('recent-activity');if(!el)return;
+  var recent=notifications.slice(0,8);
+  if(!recent.length){el.innerHTML='<div style="text-align:center;color:var(--text3);padding:16px">لا توجد نشاطات بعد</div>';return;}
+  el.innerHTML=recent.map(function(n){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:16px">'+esc(n.icon)+'</span><div style="flex:1"><div style="font-size:11px;font-weight:600">'+esc(n.title)+'</div><div style="font-size:10px;color:var(--text3)">'+esc(n.time)+' — '+esc(n.date)+'</div></div></div>';
+  }).join('');
+}
+
+// ===== ADVANCED PERMISSIONS SYSTEM =====
+var PERMS={
+  admin:{pages:['dash','users','visas','prices','transport','providers','wallets','crm'],actions:['approve','reject','delete','edit','add','export','settings']},
+  assistant:{pages:['dash','visas','wallets'],actions:['approve','reject','edit','add']},
+  staff:{pages:['staff','dash'],actions:['approve','reject']},
+  client:{pages:['portal','wallet'],actions:['request']}
+};
+
+function hasPermission(action){
+  var role=cr||'client';
+  var perms=PERMS[role];
+  if(!perms)return false;
+  return perms.actions.indexOf(action)>=0;
+}
+
+function canAccessPage(page){
+  var role=cr||'client';
+  var perms=PERMS[role];
+  if(!perms)return false;
+  return perms.pages.indexOf(page)>=0;
+}
+
+// ===== REALTIME NOTIFICATIONS via Supabase =====
+var realtimeChannel=null;
+
+function startRealtime(){
+  if(!tok||realtimeChannel)return;
+  try{
+    // Poll Supabase every 30 seconds for changes (lightweight realtime)
+    realtimeChannel=setInterval(function(){
+      sbGet('visa_requests').then(function(newReqs){
+        if(!newReqs)return;
+        var oldLen=reqs.length;
+        if(newReqs.length>oldLen){
+          var diff=newReqs.length-oldLen;
+          addNotif('req','📋 طلبات جديدة','وصل '+diff+' طلب جديد','📋');
+        }
+        // Check for status changes
+        newReqs.forEach(function(nr){
+          var old=reqs.find(function(r){return r.id===nr.id;});
+          if(old&&old.status!==nr.status){
+            if(nr.status==='approved')addNotif('approve','✅ تمت الموافقة على طلب '+nr.id,'تغيرت حالة الطلب','✅');
+            else if(nr.status==='rejected')addNotif('reject','❌ رُفض طلب '+nr.id,'تغيرت حالة الطلب','❌');
+          }
+        });
+      }).catch(function(){});
+    },30000);
+  }catch(e){}
+}
+
+function stopRealtime(){
+  if(realtimeChannel){clearInterval(realtimeChannel);realtimeChannel=null;}
+}
+
 // AUTO REFRESH DATA EVERY 60 SECONDS
 setInterval(function(){
   if(tok && cr !== 'client'){
@@ -3004,6 +3191,48 @@ setInterval(function(){
     }).catch(function(){});
   }
 }, 60000);
+
+// ===== PERFORMANCE: Debounce search =====
+var searchTimer=null;
+document.addEventListener('input',function(e){
+  if(e.target.classList.contains('sr')){
+    clearTimeout(searchTimer);
+    searchTimer=setTimeout(function(){
+      var q=e.target.value.toLowerCase();
+      var rows=e.target.closest('.card').querySelectorAll('tbody tr');
+      rows.forEach(function(r){
+        var text=r.textContent.toLowerCase();
+        r.style.display=text.includes(q)?'':'none';
+      });
+    },300);
+  }
+});
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  if(e.key==='Escape'){
+    document.querySelectorAll('.ov.open').forEach(function(o){o.classList.remove('open');});
+  }
+  if(e.ctrlKey&&e.key==='n'&&cr==='admin'){e.preventDefault();openReq();}
+});
+
+// ===== SESSION TIMEOUT (30 min) =====
+var sessionTimer=null;
+function resetSessionTimer(){
+  clearTimeout(sessionTimer);
+  sessionTimer=setTimeout(function(){
+    if(tok){
+      addNotif('system','⏰ انتهت الجلسة','تم تسجيل الخروج تلقائياً بسبب عدم النشاط','⏰');
+      logout();
+      alert('تم تسجيل الخروج تلقائياً بسبب عدم النشاط لمدة 30 دقيقة');
+    }
+  },30*60*1000);
+}
+['click','keypress','scroll','mousemove'].forEach(function(ev){
+  document.addEventListener(ev,resetSessionTimer,{passive:true});
+});
+resetSessionTimer();
 </script>
 </body>
 </html>
