@@ -181,7 +181,26 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
 .suc p{font-size:12px;color:var(--text2);margin-bottom:13px}
 .suc-id{background:var(--navy);color:var(--gold-l);border-radius:7px;padding:8px;font-family:monospace;font-size:14px;font-weight:700;margin-bottom:13px}
 
-@media(max-width:768px){.sidebar{display:none}.main{margin-right:0}.sg{grid-template-columns:1fr 1fr}.vg{grid-template-columns:1fr 1fr}.fgrid{grid-column:1}}
+/* MOBILE HAMBURGER */
+.mob-btn{display:none;position:fixed;top:10px;right:10px;z-index:200;width:40px;height:40px;border-radius:8px;background:var(--navy);border:none;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.mob-btn span{display:block;width:20px;height:2px;background:var(--gold-l);border-radius:2px;transition:transform .2s}
+.mob-btn.open span:nth-child(1){transform:rotate(45deg) translate(4px,4px)}
+.mob-btn.open span:nth-child(2){opacity:0}
+.mob-btn.open span:nth-child(3){transform:rotate(-45deg) translate(4px,-4px)}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
+.mob-overlay.show{display:block}
+@media(max-width:768px){
+  .mob-btn{display:flex}
+  .sidebar{transform:translateX(100%);transition:transform .25s ease;z-index:100}
+  .sidebar.mob-open{transform:translateX(0)}
+  .main{margin-right:0}
+  .sg{grid-template-columns:1fr 1fr}
+  .vg{grid-template-columns:1fr 1fr}
+  .fgrid{grid-column:1}
+  .topbar{padding-right:56px}
+  #pg-portal>div[style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  #pg-wallet>div[style*="grid-template-columns"]{grid-template-columns:1fr!important}
+}
 @keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 </style>
 </head>
@@ -297,6 +316,8 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
 </div>
 
 <!-- APP -->
+<button class="mob-btn" id="mob-btn" onclick="toggleMobMenu()"><span></span><span></span><span></span></button>
+<div class="mob-overlay" id="mob-overlay" onclick="toggleMobMenu()"></div>
 <div id="app">
   <div class="sidebar">
     <div class="sb-head">
@@ -405,7 +426,8 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
             <span class="ct">الطلبات</span>
             <div style="display:flex;gap:7px">
               <input class="sr" placeholder="بحث...">
-              <select class="fl"><option value="">كل الأنواع</option></select>
+              <select class="fl" id="req-type-filter" onchange="filterReqs()"><option value="">كل الأنواع</option></select>
+              <select class="fl" id="req-status-filter" onchange="filterReqs()"><option value="">كل الحالات</option><option value="pending">قيد المراجعة</option><option value="approved">موافق عليه</option><option value="rejected">مرفوض</option></select>
             </div>
           </div>
           <div style="overflow-x:auto"><table><thead><tr><th>الرقم</th><th>العميل</th><th>الهاتف</th><th>النوع</th><th>المبلغ</th><th>الدفع</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="req-tb"></tbody></table></div>
@@ -610,6 +632,81 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
               <thead><tr><th>اسم العميل</th><th>من</th><th>إلى</th><th>نوع السيارة</th><th>السعر</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead>
               <tbody id="transport-tb"></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="pg" id="pg-settings">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <!-- العملات وسعر الصرف -->
+          <div class="card">
+            <div class="ch"><span class="ct">💱 العملة وسعر الصرف</span></div>
+            <div class="cb">
+              <div class="fg"><label>العملة الافتراضية</label>
+                <div style="display:flex;gap:6px">
+                  <button class="btn bsm" id="cur-usd" onclick="setCurPref('USD')">$ دولار</button>
+                  <button class="btn bsm" id="cur-lyd" onclick="setCurPref('LYD')">د.ل دينار</button>
+                  <button class="btn bsm" id="cur-egp" onclick="setCurPref('EGP')">ج.م جنيه</button>
+                </div>
+              </div>
+              <div class="fg" style="margin-top:12px"><label>سعر صرف الدولار مقابل الدينار</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:13px;font-weight:600">1$ =</span>
+                  <input type="number" id="rate-input" value="5.5" step="0.1" min="0.1" style="width:100px;font-size:16px;font-weight:700;text-align:center">
+                  <span style="font-size:13px;font-weight:600">د.ل</span>
+                  <button class="btn bs3 bsm" onclick="setExchangeRate(document.getElementById('rate-input').value)">حفظ</button>
+                </div>
+              </div>
+              <div class="fg" style="margin-top:12px"><label>سعر صرف الدولار مقابل الجنيه المصري</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:13px;font-weight:600">1$ =</span>
+                  <input type="number" id="egp-rate-input" value="50" step="0.5" min="0.1" style="width:100px;font-size:16px;font-weight:700;text-align:center">
+                  <span style="font-size:13px;font-weight:600">ج.م</span>
+                  <button class="btn bs3 bsm" onclick="setEgpRate(document.getElementById('egp-rate-input').value)">حفظ</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- المظهر -->
+          <div class="card">
+            <div class="ch"><span class="ct">🎨 المظهر</span></div>
+            <div class="cb">
+              <div class="fg"><label>حجم الخط</label>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <button class="btn bo2 bsm" onclick="changeFontSize(-1)">A-</button>
+                  <span style="font-size:16px;font-weight:700;min-width:30px;text-align:center" id="font-size-label">14</span>
+                  <button class="btn bo2 bsm" onclick="changeFontSize(1)">A+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- النسخ الاحتياطي -->
+          <div class="card">
+            <div class="ch"><span class="ct">💾 النسخ الاحتياطي</span></div>
+            <div class="cb">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn bg2" onclick="exportAllData()">📥 تصدير كل البيانات</button>
+                <label class="btn bn2" style="cursor:pointer">📤 استيراد بيانات <input type="file" accept=".json" style="display:none" onchange="importAllData(this)"></label>
+              </div>
+              <div style="margin-top:12px;font-size:11px;color:var(--text2)">
+                <div>📊 الطلبات: <strong id="set-reqs">0</strong> | 👥 الموظفون: <strong id="set-users">0</strong> | 💰 العملاء: <strong id="set-wcs">0</strong></div>
+                <div style="margin-top:4px">🗂️ التأشيرات: <strong id="set-visas">0</strong> | 🤝 المزودون: <strong id="set-provs">0</strong> | 🚗 النقل: <strong id="set-trans">0</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- معلومات النظام -->
+          <div class="card">
+            <div class="ch"><span class="ct">ℹ️ معلومات النظام</span></div>
+            <div class="cb" style="font-size:12px;line-height:2">
+              <div><strong>اسم النظام:</strong> اليامي للتأشيرات v2026</div>
+              <div><strong>Supabase:</strong> <span style="color:var(--green)">متصل ✓</span></div>
+              <div><strong>الموقع:</strong> <a href="https://alyame-evisa-travel.netlify.app" target="_blank" style="color:var(--blue)">alyame-evisa-travel.netlify.app</a></div>
+              <div><strong>آخر تحديث:</strong> <span id="set-last-sync">-</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -985,7 +1082,7 @@ function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/
 
 const SB='https://fsiprpuhmrhjuyskwtcz.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzaXBycHVobXJoanV5c2t3dGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM1NDIsImV4cCI6MjA5MDYzOTU0Mn0._xu47dZ1kdAbYTJdKbakphpB9is71uGBraXKGFIYWFw';
-const APP='https://evisa-alyame-travel-system2026.netlify.app';
+const APP='https://alyame-evisa-travel.netlify.app';
 
 // FONT SIZE
 var fontSize=14;
@@ -1511,7 +1608,7 @@ function setupNav(){
     rb.className='sb-badge ba';rb.textContent='مدير';
     document.getElementById('btn-new').style.display='inline-flex';
     document.getElementById('bal-pill').classList.add('hidden');
-    nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div>';
+    nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div><div class="ns">النظام</div><div class="ni" onclick="goP(\'settings\',this)"><span>⚙️</span>الإعدادات</div>';
     goP('dash');renderReqs();renderUsers();renderVisas();renderAdvancedStats();startRealtime();
   }else if(cr==='assistant'){
     // مساعد المدير - صلاحيات: الطلبات + الأسعار + الأرصدة
@@ -1542,13 +1639,14 @@ function goP(id,el){
   if(pg)pg.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
   if(el)el.classList.add('on');
-  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'بوابتي',wallet:'محفظتي'};
+  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'بوابتي',wallet:'محفظتي',settings:'الإعدادات'};
   document.getElementById('tb-title').textContent=titles[id]||'';
   if(id==='providers'){renderProviders();renderProviderReqs();updateProviderSelect();}
   if(id==='wallets'){renderWCs();renderAdminTopupRequests();}
   if(id==='wallet'){renderTopupRequests();}
   if(id==='prices'){renderPrices();initPriceModal();}
   if(id==='transport'){renderTransport();}
+  if(id==='settings'){renderSettings();}
 }
 
 // RENDER
@@ -1558,11 +1656,26 @@ function renderReqs(){
   document.getElementById('st-apr').textContent=reqs.filter(function(r){return r.status==='approved';}).length;
   document.getElementById('st-usr').textContent=users.length;
   if(typeof renderAdvancedStats==='function')renderAdvancedStats();
+  // Populate type filter
+  var tf=document.getElementById('req-type-filter');
+  if(tf&&tf.options.length<=1){
+    visas.forEach(function(v){var o=document.createElement('option');o.value=v.id;o.textContent=v.i+' '+v.n;tf.appendChild(o);});
+  }
+  // Apply filters
+  var filterType=tf?tf.value:'';
+  var sf=document.getElementById('req-status-filter');
+  var filterStatus=sf?sf.value:'';
+  var filtered=reqs.filter(function(r){
+    if(filterType&&r.type!==filterType)return false;
+    if(filterStatus&&r.status!==filterStatus)return false;
+    return true;
+  });
   var tb=document.getElementById('req-tb');
-  if(!reqs.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">لا توجد طلبات</td></tr>';return;}
+  tb.innerHTML='';
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">'+(reqs.length?'لا توجد نتائج للفلتر المحدد':'لا توجد طلبات')+'</td></tr>';return;}
   var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
   var rows='';
-  reqs.forEach(function(r){
+  filtered.forEach(function(r){
     var v=vmap[r.type]||{};
     var row=document.createElement('tr');
     row.innerHTML='<td style="font-family:monospace;font-weight:700;color:var(--gold-d);font-size:11px">'+r.id+'</td><td style="font-weight:600">'+r.name+'</td><td style="font-size:11px;color:var(--text2)">'+(r.phone||'-')+'</td><td><span class="badge br2">'+(v.i||'')+' '+(v.n||r.type)+'</span></td><td style="font-weight:600">'+formatMoney(r.amt||0)+'</td><td><span class="badge '+(r.paid?'bpd':'bup')+'">'+(r.paid?'مدفوع':'غير مدفوع')+'</span></td><td><span class="badge '+(r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp')+'">'+(SL[r.status]||r.status)+'</span></td><td></td>';
@@ -1574,6 +1687,8 @@ function renderReqs(){
     tb.appendChild(row);
   });
 }
+
+function filterReqs(){renderReqs();}
 
 function viewDocs(r){
   var urls=r.docUrls||{};
@@ -3233,6 +3348,102 @@ function resetSessionTimer(){
   document.addEventListener(ev,resetSessionTimer,{passive:true});
 });
 resetSessionTimer();
+
+// ===== SETTINGS =====
+function renderSettings(){
+  var ri=document.getElementById('rate-input');if(ri)ri.value=usdToLyd;
+  var ei=document.getElementById('egp-rate-input');if(ei)ei.value=usdToEgp;
+  var fl=document.getElementById('font-size-label');if(fl)fl.textContent=fontSize;
+  // Currency buttons highlight
+  ['usd','lyd','egp'].forEach(function(c){
+    var btn=document.getElementById('cur-'+c);
+    if(btn)btn.className='btn bsm '+(curCurrency===c.toUpperCase()?'bg2':'bo2');
+  });
+  // Stats
+  var el;
+  el=document.getElementById('set-reqs');if(el)el.textContent=reqs.length;
+  el=document.getElementById('set-users');if(el)el.textContent=users.length;
+  el=document.getElementById('set-wcs');if(el)el.textContent=wcs.length;
+  el=document.getElementById('set-visas');if(el)el.textContent=visas.length;
+  el=document.getElementById('set-provs');if(el)el.textContent=providers.length;
+  el=document.getElementById('set-trans');if(el)el.textContent=transports.length;
+  el=document.getElementById('set-last-sync');if(el)el.textContent=new Date().toLocaleString('ar-SA');
+}
+
+function setCurPref(cur){
+  curCurrency=cur;
+  try{localStorage.setItem('alyami_currency',curCurrency);}catch(e){}
+  updateCurrencyBtn();refreshAllMoney();renderSettings();
+}
+
+function exportAllData(){
+  var data={
+    version:'alyami-v2026',
+    exported:new Date().toISOString(),
+    reqs:reqs,users:users,wcs:wcs,visas:visas,providers:providers,
+    transports:transports,priceList:priceList,topupReqs:topupReqs,
+    notifications:notifications,
+    settings:{currency:curCurrency,usdToLyd:usdToLyd,usdToEgp:usdToEgp,fontSize:fontSize}
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='alyami-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);
+}
+
+function importAllData(input){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data.version||!data.version.startsWith('alyami')){alert('ملف غير صالح');return;}
+      if(!confirm('⚠️ هل تريد استيراد البيانات؟\nسيتم استبدال كل البيانات الحالية!\n\nالطلبات: '+(data.reqs?data.reqs.length:0)+'\nالموظفون: '+(data.users?data.users.length:0)+'\nالعملاء: '+(data.wcs?data.wcs.length:0)))return;
+      if(data.reqs)reqs=data.reqs;
+      if(data.users)users=data.users;
+      if(data.wcs)wcs=data.wcs;
+      if(data.visas)visas=data.visas;
+      if(data.providers)providers=data.providers;
+      if(data.transports)transports=data.transports;
+      if(data.priceList)priceList=data.priceList;
+      if(data.topupReqs)topupReqs=data.topupReqs;
+      if(data.settings){
+        if(data.settings.currency)curCurrency=data.settings.currency;
+        if(data.settings.usdToLyd)usdToLyd=data.settings.usdToLyd;
+        if(data.settings.usdToEgp)usdToEgp=data.settings.usdToEgp;
+        if(data.settings.fontSize)fontSize=data.settings.fontSize;
+      }
+      lsSave();
+      try{localStorage.setItem('alyami_transports',JSON.stringify(transports));}catch(ex){}
+      try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(ex){}
+      try{localStorage.setItem('alyami_topup_reqs',JSON.stringify(topupReqs));}catch(ex){}
+      alert('✅ تم استيراد البيانات بنجاح!\nسيتم إعادة تحميل الصفحة.');
+      location.reload();
+    }catch(err){alert('خطأ في قراءة الملف: '+err.message);}
+  };
+  reader.readAsText(file);
+}
+
+// ===== MOBILE MENU =====
+function toggleMobMenu(){
+  var sb=document.querySelector('.sidebar');
+  var ov=document.getElementById('mob-overlay');
+  var btn=document.getElementById('mob-btn');
+  if(!sb)return;
+  var isOpen=sb.classList.contains('mob-open');
+  sb.classList.toggle('mob-open',!isOpen);
+  ov.classList.toggle('show',!isOpen);
+  btn.classList.toggle('open',!isOpen);
+}
+// Close mobile menu when navigating
+var origGoP=goP;
+goP=function(id,el){
+  origGoP(id,el);
+  var sb=document.querySelector('.sidebar');
+  if(sb&&sb.classList.contains('mob-open'))toggleMobMenu();
+};
 </script>
 </body>
 </html>
