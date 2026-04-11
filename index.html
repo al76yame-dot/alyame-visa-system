@@ -790,16 +790,16 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
         <div class="fg"><label>تاريخ السفر</label><input type="date" id="f-travel" dir="ltr"></div>
       </div>
       <div style="margin-top:14px">
-        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2)">📎 المرفقات (اختياري)</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2)">📎 المرفقات</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <label class="upz" id="up1-zone" style="display:block;cursor:pointer;padding:10px">
             <div style="font-size:16px">🛂</div>
-            <div style="font-size:11px;font-weight:500">صورة الجواز</div>
+            <div style="font-size:11px;font-weight:500">صورة الجواز *</div>
             <input type="file" id="up1" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'up1-zone','📄 جواز السفر')">
           </label>
           <label class="upz" id="up2-zone" style="display:block;cursor:pointer;padding:10px">
             <div style="font-size:16px">🎫</div>
-            <div style="font-size:11px;font-weight:500">صورة التذكرة</div>
+            <div style="font-size:11px;font-weight:500">صورة التذكرة *</div>
             <input type="file" id="up2" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'up2-zone','🎫 التذكرة')">
           </label>
           <label class="upz" id="up3-zone" style="display:block;cursor:pointer;padding:10px">
@@ -2233,6 +2233,8 @@ function nextS(){
     if(!document.getElementById('f-ar').value.trim()&&!document.getElementById('f-en').value.trim()){alert('أدخل اسم العميل');return;}
     if(!document.getElementById('f-pp').value.trim()){alert('أدخل رقم الجواز');return;}
     if(!document.getElementById('f-dob').value){alert('أدخل تاريخ الميلاد');return;}
+    if(!uploadedFiles.up1){alert('يرجى رفع صورة جواز السفر');return;}
+    if(!uploadedFiles.up2){alert('يرجى رفع صورة التذكرة');return;}
   }
   if(step===3){submitReq();return;}
   step++;showStep(step);
@@ -2341,6 +2343,7 @@ function submitReq(){
         alert('رصيد العميل غير كافٍ!\n\nالرصيد الحالي: '+formatMoney(wc.bal)+'\nالمبلغ المطلوب: '+formatMoney(sa));
         return;
       }
+      if(!confirm('⚠️ تأكيد الخصم من الرصيد\n\nسيتم خصم: '+formatMoney(sa)+'\nالرصيد الحالي: '+formatMoney(wc.bal)+'\nالرصيد بعد الخصم: '+formatMoney(wc.bal-sa)+'\n\nهل تريد المتابعة؟'))return;
       wc.bal=parseFloat((wc.bal-sa).toFixed(2));
       sbSaveWC(wc);
       renderWCs();
@@ -2352,6 +2355,7 @@ function submitReq(){
           alert('رصيدك غير كافٍ!\n\nرصيدك الحالي: '+formatMoney(wb)+'\nالمبلغ المطلوب: '+formatMoney(sa));
           return;
         }
+        if(!confirm('⚠️ تأكيد الخصم من رصيدك\n\nسيتم خصم: '+formatMoney(sa)+'\nرصيدك الحالي: '+formatMoney(wb)+'\nرصيدك بعد الخصم: '+formatMoney(wb-sa)+'\n\nهل تريد المتابعة؟'))return;
         wb=parseFloat((wb-sa).toFixed(2));
         document.getElementById('w-bal').textContent=formatMoney(wb);
         document.getElementById('bal-n').textContent=formatMoney(wb);
