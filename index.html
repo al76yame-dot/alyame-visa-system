@@ -737,26 +737,15 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
     <div class="steps">
       <div class="step"><div class="scc act" id="rc1">1</div><div class="sl3 act">النوع</div></div>
       <div class="sline"></div>
-      <div class="step"><div class="scc" id="rc2">2</div><div class="sl3">البيانات</div></div>
+      <div class="step"><div class="scc" id="rc2">2</div><div class="sl3">المستندات</div></div>
       <div class="sline"></div>
-      <div class="step"><div class="scc" id="rc3">3</div><div class="sl3">المستندات</div></div>
+      <div class="step"><div class="scc" id="rc3">3</div><div class="sl3">البيانات</div></div>
       <div class="sline"></div>
       <div class="step"><div class="scc" id="rc4">4</div><div class="sl3">الدفع</div></div>
     </div>
     <div id="rs1"><div class="vg" id="visa-grid"></div></div>
     <div id="rs2" class="hidden">
-      <div class="fgrid">
-        <div class="fg"><label>الاسم (عربي)</label><input type="text" id="f-ar" placeholder="محمد العبدالله"></div>
-        <div class="fg"><label>Full Name</label><input type="text" id="f-en" dir="ltr" placeholder="Mohammed"></div>
-        <div class="fg"><label>رقم الجواز</label><input type="text" id="f-pp" dir="ltr" placeholder="AA1234567"></div>
-        <div class="fg"><label>الجنسية</label><select id="f-nat"><option value="">اختر الجنسية</option></select></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="f-ph" dir="ltr" placeholder="+218 91 XXX XXXX"></div>
-        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="f-dob" dir="ltr"></div>
-        <div class="fg full"><label>ملاحظات</label><textarea id="f-notes" style="height:60px;resize:vertical" placeholder="..."></textarea></div>
-      </div>
-    </div>
-    <div id="rs3" class="hidden">
-      <div style="background:var(--blue-l);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--blue);margin-bottom:8px;line-height:1.7">🔍 <strong>قراءة تلقائية:</strong> عند رفع صورة الجواز أو التذكرة، سيتم قراءة البيانات وتعبئة الحقول تلقائياً</div>
+      <div style="background:var(--blue-l);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--blue);margin-bottom:8px;line-height:1.7">🔍 <strong>قراءة تلقائية:</strong> ارفع صورة الجواز والتذكرة وسيتم ملء البيانات تلقائياً في الخطوة التالية</div>
       <div style="background:var(--amber-l);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--amber);margin-bottom:12px">📌 يرجى رفع المستندات بصورة واضحة وكاملة لضمان دقة القراءة التلقائية</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
         <div>
@@ -795,6 +784,18 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
             <input type="file" id="up4" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'up4-zone','📋 مستند إضافي')">
           </label>
         </div>
+      </div>
+    </div>
+    <div id="rs3" class="hidden">
+      <div id="ocr-autofill-banner" style="background:var(--green-l);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:12px;display:none;line-height:1.7">✅ <strong>تم ملء البيانات تلقائياً من المستندات</strong> — يرجى التحقق والتعديل إن لزم</div>
+      <div class="fgrid">
+        <div class="fg"><label>الاسم (عربي)</label><input type="text" id="f-ar" placeholder="محمد العبدالله"></div>
+        <div class="fg"><label>Full Name</label><input type="text" id="f-en" dir="ltr" placeholder="Mohammed"></div>
+        <div class="fg"><label>رقم الجواز</label><input type="text" id="f-pp" dir="ltr" placeholder="AA1234567"></div>
+        <div class="fg"><label>الجنسية</label><select id="f-nat"><option value="">اختر الجنسية</option></select></div>
+        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="f-ph" dir="ltr" placeholder="+218 91 XXX XXXX"></div>
+        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="f-dob" dir="ltr"></div>
+        <div class="fg full"><label>ملاحظات</label><textarea id="f-notes" style="height:60px;resize:vertical" placeholder="..."></textarea></div>
       </div>
     </div>
     <div id="rs4" class="hidden">
@@ -2182,12 +2183,18 @@ function showStep(n){
 }
 function nextS(){
   if(step===1&&!sv){alert('اختر نوع التأشيرة أولاً');return;}
-  if(step===2){
-    if(!document.getElementById('f-ar').value.trim()){alert('أدخل اسم العميل');return;}
+  if(step===3){
+    if(!document.getElementById('f-ar').value.trim()&&!document.getElementById('f-en').value.trim()){alert('أدخل اسم العميل');return;}
     if(!document.getElementById('f-pp').value.trim()){alert('أدخل رقم الجواز');return;}
   }
   if(step===4){submitReq();return;}
   step++;showStep(step);
+  // When moving to step 3 (data), show autofill banner if OCR filled anything
+  if(step===3){
+    var hasData=document.getElementById('f-en').value||document.getElementById('f-pp').value||document.getElementById('f-dob').value;
+    var banner=document.getElementById('ocr-autofill-banner');
+    if(banner)banner.style.display=hasData?'block':'none';
+  }
 }
 function prevS(){if(step>1){step--;showStep(step);}}
 function selV(id,price,el){sv=id;sa=price;document.querySelectorAll('.vc2').forEach(function(c){c.classList.remove('on');});el.classList.add('on');var ps=document.getElementById('pay-show');if(ps)ps.textContent=formatMoney(price);}
@@ -3369,22 +3376,18 @@ function resetSessionTimer(){
 resetSessionTimer();
 
 // ===== OCR: PASSPORT & TICKET READER =====
-var ocrWorker=null;
-var ocrReady=false;
+var ocrBusy=false;
 
-// Initialize Tesseract worker lazily on first use
-async function getOCRWorker(){
-  if(ocrWorker&&ocrReady)return ocrWorker;
+async function doOCR(imageSource){
   try{
-    ocrWorker=await Tesseract.createWorker('eng+ara',1,{
+    var result=await Tesseract.recognize(imageSource,'eng',{
       workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
       corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js',
     });
-    ocrReady=true;
-    return ocrWorker;
+    return result.data.text;
   }catch(e){
-    console.error('OCR init error:',e);
-    return null;
+    console.error('OCR error:',e);
+    return '';
   }
 }
 
@@ -3563,84 +3566,74 @@ function parseTicketText(text){
 
 // ===== MAIN OCR HANDLER =====
 async function runPassportOCR(file,zoneId){
-  showOCRProgress(zoneId,5,'جاري تجهيز محرك القراءة...');
-  var worker=await getOCRWorker();
-  if(!worker){
-    removeOCRProgress(zoneId);
-    showOCRResult(zoneId,'⚠️ تعذر تشغيل القراءة التلقائية','var(--amber)');
-    return;
-  }
-
-  showOCRProgress(zoneId,20,'جاري قراءة الجواز...');
+  if(ocrBusy)return;
+  ocrBusy=true;
+  showOCRProgress(zoneId,10,'جاري تجهيز محرك القراءة...');
 
   try{
     var imgSrc=await readFileAsDataURL(file);
 
-    // Pre-process: create higher contrast image for MRZ
+    // First try: OCR on MRZ area (bottom 40% with high contrast)
+    showOCRProgress(zoneId,25,'جاري معالجة صورة الجواز...');
     var processedImg=await preprocessForMRZ(imgSrc);
 
-    showOCRProgress(zoneId,40,'جاري التعرف على النص...');
+    showOCRProgress(zoneId,40,'جاري قراءة منطقة MRZ...');
+    var mrzText='';
+    if(processedImg){
+      mrzText=await doOCR(processedImg);
+    }
 
-    var result=await worker.recognize(processedImg||imgSrc);
-    var text=result.data.text;
+    var mrzData=parseMRZ(mrzText);
 
-    showOCRProgress(zoneId,80,'جاري تحليل البيانات...');
+    // If MRZ failed, try full image OCR
+    if(!mrzData||(!mrzData.passportNo&&!mrzData.nameEn)){
+      showOCRProgress(zoneId,60,'جاري قراءة الصفحة كاملة...');
+      var fullText=await doOCR(imgSrc);
 
-    // Try MRZ parsing first
-    var mrzData=parseMRZ(text);
+      showOCRProgress(zoneId,80,'جاري تحليل البيانات...');
+      // Try MRZ from full text
+      mrzData=parseMRZ(fullText);
+
+      // If still no MRZ, try plain text extraction
+      if(!mrzData||(!mrzData.passportNo&&!mrzData.nameEn)){
+        mrzData=extractPassportFromText(fullText);
+      }
+    }
 
     if(mrzData&&(mrzData.passportNo||mrzData.nameEn)){
-      // Fill form fields
       fillPassportData(mrzData);
       showOCRProgress(zoneId,100,'✅ تم قراءة الجواز بنجاح!');
       setTimeout(function(){
         removeOCRProgress(zoneId);
-        showOCRResult(zoneId,'✅ تم قراءة البيانات تلقائياً','var(--green)');
+        showOCRResult(zoneId,'✅ تم قراءة البيانات — ستظهر في الخطوة التالية','var(--green)');
       },1500);
     } else {
-      // Fallback: try to extract data from plain text
-      var fallback=extractPassportFromText(text);
-      if(fallback&&(fallback.passportNo||fallback.nameEn)){
-        fillPassportData(fallback);
-        showOCRProgress(zoneId,100,'✅ تم استخراج بعض البيانات');
-        setTimeout(function(){
-          removeOCRProgress(zoneId);
-          showOCRResult(zoneId,'⚡ تم استخراج بيانات — يرجى التحقق','var(--amber)');
-        },1500);
-      } else {
-        removeOCRProgress(zoneId);
-        showOCRResult(zoneId,'📝 لم يتم التعرف — أدخل البيانات يدوياً','var(--amber)');
-      }
+      removeOCRProgress(zoneId);
+      showOCRResult(zoneId,'📝 لم يتم التعرف — أدخل البيانات يدوياً في الخطوة التالية','var(--amber)');
     }
   }catch(e){
-    console.error('OCR error:',e);
+    console.error('Passport OCR error:',e);
     removeOCRProgress(zoneId);
     showOCRResult(zoneId,'⚠️ خطأ في القراءة — أدخل يدوياً','var(--red)');
   }
+  ocrBusy=false;
 }
 
 async function runTicketOCR(file,zoneId){
-  showOCRProgress(zoneId,5,'جاري تجهيز محرك القراءة...');
-  var worker=await getOCRWorker();
-  if(!worker){
-    removeOCRProgress(zoneId);
-    showOCRResult(zoneId,'⚠️ تعذر تشغيل القراءة','var(--amber)');
-    return;
-  }
-
-  showOCRProgress(zoneId,30,'جاري قراءة التذكرة...');
+  if(ocrBusy)return;
+  ocrBusy=true;
+  showOCRProgress(zoneId,15,'جاري قراءة التذكرة...');
 
   try{
     var imgSrc=await readFileAsDataURL(file);
-    var result=await worker.recognize(imgSrc);
-    var text=result.data.text;
 
-    showOCRProgress(zoneId,80,'جاري تحليل بيانات التذكرة...');
+    showOCRProgress(zoneId,50,'جاري التعرف على النص...');
+    var text=await doOCR(imgSrc);
 
+    showOCRProgress(zoneId,85,'جاري تحليل بيانات التذكرة...');
     var ticketData=parseTicketText(text);
     var found=false;
 
-    // Fill notes with ticket info
     var notesEl=document.getElementById('f-notes');
     var infoParts=[];
     if(ticketData.flight)infoParts.push('رحلة: '+ticketData.flight);
@@ -3654,18 +3647,12 @@ async function runTicketOCR(file,zoneId){
       var existing=notesEl.value.trim();
       var newNote='[بيانات التذكرة] '+infoParts.join(' | ');
       notesEl.value=existing?(existing+'\n'+newNote):newNote;
-      // Highlight the notes field
-      notesEl.style.border='2px solid var(--green)';
-      setTimeout(function(){notesEl.style.border='';},3000);
     }
 
-    // If ticket has passenger name and form name is empty, fill it
     if(ticketData.name){
       var enEl=document.getElementById('f-en');
       if(enEl&&!enEl.value.trim()){
         enEl.value=ticketData.name;
-        enEl.style.border='2px solid var(--green)';
-        setTimeout(function(){enEl.style.border='';},3000);
         found=true;
       }
     }
@@ -3685,6 +3672,7 @@ async function runTicketOCR(file,zoneId){
     removeOCRProgress(zoneId);
     showOCRResult(zoneId,'⚠️ خطأ في قراءة التذكرة','var(--red)');
   }
+  ocrBusy=false;
 }
 
 // ===== HELPERS =====
