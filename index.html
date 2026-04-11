@@ -939,10 +939,12 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="fg"><label>نوع السيارة</label>
         <select id="ct-car"><option>سيارة عادية</option><option>فان عائلي</option><option>حافلة صغيرة</option></select>
       </div>
+      <div class="fg"><label>سعر الخدمة ($)</label><input type="number" id="ct-price" value="50" min="0" style="font-weight:700;text-align:center"></div>
       <div class="fg full"><label>ملاحظات</label><input type="text" id="ct-notes" placeholder="رقم الرحلة، معلومات إضافية..."></div>
     </div>
+    <div id="ct-bal-info" style="background:var(--blue-l);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--blue);margin-top:10px;display:none">💰 رصيدك: <strong id="ct-bal-show">$0</strong> — سيتم الخصم عند تقديم الطلب</div>
   </div>
-  <div class="mf"><button class="btn bo2" onclick="closeOv('ov-c-transport')">إلغاء</button><button class="btn bn2" onclick="submitClientTransport()">📤 إرسال الطلب</button></div>
+  <div class="mf"><button class="btn bo2" onclick="closeOv('ov-c-transport')">إلغاء</button><button class="btn bn2" onclick="submitClientTransport()">📤 إرسال وخصم من الرصيد</button></div>
 </div>
 </div>
 
@@ -1946,9 +1948,10 @@ function renderClientReqs(){
   var el=document.getElementById('c-reqs');
   var mine=reqs.filter(function(r){return r.cid===cu.phone;});
   if(!mine.length){el.innerHTML='<div style="text-align:center;padding:22px;color:var(--text3);font-size:12px">لا توجد طلبات<br><br><button class="btn bg2 bsm" onclick="openReq()">+ اطلب الآن</button></div>';return;}
-  el.innerHTML=mine.map(function(r){
+  el.innerHTML=mine.map(function(r,idx){
     var prog={pending:30,review:60,approved:100,rejected:10};
-    return '<div class="rcard"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div><div style="font-weight:700;font-size:12px">'+r.type+'</div><div style="font-size:10px;color:var(--text3);font-family:monospace">'+r.id+'</div></div><span class="badge '+(r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp')+'">'+( SL[r.status]||r.status)+'</span></div><div class="pb"><div class="pf" style="width:'+(prog[r.status]||30)+'%"></div></div></div>';
+    var visaBtn=r.status==='approved'?'<button class="btn bsm" style="font-size:9px;background:var(--green);color:#fff;margin-top:4px" onclick="clientPrintVisa('+idx+')">📄 استخراج التأشيرة</button>':'';
+    return '<div class="rcard"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div><div style="font-weight:700;font-size:12px">'+r.type+'</div><div style="font-size:10px;color:var(--text3);font-family:monospace">'+r.id+'</div></div><span class="badge '+(r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp')+'">'+( SL[r.status]||r.status)+'</span></div><div class="pb"><div class="pf" style="width:'+(prog[r.status]||30)+'%"></div></div>'+visaBtn+'</div>';
   }).join('');
 }
 
@@ -3456,18 +3459,26 @@ function renderClientReqsFull(){
   if(!el)return;
   var mine=reqs.filter(function(r){return r.cid===cu.phone;});
   if(!mine.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">لا توجد طلبات<br><br><button class="btn bg2 bsm" onclick="openReq()">+ اطلب الآن</button></div>';return;}
-  el.innerHTML=mine.map(function(r){
+  el.innerHTML=mine.map(function(r,idx){
     var st=SL[r.status]||r.status;
     var badge=r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp';
-    var docs='';
+    var btns=[];
     if(r.docUrls){
-      var btns=[];
-      if(r.docUrls.passport)btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="printDoc(\''+r.docUrls.passport+'\')">🛂 طباعة الجواز</button>');
-      if(r.docUrls.ticket)btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="printDoc(\''+r.docUrls.ticket+'\')">🎫 طباعة التذكرة</button>');
-      if(btns.length)docs='<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">'+btns.join('')+'</div>';
+      if(r.docUrls.passport)btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="printDoc(\''+r.docUrls.passport+'\')">🛂 الجواز</button>');
+      if(r.docUrls.ticket)btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="printDoc(\''+r.docUrls.ticket+'\')">🎫 التذكرة</button>');
     }
+    if(r.status==='approved'){
+      btns.push('<button class="btn bsm bg2" style="font-size:10px;background:var(--green);color:#fff" onclick="clientPrintVisa('+idx+')">📄 استخراج التأشيرة</button>');
+    }
+    var docs=btns.length?'<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">'+btns.join('')+'</div>':'';
     return '<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:13px">'+r.type+'</div><div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">'+r.id+' | '+r.date+'</div>'+(r.name_en?'<div style="font-size:11px;margin-top:3px">'+r.name+' / '+r.name_en+'</div>':'')+(r.passport?'<div style="font-size:11px;color:var(--text2)">جواز: '+r.passport+'</div>':'')+(r.route_from&&r.route_to?'<div style="font-size:11px;color:var(--text2)">✈️ '+r.route_from+' → '+r.route_to+(r.travel_date?' | '+r.travel_date:'')+'</div>':'')+docs+'</div><span class="badge '+badge+'">'+st+'</span></div></div>';
   }).join('');
+}
+
+function clientPrintVisa(idx){
+  var mine=reqs.filter(function(r){return r.cid===cu.phone;});
+  if(!mine[idx])return;
+  printVisa(mine[idx]);
 }
 
 // Client Export PDF
@@ -3544,8 +3555,12 @@ function selCTType(btn,type){
 function openClientTransport(){
   ['ct-from','ct-to','ct-date','ct-time','ct-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('ct-pax').value='1';
+  document.getElementById('ct-price').value='50';
   document.getElementById('ct-type').value='استقبال';
   document.querySelectorAll('.ct-type-btn').forEach(function(b,i){b.className='btn '+(i===0?'bg2':'bo2')+' ct-type-btn'+(i===0?' on':'');});
+  var balInfo=document.getElementById('ct-bal-info');
+  var balShow=document.getElementById('ct-bal-show');
+  if(balInfo&&cr==='client'){balInfo.style.display='block';if(balShow)balShow.textContent=formatMoney(wb);}
   document.getElementById('ov-c-transport').classList.add('open');
 }
 
@@ -3553,8 +3568,24 @@ function submitClientTransport(){
   var from=document.getElementById('ct-from').value.trim();
   var to=document.getElementById('ct-to').value.trim();
   var date=document.getElementById('ct-date').value;
+  var price=parseFloat(document.getElementById('ct-price').value)||0;
   if(!from||!to){alert('أدخل نقطة الانطلاق والوجهة');return;}
   if(!date){alert('اختر التاريخ');return;}
+
+  // Deduct from wallet if client
+  if(cr==='client'&&price>0){
+    if(wb<price){
+      alert('رصيدك غير كافٍ!\n\nرصيدك الحالي: '+formatMoney(wb)+'\nسعر الخدمة: '+formatMoney(price));
+      return;
+    }
+    if(!confirm('⚠️ تأكيد خصم سعر النقل\n\nسعر الخدمة: '+formatMoney(price)+'\nرصيدك الحالي: '+formatMoney(wb)+'\nرصيدك بعد الخصم: '+formatMoney(wb-price)+'\n\nهل تريد المتابعة؟'))return;
+    wb=parseFloat((wb-price).toFixed(2));
+    document.getElementById('w-bal').textContent=formatMoney(wb);
+    document.getElementById('bal-n').textContent=formatMoney(wb);
+    // Update in wcs too
+    var myWC=wcs.find(function(c){return c.phone===cu.phone;});
+    if(myWC){myWC.bal=wb;sbSaveWC(myWC);}
+  }
 
   var trip={
     id:Date.now(),
@@ -3567,17 +3598,17 @@ function submitClientTransport(){
     date:date,
     time:document.getElementById('ct-time').value||'',
     notes:document.getElementById('ct-notes').value||'',
-    price:0,
+    price:price,
+    paid:cr==='client'&&price>0,
     status:'pending'
   };
 
   transports.push(trip);
   try{localStorage.setItem('alyami_transports',JSON.stringify(transports));}catch(e){}
-  addNotif('transport','🚗 طلب نقل جديد — '+cu.name,trip.type+': '+trip.from+' → '+trip.to+' | '+trip.date,'🚗');
+  addNotif('transport','🚗 طلب نقل جديد — '+cu.name,trip.type+': '+trip.from+' → '+trip.to+' | '+trip.date+(price>0?' | '+formatMoney(price):''),'🚗');
   closeOv('ov-c-transport');
-  renderClientTransport();
-  renderTransport();
-  alert('✅ تم إرسال طلب النقل!\nسيتم التواصل معك لتأكيد الحجز.');
+  renderClientTransport();renderTransport();renderClientDashboard();
+  alert('✅ تم إرسال طلب النقل!'+(price>0?'\n💰 تم خصم '+formatMoney(price)+' من رصيدك':'\nسيتم التواصل معك لتأكيد الحجز.'));
 }
 
 function renderClientTransport(){
