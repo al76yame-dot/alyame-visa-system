@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://api.qrserver.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src * data: blob:; connect-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://api.qrserver.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com; font-src https://fonts.gstatic.com; worker-src blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://api.qrserver.com https://cdn.jsdelivr.net https://unpkg.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src * data: blob:; connect-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://api.qrserver.com https://cdn.jsdelivr.net https://unpkg.com https://tessdata.projectnaptha.com; font-src https://fonts.gstatic.com; worker-src blob: https://unpkg.com https://cdn.jsdelivr.net;">
 <meta name="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>اليامي - نظام التأشيرات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -3380,10 +3380,13 @@ var ocrBusy=false;
 
 async function doOCR(imageSource){
   try{
-    var result=await Tesseract.recognize(imageSource,'eng',{
-      workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-      corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core.wasm.js',
+    var timeout=new Promise(function(_,reject){
+      setTimeout(function(){reject(new Error('OCR timeout'));},60000);
     });
+    var ocr=Tesseract.recognize(imageSource,'eng',{
+      logger:function(m){console.log('OCR:',m.status,Math.round((m.progress||0)*100)+'%');}
+    });
+    var result=await Promise.race([ocr,timeout]);
     return result.data.text;
   }catch(e){
     console.error('OCR error:',e);
@@ -3440,20 +3443,27 @@ function parseMRZ(text){
   // Clean up OCR output - normalize chars
   var lines=text.split(/\n/).map(function(l){return l.replace(/\s/g,'').toUpperCase();}).filter(function(l){return l.length>=30;});
 
-  // Find MRZ lines - look for lines starting with P< or containing mostly MRZ chars
+  // Find MRZ lines
   var mrzLines=[];
   for(var i=0;i<lines.length;i++){
     var line=lines[i];
-    // Fix common OCR mistakes in MRZ
-    line=line.replace(/O/g,'0').replace(/[Il\|]/g,'1').replace(/[{}]/g,'<').replace(/[()]/g,'<');
-    // Restore letters where needed - first line starts with P
-    if(line.match(/^P/)&&line.length>=40){
-      // First MRZ line - restore letters
-      line='P'+line.slice(1).replace(/0/g,'O');
+    // Fix bracket-like chars to chevrons
+    line=line.replace(/[{}()]/g,'<');
+    // Line 1: starts with P, contains names (letters)
+    if(line.match(/^P[<\w]/)&&line.length>=40&&mrzLines.length===0){
+      // Only fix pipe/bar chars to < in name line
+      line=line.replace(/[\|]/g,'<');
       mrzLines.push(line);
     }
-    // Second line - mostly numbers and country codes
+    // Line 2: starts with alphanumeric, contains numbers + country codes
     else if(line.match(/^[A-Z0-9<]{30,}$/)&&mrzLines.length===1){
+      // Fix OCR mistakes in numeric line: O→0, I/l→1
+      line=line.replace(/O/g,'0').replace(/[Il\|]/g,'1');
+      // Restore letters in country code area (positions 10-12)
+      var pre=line.slice(0,10);
+      var nat=line.slice(10,13).replace(/0/g,'O').replace(/1/g,'I');
+      var rest=line.slice(13);
+      line=pre+nat+rest;
       mrzLines.push(line);
     }
   }
@@ -3479,16 +3489,16 @@ function parseMRZ(text){
 
   var result={};
 
-  // Parse Line 1: names
+  // Parse Line 1: names (no digit substitution - keep original letters)
   try{
     var namesPart=l1.slice(5); // skip P<XXX
     var nameParts=namesPart.split('<<');
-    var surname=(nameParts[0]||'').replace(/</g,' ').trim();
-    var given=(nameParts[1]||'').replace(/</g,' ').trim();
+    var surname=(nameParts[0]||'').replace(/</g,' ').replace(/[01]/g,'').trim();
+    var given=(nameParts[1]||'').replace(/</g,' ').replace(/[01]/g,'').trim();
     result.nameEn=(given+' '+surname).trim();
   }catch(e){}
 
-  // Parse Line 2
+  // Parse Line 2 (already had OCR digit fixes applied above)
   try{
     // Passport number: positions 0-8
     result.passportNo=l2.slice(0,9).replace(/</g,'').trim();
