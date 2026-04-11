@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://api.qrserver.com https://cdn.jsdelivr.net https://unpkg.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src * data: blob:; connect-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://api.qrserver.com https://cdn.jsdelivr.net https://unpkg.com https://tessdata.projectnaptha.com; font-src https://fonts.gstatic.com; worker-src blob: https://unpkg.com https://cdn.jsdelivr.net;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://api.qrserver.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src * data: blob:; connect-src 'self' https://fsiprpuhmrhjuyskwtcz.supabase.co https://api.qrserver.com; font-src https://fonts.gstatic.com;">
 <meta name="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>اليامي - نظام التأشيرات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -737,68 +736,49 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
     <div class="steps">
       <div class="step"><div class="scc act" id="rc1">1</div><div class="sl3 act">النوع</div></div>
       <div class="sline"></div>
-      <div class="step"><div class="scc" id="rc2">2</div><div class="sl3">المستندات</div></div>
+      <div class="step"><div class="scc" id="rc2">2</div><div class="sl3">البيانات</div></div>
       <div class="sline"></div>
-      <div class="step"><div class="scc" id="rc3">3</div><div class="sl3">البيانات</div></div>
-      <div class="sline"></div>
-      <div class="step"><div class="scc" id="rc4">4</div><div class="sl3">الدفع</div></div>
+      <div class="step"><div class="scc" id="rc3">3</div><div class="sl3">الدفع</div></div>
     </div>
     <div id="rs1"><div class="vg" id="visa-grid"></div></div>
     <div id="rs2" class="hidden">
-      <div style="background:var(--blue-l);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--blue);margin-bottom:8px;line-height:1.7">🔍 <strong>قراءة تلقائية:</strong> ارفع صورة الجواز والتذكرة وسيتم ملء البيانات تلقائياً في الخطوة التالية</div>
-      <div style="background:var(--amber-l);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--amber);margin-bottom:12px">📌 يرجى رفع المستندات بصورة واضحة وكاملة لضمان دقة القراءة التلقائية</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
-        <div>
-          <div style="font-size:12px;font-weight:500;margin-bottom:6px">📄 جواز السفر * <span style="font-size:10px;color:var(--blue);font-weight:600">🔍 قراءة تلقائية</span></div>
-          <label class="upz" id="up1-zone" style="display:block;cursor:pointer">
-            <div style="font-size:22px;margin-bottom:4px">🛂</div>
-            <div style="font-size:12px;font-weight:500">اضغط لرفع صورة الجواز</div>
-            <div style="font-size:10px;color:var(--blue)">سيتم قراءة البيانات تلقائياً</div>
+      <div class="fgrid">
+        <div class="fg"><label>الاسم (عربي) *</label><input type="text" id="f-ar" placeholder="محمد العبدالله"></div>
+        <div class="fg"><label>Full Name (English) *</label><input type="text" id="f-en" dir="ltr" placeholder="Mohammed Al-Abdullah"></div>
+        <div class="fg"><label>رقم الجواز *</label><input type="text" id="f-pp" dir="ltr" placeholder="AA1234567"></div>
+        <div class="fg"><label>تاريخ الميلاد *</label><input type="date" id="f-dob" dir="ltr"></div>
+        <div class="fg"><label>خط الطيران</label><input type="text" id="f-airline" placeholder="الخطوط الليبية"></div>
+        <div class="fg"><label>من</label><input type="text" id="f-from" placeholder="طرابلس"></div>
+        <div class="fg"><label>إلى</label><input type="text" id="f-to" placeholder="القاهرة"></div>
+        <div class="fg"><label>تاريخ السفر</label><input type="date" id="f-travel" dir="ltr"></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2)">📎 المرفقات (اختياري)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <label class="upz" id="up1-zone" style="display:block;cursor:pointer;padding:10px">
+            <div style="font-size:16px">🛂</div>
+            <div style="font-size:11px;font-weight:500">صورة الجواز</div>
             <input type="file" id="up1" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'up1-zone','📄 جواز السفر')">
           </label>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:500;margin-bottom:6px">🎫 التذكرة * <span style="font-size:10px;color:var(--blue);font-weight:600">🔍 قراءة تلقائية</span></div>
-          <label class="upz" id="up2-zone" style="display:block;cursor:pointer">
-            <div style="font-size:22px;margin-bottom:4px">🎫</div>
-            <div style="font-size:12px;font-weight:500">اضغط لرفع صورة التذكرة</div>
-            <div style="font-size:10px;color:var(--blue)">سيتم قراءة بيانات الرحلة تلقائياً</div>
+          <label class="upz" id="up2-zone" style="display:block;cursor:pointer;padding:10px">
+            <div style="font-size:16px">🎫</div>
+            <div style="font-size:11px;font-weight:500">صورة التذكرة</div>
             <input type="file" id="up2" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'up2-zone','🎫 التذكرة')">
           </label>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:500;margin-bottom:6px">🖼️ الصورة الشخصية *</div>
-          <label class="upz" id="up3-zone" style="display:block;cursor:pointer">
-            <div style="font-size:22px;margin-bottom:4px">🖼️</div>
-            <div style="font-size:12px;font-weight:500">اضغط لرفع الصورة</div>
-            <div style="font-size:10px;color:var(--text3)">JPG خلفية بيضاء</div>
+          <label class="upz" id="up3-zone" style="display:block;cursor:pointer;padding:10px">
+            <div style="font-size:16px">🖼️</div>
+            <div style="font-size:11px;font-weight:500">الصورة الشخصية</div>
             <input type="file" id="up3" accept="image/*" style="display:none" onchange="handleUpload(this,'up3-zone','🖼️ الصورة الشخصية')">
           </label>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:500;margin-bottom:6px">📋 مستند إضافي</div>
-          <label class="upz" id="up4-zone" style="display:block;cursor:pointer">
-            <div style="font-size:22px;margin-bottom:4px">📋</div>
-            <div style="font-size:12px;font-weight:500">اضغط للرفع</div>
-            <div style="font-size:10px;color:var(--text3)">اختياري</div>
+          <label class="upz" id="up4-zone" style="display:block;cursor:pointer;padding:10px">
+            <div style="font-size:16px">📋</div>
+            <div style="font-size:11px;font-weight:500">مستند إضافي</div>
             <input type="file" id="up4" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'up4-zone','📋 مستند إضافي')">
           </label>
         </div>
       </div>
     </div>
     <div id="rs3" class="hidden">
-      <div id="ocr-autofill-banner" style="background:var(--green-l);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:12px;display:none;line-height:1.7">✅ <strong>تم ملء البيانات تلقائياً من المستندات</strong> — يرجى التحقق والتعديل إن لزم</div>
-      <div class="fgrid">
-        <div class="fg"><label>الاسم (عربي)</label><input type="text" id="f-ar" placeholder="محمد العبدالله"></div>
-        <div class="fg"><label>Full Name</label><input type="text" id="f-en" dir="ltr" placeholder="Mohammed"></div>
-        <div class="fg"><label>رقم الجواز</label><input type="text" id="f-pp" dir="ltr" placeholder="AA1234567"></div>
-        <div class="fg"><label>الجنسية</label><select id="f-nat"><option value="">اختر الجنسية</option></select></div>
-        <div class="fg"><label>رقم الهاتف</label><input type="tel" id="f-ph" dir="ltr" placeholder="+218 91 XXX XXXX"></div>
-        <div class="fg"><label>تاريخ الميلاد</label><input type="date" id="f-dob" dir="ltr"></div>
-        <div class="fg full"><label>ملاحظات</label><textarea id="f-notes" style="height:60px;resize:vertical" placeholder="..."></textarea></div>
-      </div>
-    </div>
-    <div id="rs4" class="hidden">
       <div style="background:var(--navy);border-radius:9px;padding:14px;color:#fff;margin-bottom:12px">
         <div style="font-size:11px;color:rgba(255,255,255,.45)">المبلغ المستحق</div>
         <div style="font-size:26px;font-weight:700;color:var(--gold-l)" id="pay-show">$0</div>
@@ -1410,8 +1390,6 @@ var VB={hajj:'bp',umra:'ba2',egypt:'bp',tourist:'br2',work:'br2',transit:'br2'};
 // INIT
 document.addEventListener('DOMContentLoaded',function(){
   initCCs();
-  var sel=document.getElementById('f-nat');
-  nats.forEach(function(n){var o=document.createElement('option');o.textContent=n;sel.appendChild(o);});
 });
 
 // CC DROPDOWNS
@@ -2122,10 +2100,8 @@ function openReq(){
     }
   });
   renderVisaGrid();
-  var sel=document.getElementById('f-nat');
-  if(sel&&sel.options.length<=1){nats.forEach(function(n){var o=document.createElement('option');o.textContent=n;sel.appendChild(o);});}
   // Reset form fields
-  ['f-ar','f-en','f-pp','f-ph','f-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['f-ar','f-en','f-pp','f-dob','f-airline','f-from','f-to','f-travel'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   showStep(1);
   document.getElementById('ov-req').classList.add('open');
 }
@@ -2143,15 +2119,15 @@ function selPM(el){
 }
 
 function showStep(n){
-  [1,2,3,4].forEach(function(i){
+  [1,2,3].forEach(function(i){
     var el=document.getElementById('rs'+i);if(el)el.classList.toggle('hidden',i!==n);
     var c=document.getElementById('rc'+i);if(c){c.className='scc'+(i<n?' done':i===n?' act':'');}
   });
   document.getElementById('prev-b').style.display=n>1?'inline-flex':'none';
-  document.getElementById('next-b').textContent=n===4?'تأكيد الدفع':'التالي';
+  document.getElementById('next-b').textContent=n===3?'تأكيد الدفع':'التالي';
 
-  // When showing step 4 - update payment info
-  if(n===4){
+  // When showing step 3 - update payment info
+  if(n===3){
     var showEl=document.getElementById('pay-show');
     if(showEl)showEl.textContent=formatMoney(sa);
 
@@ -2159,8 +2135,8 @@ function showStep(n){
     var walletInfo=document.getElementById('wallet-pay-info');
     var balShow=document.getElementById('pay-balance-show');
     var balStatus=document.getElementById('pay-balance-status');
-    var clientPhone=document.getElementById('f-ph').value||cu.phone||'';
-    var wc=wcs.find(function(c){return c.phone===clientPhone||c.phone===cu.phone;});
+    var clientPhone=cu.phone||'';
+    var wc=wcs.find(function(c){return c.phone===clientPhone;});
     var availBal=wc?wc.bal:(cr==='client'?wb:0);
 
     if(walletInfo&&availBal>0){
@@ -2170,7 +2146,6 @@ function showStep(n){
         if(availBal>=sa){
           balStatus.textContent='كافٍ للدفع ✅';
           balStatus.style.color='var(--green)';
-          // Highlight wallet payment option
           var wpm=document.getElementById('wallet-pm');
           if(wpm)wpm.style.border='2px solid var(--green)';
         } else {
@@ -2183,18 +2158,13 @@ function showStep(n){
 }
 function nextS(){
   if(step===1&&!sv){alert('اختر نوع التأشيرة أولاً');return;}
-  if(step===3){
+  if(step===2){
     if(!document.getElementById('f-ar').value.trim()&&!document.getElementById('f-en').value.trim()){alert('أدخل اسم العميل');return;}
     if(!document.getElementById('f-pp').value.trim()){alert('أدخل رقم الجواز');return;}
+    if(!document.getElementById('f-dob').value){alert('أدخل تاريخ الميلاد');return;}
   }
-  if(step===4){submitReq();return;}
+  if(step===3){submitReq();return;}
   step++;showStep(step);
-  // When moving to step 3 (data), show autofill banner if OCR filled anything
-  if(step===3){
-    var hasData=document.getElementById('f-en').value||document.getElementById('f-pp').value||document.getElementById('f-dob').value;
-    var banner=document.getElementById('ocr-autofill-banner');
-    if(banner)banner.style.display=hasData?'block':'none';
-  }
 }
 function prevS(){if(step>1){step--;showStep(step);}}
 function selV(id,price,el){sv=id;sa=price;document.querySelectorAll('.vc2').forEach(function(c){c.classList.remove('on');});el.classList.add('on');var ps=document.getElementById('pay-show');if(ps)ps.textContent=formatMoney(price);}
@@ -2248,13 +2218,11 @@ async function handleUpload(input,zoneId,label){
         zone.style.border='none';zone.style.padding='4px';
       }
       // OCR: Auto-read passport or ticket
-      if(file.type.startsWith('image/')){triggerOCR(key,file,zoneId);}
     } else {
       // Upload failed - save locally only
       uploadedUrls[key]=null;
       showUploadLocal(zone,file,key,zoneId,label);
       // OCR even on local
-      if(file.type.startsWith('image/')){triggerOCR(key,file,zoneId);}
     }
   } catch(e){
     // Offline - save locally
@@ -2265,16 +2233,6 @@ async function handleUpload(input,zoneId,label){
   }
 }
 
-// Trigger OCR based on upload slot
-function triggerOCR(key,file,zoneId){
-  if(key==='up1'){
-    // Passport
-    runPassportOCR(file,zoneId);
-  } else if(key==='up2'){
-    // Ticket
-    runTicketOCR(file,zoneId);
-  }
-}
 
 function showUploadLocal(zone,file,key,zoneId,label){
   if(file.type.startsWith('image/')){
@@ -2299,13 +2257,13 @@ function submitReq(){
   if(uploadedFiles.up4){docs.push('📋 '+uploadedFiles.up4.name);if(uploadedUrls.up4)docUrls.extra=uploadedUrls.up4;}
 
   // Check if paying from wallet balance
-  var payMethod=document.querySelector('#rs4 .pm2.on .pn');
+  var payMethod=document.querySelector('#rs3 .pm2.on .pn');
   var payFromWallet=payMethod&&payMethod.textContent==='رصيد';
   var paid=false;
 
   if(payFromWallet){
     // Find client wallet
-    var clientPhone=document.getElementById('f-ph').value||cu.phone||'';
+    var clientPhone=cu.phone||'';
     var wc=wcs.find(function(c){return c.phone===clientPhone||c.phone===cu.phone;});
     if(wc){
       if(wc.bal<sa){
@@ -2334,14 +2292,17 @@ function submitReq(){
   var newReq={
     id:id,
     name:document.getElementById('f-ar').value||cu.name||'عميل',
-    phone:document.getElementById('f-ph').value||cu.phone||'',
+    name_en:document.getElementById('f-en').value||'',
+    phone:cu.phone||'',
     type:sv,amt:sa,paid:paid,
     status:paid?'review':'pending',
     cid:cu.phone||'',
     passport:document.getElementById('f-pp').value||'',
-    nationality:document.getElementById('f-nat').value||'',
     dob:document.getElementById('f-dob').value||'',
-    notes:document.getElementById('f-notes').value||'',
+    airline:document.getElementById('f-airline').value||'',
+    route_from:document.getElementById('f-from').value||'',
+    route_to:document.getElementById('f-to').value||'',
+    travel_date:document.getElementById('f-travel').value||'',
     date:new Date().toLocaleDateString('ar-SA'),
     docs:docs,
     docUrls:docUrls,
@@ -2634,9 +2595,12 @@ function printVisa(r){
       <table class="info-table">
         <tr><td>الاسم الكامل</td><td style="font-weight:700;font-size:14px">${r.name||'-'}</td></tr>
         <tr><td>رقم الجواز</td><td style="font-family:monospace;font-weight:700;font-size:14px;letter-spacing:2px">${r.passport||'-'}</td></tr>
+        <tr><td>الاسم (إنجليزي)</td><td dir="ltr" style="text-align:right">${r.name_en||'-'}</td></tr>
         <tr><td>رقم الهاتف</td><td dir="ltr" style="text-align:right">${r.phone||'-'}</td></tr>
-        <tr><td>الجنسية</td><td>${r.nationality||document.getElementById('f-nat')&&document.getElementById('f-nat').value||'-'}</td></tr>
         <tr><td>تاريخ الميلاد</td><td>${r.dob||'-'}</td></tr>
+        <tr><td>خط الطيران</td><td>${r.airline||'-'}</td></tr>
+        <tr><td>الرحلة</td><td>${(r.route_from&&r.route_to)?(r.route_from+' → '+r.route_to):'-'}</td></tr>
+        <tr><td>تاريخ السفر</td><td>${r.travel_date||'-'}</td></tr>
       </table>
     </div>
 
@@ -3375,471 +3339,8 @@ function resetSessionTimer(){
 });
 resetSessionTimer();
 
-// ===== OCR: PASSPORT & TICKET READER =====
-var ocrBusy=false;
+// ===== OCR REMOVED =====
 
-async function doOCR(imageSource){
-  try{
-    var timeout=new Promise(function(_,reject){
-      setTimeout(function(){reject(new Error('OCR timeout'));},60000);
-    });
-    var ocr=Tesseract.recognize(imageSource,'eng',{
-      logger:function(m){console.log('OCR:',m.status,Math.round((m.progress||0)*100)+'%');}
-    });
-    var result=await Promise.race([ocr,timeout]);
-    return result.data.text;
-  }catch(e){
-    console.error('OCR error:',e);
-    return '';
-  }
-}
-
-// Show OCR progress toast
-function showOCRProgress(zoneId,percent,msg){
-  var zone=document.getElementById(zoneId);
-  if(!zone)return;
-  var bar=zone.querySelector('.ocr-bar');
-  if(!bar){
-    var wrap=document.createElement('div');
-    wrap.className='ocr-progress';
-    wrap.style.cssText='margin-top:6px;background:var(--blue-l);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--blue)';
-    wrap.innerHTML='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span class="ocr-spin">🔍</span> <span class="ocr-msg">جاري قراءة البيانات...</span></div><div style="background:#ddd;border-radius:4px;height:4px;overflow:hidden"><div class="ocr-bar" style="height:100%;background:var(--blue);border-radius:4px;width:0%;transition:width .3s"></div></div>';
-    zone.appendChild(wrap);
-    bar=wrap.querySelector('.ocr-bar');
-  }
-  if(bar)bar.style.width=percent+'%';
-  var msgEl=zone.querySelector('.ocr-msg');
-  if(msgEl&&msg)msgEl.textContent=msg;
-}
-
-function removeOCRProgress(zoneId){
-  var zone=document.getElementById(zoneId);
-  if(!zone)return;
-  var p=zone.querySelector('.ocr-progress');
-  if(p)p.remove();
-}
-
-// ===== MRZ PARSER =====
-// Passport MRZ is 2 lines of 44 characters (TD3 format)
-// Line 1: P<ISSUING_COUNTRY_CODE<SURNAME<<GIVEN_NAMES<<<...
-// Line 2: PASSPORT_NO<CHECK<NATIONALITY<DOB<CHECK<SEX<EXPIRY<CHECK<PERSONAL_NO<CHECK<FINAL_CHECK
-
-var MRZ_COUNTRY_MAP={
-  'LBY':'ليبية','SAU':'سعودية','EGY':'مصرية','ARE':'إماراتية','QAT':'قطرية',
-  'KWT':'كويتية','BHR':'بحرينية','OMN':'عمانية','JOR':'أردنية','LBN':'لبنانية',
-  'SYR':'سورية','IRQ':'عراقية','YEM':'يمنية','SDN':'سودانية','TUN':'تونسية',
-  'DZA':'جزائرية','MAR':'مغربية','SOM':'صومالية','PSE':'فلسطينية','TUR':'تركية',
-  'IRN':'إيرانية','PAK':'باكستانية','BGD':'بنغلاديشية','IND':'هندية','IDN':'إندونيسية',
-  'MYS':'ماليزية','GBR':'بريطانية','USA':'أمريكية','DEU':'ألمانية','FRA':'فرنسية',
-  'ITA':'إيطالية','RUS':'روسية','CHN':'صينية','JPN':'يابانية','NGA':'نيجيرية',
-  'KEN':'كينية','ZAF':'جنوب أفريقية','AUS':'أسترالية','CAN':'كندية','ESP':'إسبانية',
-  'NLD':'هولندية','BEL':'بلجيكية','CHE':'سويسرية','SWE':'سويدية','NOR':'نرويجية',
-  'BRA':'برازيلية','ARG':'أرجنتينية','KOR':'كورية جنوبية','UKR':'أوكرانية',
-  'ETH':'إثيوبية','GHA':'غانية','MRT':'موريتانية','TKM':'تركمانستانية','AFG':'أفغانية',
-  'ALB':'ألبانية','DNK':'دنماركية'
-};
-
-function parseMRZ(text){
-  // Clean up OCR output - normalize chars
-  var lines=text.split(/\n/).map(function(l){return l.replace(/\s/g,'').toUpperCase();}).filter(function(l){return l.length>=30;});
-
-  // Find MRZ lines
-  var mrzLines=[];
-  for(var i=0;i<lines.length;i++){
-    var line=lines[i];
-    // Fix bracket-like chars to chevrons
-    line=line.replace(/[{}()]/g,'<');
-    // Line 1: starts with P, contains names (letters)
-    if(line.match(/^P[<\w]/)&&line.length>=40&&mrzLines.length===0){
-      // Only fix pipe/bar chars to < in name line
-      line=line.replace(/[\|]/g,'<');
-      mrzLines.push(line);
-    }
-    // Line 2: starts with alphanumeric, contains numbers + country codes
-    else if(line.match(/^[A-Z0-9<]{30,}$/)&&mrzLines.length===1){
-      // Fix OCR mistakes in numeric line: O→0, I/l→1
-      line=line.replace(/O/g,'0').replace(/[Il\|]/g,'1');
-      // Restore letters in country code area (positions 10-12)
-      var pre=line.slice(0,10);
-      var nat=line.slice(10,13).replace(/0/g,'O').replace(/1/g,'I');
-      var rest=line.slice(13);
-      line=pre+nat+rest;
-      mrzLines.push(line);
-    }
-  }
-
-  // If we couldn't find proper MRZ, try a more lenient approach
-  if(mrzLines.length<2){
-    mrzLines=[];
-    for(var j=0;j<lines.length;j++){
-      var cl=lines[j].replace(/[^A-Z0-9<]/g,'');
-      if(cl.length>=38)mrzLines.push(cl);
-      if(mrzLines.length>=2)break;
-    }
-  }
-
-  if(mrzLines.length<2)return null;
-
-  var l1=mrzLines[0];
-  var l2=mrzLines[1];
-
-  // Pad to 44 chars
-  while(l1.length<44)l1+='<';
-  while(l2.length<44)l2+='<';
-
-  var result={};
-
-  // Parse Line 1: names (no digit substitution - keep original letters)
-  try{
-    var namesPart=l1.slice(5); // skip P<XXX
-    var nameParts=namesPart.split('<<');
-    var surname=(nameParts[0]||'').replace(/</g,' ').replace(/[01]/g,'').trim();
-    var given=(nameParts[1]||'').replace(/</g,' ').replace(/[01]/g,'').trim();
-    result.nameEn=(given+' '+surname).trim();
-  }catch(e){}
-
-  // Parse Line 2 (already had OCR digit fixes applied above)
-  try{
-    // Passport number: positions 0-8
-    result.passportNo=l2.slice(0,9).replace(/</g,'').trim();
-
-    // Nationality: positions 10-12
-    var natCode=l2.slice(10,13).replace(/</g,'').replace(/[0-9]/g,'');
-    result.nationalityCode=natCode;
-    result.nationality=MRZ_COUNTRY_MAP[natCode]||'';
-
-    // Date of birth: positions 13-18 (YYMMDD)
-    var dobRaw=l2.slice(13,19);
-    if(dobRaw.match(/^[0-9]{6}$/)){
-      var yy=parseInt(dobRaw.slice(0,2));
-      var mm=dobRaw.slice(2,4);
-      var dd=dobRaw.slice(4,6);
-      var year=yy>40?(1900+yy):(2000+yy);
-      result.dob=year+'-'+mm+'-'+dd;
-    }
-
-    // Gender: position 20
-    var gender=l2.charAt(20);
-    result.gender=gender==='F'?'أنثى':gender==='M'?'ذكر':'';
-
-    // Expiry: positions 21-26 (YYMMDD)
-    var expRaw=l2.slice(21,27);
-    if(expRaw.match(/^[0-9]{6}$/)){
-      var eyy=parseInt(expRaw.slice(0,2));
-      var emm=expRaw.slice(2,4);
-      var edd=expRaw.slice(4,6);
-      var eyear=eyy>40?(1900+eyy):(2000+eyy);
-      result.expiry=eyear+'-'+emm+'-'+edd;
-    }
-  }catch(e){}
-
-  return result;
-}
-
-// ===== TICKET READER =====
-function parseTicketText(text){
-  var result={};
-
-  // Try to find passenger name
-  var nameMatch=text.match(/(?:NAME|PASSENGER|اسم|الراكب|المسافر)[:\s]*([A-Z][A-Za-z\s]+)/i)
-    ||text.match(/(?:MR|MRS|MS|MISS)\s+([A-Z][A-Za-z\s\/]+)/i);
-  if(nameMatch)result.name=nameMatch[1].trim();
-
-  // Flight number
-  var flightMatch=text.match(/(?:FLIGHT|رحلة|FLT)[:\s]*([A-Z]{2}\s*\d{2,4})/i)
-    ||text.match(/\b([A-Z]{2}\s*\d{3,4})\b/);
-  if(flightMatch)result.flight=flightMatch[1].replace(/\s/g,'');
-
-  // Dates (multiple formats)
-  var dateMatch=text.match(/(\d{1,2})\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*(\d{2,4})/i);
-  if(dateMatch){
-    var months={JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12'};
-    var dy=dateMatch[3].length===2?'20'+dateMatch[3]:dateMatch[3];
-    result.date=dy+'-'+months[dateMatch[2].toUpperCase()]+'-'+(dateMatch[1].length===1?'0':'')+dateMatch[1];
-  }
-
-  // Airport codes
-  var routeMatch=text.match(/\b([A-Z]{3})\s*[-–—>→/]\s*([A-Z]{3})\b/);
-  if(routeMatch){result.from=routeMatch[1];result.to=routeMatch[2];}
-
-  // Booking reference / PNR
-  var pnrMatch=text.match(/(?:PNR|BOOKING|REF|CONFIRMATION|حجز|مرجع)[:\s]*([A-Z0-9]{5,8})/i)
-    ||text.match(/\b([A-Z]{6})\b/);
-  if(pnrMatch)result.pnr=pnrMatch[1];
-
-  // Seat
-  var seatMatch=text.match(/(?:SEAT|مقعد)[:\s]*(\d{1,2}[A-Z])/i);
-  if(seatMatch)result.seat=seatMatch[1];
-
-  return result;
-}
-
-// ===== MAIN OCR HANDLER =====
-async function runPassportOCR(file,zoneId){
-  if(ocrBusy)return;
-  ocrBusy=true;
-  showOCRProgress(zoneId,10,'جاري تجهيز محرك القراءة...');
-
-  try{
-    var imgSrc=await readFileAsDataURL(file);
-
-    // First try: OCR on MRZ area (bottom 40% with high contrast)
-    showOCRProgress(zoneId,25,'جاري معالجة صورة الجواز...');
-    var processedImg=await preprocessForMRZ(imgSrc);
-
-    showOCRProgress(zoneId,40,'جاري قراءة منطقة MRZ...');
-    var mrzText='';
-    if(processedImg){
-      mrzText=await doOCR(processedImg);
-    }
-
-    var mrzData=parseMRZ(mrzText);
-
-    // If MRZ failed, try full image OCR
-    if(!mrzData||(!mrzData.passportNo&&!mrzData.nameEn)){
-      showOCRProgress(zoneId,60,'جاري قراءة الصفحة كاملة...');
-      var fullText=await doOCR(imgSrc);
-
-      showOCRProgress(zoneId,80,'جاري تحليل البيانات...');
-      // Try MRZ from full text
-      mrzData=parseMRZ(fullText);
-
-      // If still no MRZ, try plain text extraction
-      if(!mrzData||(!mrzData.passportNo&&!mrzData.nameEn)){
-        mrzData=extractPassportFromText(fullText);
-      }
-    }
-
-    if(mrzData&&(mrzData.passportNo||mrzData.nameEn)){
-      fillPassportData(mrzData);
-      showOCRProgress(zoneId,100,'✅ تم قراءة الجواز بنجاح!');
-      setTimeout(function(){
-        removeOCRProgress(zoneId);
-        showOCRResult(zoneId,'✅ تم قراءة البيانات — ستظهر في الخطوة التالية','var(--green)');
-      },1500);
-    } else {
-      removeOCRProgress(zoneId);
-      showOCRResult(zoneId,'📝 لم يتم التعرف — أدخل البيانات يدوياً في الخطوة التالية','var(--amber)');
-    }
-  }catch(e){
-    console.error('Passport OCR error:',e);
-    removeOCRProgress(zoneId);
-    showOCRResult(zoneId,'⚠️ خطأ في القراءة — أدخل يدوياً','var(--red)');
-  }
-  ocrBusy=false;
-}
-
-async function runTicketOCR(file,zoneId){
-  if(ocrBusy)return;
-  ocrBusy=true;
-  showOCRProgress(zoneId,15,'جاري قراءة التذكرة...');
-
-  try{
-    var imgSrc=await readFileAsDataURL(file);
-
-    showOCRProgress(zoneId,50,'جاري التعرف على النص...');
-    var text=await doOCR(imgSrc);
-
-    showOCRProgress(zoneId,85,'جاري تحليل بيانات التذكرة...');
-    var ticketData=parseTicketText(text);
-    var found=false;
-
-    var notesEl=document.getElementById('f-notes');
-    var infoParts=[];
-    if(ticketData.flight)infoParts.push('رحلة: '+ticketData.flight);
-    if(ticketData.from&&ticketData.to)infoParts.push('من: '+ticketData.from+' → '+ticketData.to);
-    if(ticketData.date)infoParts.push('تاريخ: '+ticketData.date);
-    if(ticketData.pnr)infoParts.push('حجز: '+ticketData.pnr);
-    if(ticketData.seat)infoParts.push('مقعد: '+ticketData.seat);
-
-    if(infoParts.length>0){
-      found=true;
-      var existing=notesEl.value.trim();
-      var newNote='[بيانات التذكرة] '+infoParts.join(' | ');
-      notesEl.value=existing?(existing+'\n'+newNote):newNote;
-    }
-
-    if(ticketData.name){
-      var enEl=document.getElementById('f-en');
-      if(enEl&&!enEl.value.trim()){
-        enEl.value=ticketData.name;
-        found=true;
-      }
-    }
-
-    if(found){
-      showOCRProgress(zoneId,100,'✅ تم قراءة التذكرة!');
-      setTimeout(function(){
-        removeOCRProgress(zoneId);
-        showOCRResult(zoneId,'✅ تم استخراج بيانات التذكرة','var(--green)');
-      },1500);
-    } else {
-      removeOCRProgress(zoneId);
-      showOCRResult(zoneId,'📝 لم يتم التعرف على بيانات التذكرة','var(--amber)');
-    }
-  }catch(e){
-    console.error('Ticket OCR error:',e);
-    removeOCRProgress(zoneId);
-    showOCRResult(zoneId,'⚠️ خطأ في قراءة التذكرة','var(--red)');
-  }
-  ocrBusy=false;
-}
-
-// ===== HELPERS =====
-function readFileAsDataURL(file){
-  return new Promise(function(resolve,reject){
-    var reader=new FileReader();
-    reader.onload=function(e){resolve(e.target.result);};
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// Pre-process image for better MRZ detection
-function preprocessForMRZ(imgSrc){
-  return new Promise(function(resolve){
-    var img=new Image();
-    img.onload=function(){
-      try{
-        var canvas=document.createElement('canvas');
-        var ctx=canvas.getContext('2d');
-        // Focus on bottom 40% of passport (where MRZ is)
-        var mrzH=Math.floor(img.height*0.4);
-        var mrzY=img.height-mrzH;
-        canvas.width=img.width;
-        canvas.height=mrzH;
-        ctx.drawImage(img,0,mrzY,img.width,mrzH,0,0,img.width,mrzH);
-        // High contrast grayscale
-        var imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-        var d=imageData.data;
-        for(var i=0;i<d.length;i+=4){
-          var gray=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
-          var val=gray<140?0:255; // threshold
-          d[i]=val;d[i+1]=val;d[i+2]=val;
-        }
-        ctx.putImageData(imageData,0,0);
-        resolve(canvas.toDataURL('image/png'));
-      }catch(e){resolve(null);}
-    };
-    img.onerror=function(){resolve(null);};
-    img.src=imgSrc;
-  });
-}
-
-// Fallback: extract passport data from plain OCR text (non-MRZ)
-function extractPassportFromText(text){
-  var result={};
-
-  // Passport number patterns
-  var ppMatch=text.match(/(?:PASSPORT\s*N[O0]?|رقم\s*الجواز|جواز)[:\s.]*([A-Z]{0,2}\d{5,9})/i)
-    ||text.match(/\b([A-Z]{1,2}\d{6,8})\b/);
-  if(ppMatch)result.passportNo=ppMatch[1].toUpperCase();
-
-  // Name - English
-  var nameMatch=text.match(/(?:SURNAME|NAME|GIVEN|الاسم)[:\s]*([A-Za-z\s]+)/i);
-  if(nameMatch)result.nameEn=nameMatch[1].trim();
-
-  // Name - Arabic
-  var arMatch=text.match(/([\u0600-\u06FF\s]{4,30})/);
-  if(arMatch)result.nameAr=arMatch[1].trim();
-
-  // DOB
-  var dobMatch=text.match(/(?:DATE\s*OF\s*BIRTH|DOB|تاريخ\s*الميلاد|الميلاد)[:\s]*(\d{1,2}[\/.\\-]\d{1,2}[\/.\\-]\d{2,4})/i);
-  if(dobMatch){
-    var parts=dobMatch[1].split(/[\/.\\-]/);
-    if(parts.length===3){
-      var d=parts[0].length<=2?parts[0]:'';
-      var m=parts[1].length<=2?parts[1]:'';
-      var y=parts[2];
-      if(y.length===2)y=parseInt(y)>40?'19'+y:'20'+y;
-      if(d&&m&&y)result.dob=y+'-'+(m.length===1?'0'+m:m)+'-'+(d.length===1?'0'+d:d);
-    }
-  }
-
-  // Nationality
-  var natMatch=text.match(/(?:NATIONALITY|الجنسية|NATION)[:\s]*([A-Za-z\u0600-\u06FF]+)/i);
-  if(natMatch){
-    var natText=natMatch[1].toUpperCase();
-    result.nationality=MRZ_COUNTRY_MAP[natText.slice(0,3)]||natMatch[1].trim();
-  }
-
-  return result;
-}
-
-// Fill passport data into form fields
-function fillPassportData(data){
-  if(!data)return;
-  var fields=[
-    {id:'f-en',val:data.nameEn},
-    {id:'f-pp',val:data.passportNo},
-    {id:'f-dob',val:data.dob}
-  ];
-
-  fields.forEach(function(f){
-    var el=document.getElementById(f.id);
-    if(el&&f.val){
-      el.value=f.val;
-      el.style.border='2px solid var(--green)';
-      el.style.transition='border .3s';
-      setTimeout(function(){el.style.border='';},3000);
-    }
-  });
-
-  // Arabic name from MRZ (transliterated) - only if empty
-  if(data.nameAr){
-    var arEl=document.getElementById('f-ar');
-    if(arEl&&!arEl.value.trim()){
-      arEl.value=data.nameAr;
-      arEl.style.border='2px solid var(--green)';
-      setTimeout(function(){arEl.style.border='';},3000);
-    }
-  }
-
-  // Nationality dropdown
-  if(data.nationality){
-    var natEl=document.getElementById('f-nat');
-    if(natEl){
-      var opts=natEl.options;
-      for(var i=0;i<opts.length;i++){
-        if(opts[i].textContent===data.nationality){
-          natEl.selectedIndex=i;
-          natEl.style.border='2px solid var(--green)';
-          setTimeout(function(){natEl.style.border='';},3000);
-          break;
-        }
-      }
-    }
-  }
-
-  // Show summary toast
-  var parts=[];
-  if(data.passportNo)parts.push('رقم الجواز: '+data.passportNo);
-  if(data.nameEn)parts.push('الاسم: '+data.nameEn);
-  if(data.nationality)parts.push('الجنسية: '+data.nationality);
-  if(data.dob)parts.push('تاريخ الميلاد: '+data.dob);
-
-  if(parts.length){
-    showNotifToast({
-      icon:'🛂',
-      title:'تم قراءة الجواز تلقائياً',
-      msg:parts.join(' | ')
-    });
-  }
-}
-
-function showOCRResult(zoneId,msg,color){
-  var zone=document.getElementById(zoneId);
-  if(!zone)return;
-  var old=zone.querySelector('.ocr-result');
-  if(old)old.remove();
-  var el=document.createElement('div');
-  el.className='ocr-result';
-  el.style.cssText='margin-top:4px;padding:4px 8px;border-radius:5px;font-size:10px;font-weight:600;text-align:center;color:'+color+';background:'+color+'15';
-  el.textContent=msg;
-  zone.appendChild(el);
-  // Auto-remove after 8 seconds
-  setTimeout(function(){if(el.parentElement)el.remove();},8000);
-}
 
 // ===== SETTINGS =====
 function renderSettings(){
