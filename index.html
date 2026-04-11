@@ -521,19 +521,34 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="pg" id="pg-portal">
         <div class="ph2">
           <h2 id="ph-name">مرحباً!</h2>
-          <p>تابع طلباتك وقدم طلبات جديدة</p>
+          <p>لوحة التحكم الخاصة بك</p>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 270px;gap:14px">
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-              <span style="font-size:13px;font-weight:600;color:var(--navy)">طلباتي</span>
-              <button class="btn bg2 bsm" onclick="openReq()">+ طلب جديد</button>
-            </div>
-            <div id="c-reqs"><div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">لا توجد طلبات بعد</div></div>
+        <!-- Client Dashboard Stats -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+          <div class="card" style="text-align:center;padding:16px"><div style="font-size:24px;margin-bottom:4px">📋</div><div style="font-size:22px;font-weight:700;color:var(--navy)" id="cd-reqs">0</div><div style="font-size:11px;color:var(--text3)">طلباتي</div></div>
+          <div class="card" style="text-align:center;padding:16px"><div style="font-size:24px;margin-bottom:4px">💰</div><div style="font-size:22px;font-weight:700;color:var(--gold-d)" id="cd-bal">$0</div><div style="font-size:11px;color:var(--text3)">رصيدي</div></div>
+          <div class="card" style="text-align:center;padding:16px"><div style="font-size:24px;margin-bottom:4px">🚗</div><div style="font-size:22px;font-weight:700;color:var(--green)" id="cd-trips">0</div><div style="font-size:11px;color:var(--text3)">رحلات النقل</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <!-- Recent Requests -->
+          <div class="card">
+            <div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span class="ct">آخر الطلبات</span><button class="btn bg2 bsm" onclick="openReq()">+ طلب جديد</button></div>
+            <div class="cb" id="c-reqs" style="max-height:300px;overflow-y:auto"><div style="text-align:center;padding:22px;color:var(--text3);font-size:12px">لا توجد طلبات بعد</div></div>
           </div>
+          <!-- Quick Actions -->
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:9px">الإشعارات</div>
-            <div style="background:white;border-right:3px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border)"><div style="font-weight:600;font-size:12px">مرحباً في اليامي</div><div style="font-size:11px;color:var(--text2)">يمكنك تقديم طلبات التأشيرة</div></div>
+            <div class="card" style="margin-bottom:10px">
+              <div class="ch"><span class="ct">إجراءات سريعة</span></div>
+              <div class="cb" style="display:grid;gap:8px">
+                <button class="btn bg2" style="width:100%;font-size:12px" onclick="openReq()">📋 طلب تأشيرة جديدة</button>
+                <button class="btn bo2" style="width:100%;font-size:12px" onclick="openClientTransport()">🚗 طلب نقل / استقبال</button>
+                <button class="btn bo2" style="width:100%;font-size:12px" onclick="goP('wallet')">💰 شحن رصيد</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="ch"><span class="ct">المستندات المرفوعة</span></div>
+              <div class="cb" id="c-docs-list" style="max-height:200px;overflow-y:auto"><div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">لا توجد مستندات</div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -594,6 +609,24 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- CLIENT REQUESTS PAGE -->
+      <div class="pg" id="pg-c-requests">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:15px;font-weight:700;color:var(--navy)">طلباتي</h3>
+          <button class="btn bg2 bsm" onclick="openReq()">+ طلب جديد</button>
+        </div>
+        <div id="c-reqs-full"><div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">لا توجد طلبات</div></div>
+      </div>
+
+      <!-- CLIENT TRANSPORT PAGE -->
+      <div class="pg" id="pg-c-transport">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:15px;font-weight:700;color:var(--navy)">طلبات النقل والاستقبال</h3>
+          <button class="btn bg2 bsm" onclick="openClientTransport()">+ طلب نقل جديد</button>
+        </div>
+        <div id="c-transport-list"><div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">لا توجد طلبات نقل</div></div>
       </div>
 
       <!-- PRICE LIST PAGE -->
@@ -880,6 +913,32 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
     </div>
   </div>
   <div class="mf"><button class="btn bo2" onclick="closeOv('ov-transport')">إلغاء</button><button class="btn bn2" onclick="saveTransport()">حفظ</button></div>
+</div>
+</div>
+
+<!-- CLIENT TRANSPORT REQUEST MODAL -->
+<div class="ov" id="ov-c-transport">
+<div class="modal" style="max-width:460px">
+  <div class="mh"><span class="mt2">طلب نقل / استقبال</span><button class="xb" onclick="closeOv('ov-c-transport')">×</button></div>
+  <div class="mb2">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <button class="btn bg2 ct-type-btn on" onclick="selCTType(this,'استقبال')">🛬 استقبال</button>
+      <button class="btn bo2 ct-type-btn" onclick="selCTType(this,'مغادرة')">🛫 مغادرة</button>
+    </div>
+    <input type="hidden" id="ct-type" value="استقبال">
+    <div class="fgrid">
+      <div class="fg"><label>من (نقطة الانطلاق) *</label><input type="text" id="ct-from" placeholder="المطار / الفندق"></div>
+      <div class="fg"><label>إلى (الوجهة) *</label><input type="text" id="ct-to" placeholder="الفندق / المطار"></div>
+      <div class="fg"><label>التاريخ *</label><input type="date" id="ct-date"></div>
+      <div class="fg"><label>الوقت</label><input type="time" id="ct-time"></div>
+      <div class="fg"><label>عدد الركاب</label><input type="number" id="ct-pax" value="1" min="1" max="20"></div>
+      <div class="fg"><label>نوع السيارة</label>
+        <select id="ct-car"><option>سيارة عادية</option><option>فان عائلي</option><option>حافلة صغيرة</option></select>
+      </div>
+      <div class="fg full"><label>ملاحظات</label><input type="text" id="ct-notes" placeholder="رقم الرحلة، معلومات إضافية..."></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn bo2" onclick="closeOv('ov-c-transport')">إلغاء</button><button class="btn bn2" onclick="submitClientTransport()">📤 إرسال الطلب</button></div>
 </div>
 </div>
 
@@ -1609,8 +1668,13 @@ function setupNav(){
     document.getElementById('btn-new').style.display='none';
     document.getElementById('bal-pill').classList.remove('hidden');
     document.getElementById('ph-name').textContent='مرحباً '+cu.name+' 👋';
-    nav.innerHTML='<div class="ns">بوابتي</div><div class="ni on" onclick="goP(\'portal\',this)"><span>🏠</span>رئيسية</div><div class="ni" onclick="goP(\'portal\',this)"><span>📋</span>طلباتي</div><div class="ns">المحفظة</div><div class="ni" onclick="goP(\'wallet\',this)"><span>💰</span>محفظتي</div><div class="ni" onclick="goP(\'wallet\',this)"><span>⚡</span>شحن رصيد</div>';
-    goP('portal');renderClientReqs();
+    // Load client balance from wcs
+    var myWC=wcs.find(function(c){return c.phone===cu.phone;});
+    if(myWC)wb=myWC.bal||0;
+    document.getElementById('w-bal').textContent=formatMoney(wb);
+    document.getElementById('bal-n').textContent=formatMoney(wb);
+    nav.innerHTML='<div class="ns">بوابتي</div><div class="ni on" onclick="goP(\'portal\',this)"><span>🏠</span>الرئيسية</div><div class="ni" onclick="goP(\'c-requests\',this)"><span>📋</span>طلباتي</div><div class="ni" onclick="goP(\'c-transport\',this)"><span>🚗</span>نقل واستقبال</div><div class="ns">المحفظة</div><div class="ni" onclick="goP(\'wallet\',this)"><span>💰</span>محفظتي</div>';
+    goP('portal');renderClientReqs();renderClientTransport();
   }
 }
 
@@ -1620,13 +1684,16 @@ function goP(id,el){
   if(pg)pg.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
   if(el)el.classList.add('on');
-  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'بوابتي',wallet:'محفظتي',settings:'الإعدادات'};
+  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'الرئيسية',wallet:'محفظتي','c-requests':'طلباتي','c-transport':'نقل واستقبال',settings:'الإعدادات'};
   document.getElementById('tb-title').textContent=titles[id]||'';
   if(id==='providers'){renderProviders();renderProviderReqs();updateProviderSelect();}
   if(id==='wallets'){renderWCs();renderAdminTopupRequests();}
   if(id==='wallet'){renderTopupRequests();}
   if(id==='prices'){renderPrices();initPriceModal();}
   if(id==='transport'){renderTransport();}
+  if(id==='portal'){renderClientDashboard();renderClientReqs();}
+  if(id==='c-requests'){renderClientReqsFull();}
+  if(id==='c-transport'){renderClientTransport();}
   if(id==='settings'){renderSettings();}
 }
 
@@ -3238,7 +3305,7 @@ var PERMS={
   admin:{pages:['dash','users','visas','prices','transport','providers','wallets','crm'],actions:['approve','reject','delete','edit','add','export','settings']},
   assistant:{pages:['dash','visas','wallets'],actions:['approve','reject','edit','add']},
   staff:{pages:['staff','dash'],actions:['approve','reject']},
-  client:{pages:['portal','wallet'],actions:['request']}
+  client:{pages:['portal','wallet','c-requests','c-transport'],actions:['request','transport']}
 };
 
 function hasPermission(action){
@@ -3339,8 +3406,120 @@ function resetSessionTimer(){
 });
 resetSessionTimer();
 
-// ===== OCR REMOVED =====
+// ===== CLIENT DASHBOARD & TRANSPORT =====
 
+function renderClientDashboard(){
+  var mine=reqs.filter(function(r){return r.cid===cu.phone;});
+  var cdReqs=document.getElementById('cd-reqs');if(cdReqs)cdReqs.textContent=mine.length;
+  var cdBal=document.getElementById('cd-bal');if(cdBal)cdBal.textContent=formatMoney(wb);
+  var myTrips=transports.filter(function(t){return t.clientPhone===cu.phone;});
+  var cdTrips=document.getElementById('cd-trips');if(cdTrips)cdTrips.textContent=myTrips.length;
+
+  // Render docs list from requests
+  var docsEl=document.getElementById('c-docs-list');
+  if(docsEl){
+    var allDocs=[];
+    mine.forEach(function(r){
+      if(r.docUrls){
+        if(r.docUrls.passport)allDocs.push({type:'🛂 جواز سفر',url:r.docUrls.passport,reqId:r.id});
+        if(r.docUrls.ticket)allDocs.push({type:'🎫 تذكرة',url:r.docUrls.ticket,reqId:r.id});
+        if(r.docUrls.photo)allDocs.push({type:'🖼️ صورة شخصية',url:r.docUrls.photo,reqId:r.id});
+        if(r.docUrls.extra)allDocs.push({type:'📋 مستند إضافي',url:r.docUrls.extra,reqId:r.id});
+      }
+    });
+    if(allDocs.length){
+      docsEl.innerHTML=allDocs.map(function(d){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px"><span>'+d.type+' <span style="color:var(--text3);font-size:10px">('+d.reqId+')</span></span><button class="btn bsm bo2" onclick="printDoc(\''+d.url+'\')">🖨️ طباعة</button></div>';
+      }).join('');
+    } else {
+      docsEl.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">لا توجد مستندات</div>';
+    }
+  }
+}
+
+function printDoc(url){
+  var w=window.open('','_blank');
+  w.document.write('<html dir="rtl"><head><title>طباعة المستند</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#fff}img{max-width:100%;max-height:95vh}@media print{body{margin:0}}</style></head><body><img src="'+url+'" onload="window.print();"></body></html>');
+  w.document.close();
+}
+
+function renderClientReqsFull(){
+  var el=document.getElementById('c-reqs-full');
+  if(!el)return;
+  var mine=reqs.filter(function(r){return r.cid===cu.phone;});
+  if(!mine.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">لا توجد طلبات<br><br><button class="btn bg2 bsm" onclick="openReq()">+ اطلب الآن</button></div>';return;}
+  el.innerHTML=mine.map(function(r){
+    var st=SL[r.status]||r.status;
+    var badge=r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp';
+    var docs='';
+    if(r.docUrls){
+      var btns=[];
+      if(r.docUrls.passport)btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="printDoc(\''+r.docUrls.passport+'\')">🛂 طباعة الجواز</button>');
+      if(r.docUrls.ticket)btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="printDoc(\''+r.docUrls.ticket+'\')">🎫 طباعة التذكرة</button>');
+      if(btns.length)docs='<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">'+btns.join('')+'</div>';
+    }
+    return '<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:13px">'+r.type+'</div><div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">'+r.id+' | '+r.date+'</div>'+(r.name_en?'<div style="font-size:11px;margin-top:3px">'+r.name+' / '+r.name_en+'</div>':'')+(r.passport?'<div style="font-size:11px;color:var(--text2)">جواز: '+r.passport+'</div>':'')+(r.route_from&&r.route_to?'<div style="font-size:11px;color:var(--text2)">✈️ '+r.route_from+' → '+r.route_to+(r.travel_date?' | '+r.travel_date:'')+'</div>':'')+docs+'</div><span class="badge '+badge+'">'+st+'</span></div></div>';
+  }).join('');
+}
+
+// Client Transport
+function selCTType(btn,type){
+  document.querySelectorAll('.ct-type-btn').forEach(function(b){b.className='btn bo2 ct-type-btn';});
+  btn.className='btn bg2 ct-type-btn on';
+  document.getElementById('ct-type').value=type;
+}
+
+function openClientTransport(){
+  ['ct-from','ct-to','ct-date','ct-time','ct-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ct-pax').value='1';
+  document.getElementById('ct-type').value='استقبال';
+  document.querySelectorAll('.ct-type-btn').forEach(function(b,i){b.className='btn '+(i===0?'bg2':'bo2')+' ct-type-btn'+(i===0?' on':'');});
+  document.getElementById('ov-c-transport').classList.add('open');
+}
+
+function submitClientTransport(){
+  var from=document.getElementById('ct-from').value.trim();
+  var to=document.getElementById('ct-to').value.trim();
+  var date=document.getElementById('ct-date').value;
+  if(!from||!to){alert('أدخل نقطة الانطلاق والوجهة');return;}
+  if(!date){alert('اختر التاريخ');return;}
+
+  var trip={
+    id:Date.now(),
+    client:cu.name||'عميل',
+    clientPhone:cu.phone||'',
+    type:document.getElementById('ct-type').value,
+    from:from,to:to,
+    car:document.getElementById('ct-car').value,
+    pax:parseInt(document.getElementById('ct-pax').value)||1,
+    date:date,
+    time:document.getElementById('ct-time').value||'',
+    notes:document.getElementById('ct-notes').value||'',
+    price:0,
+    status:'pending'
+  };
+
+  transports.push(trip);
+  try{localStorage.setItem('alyami_transports',JSON.stringify(transports));}catch(e){}
+  addNotif('transport','🚗 طلب نقل جديد — '+cu.name,trip.type+': '+trip.from+' → '+trip.to+' | '+trip.date,'🚗');
+  closeOv('ov-c-transport');
+  renderClientTransport();
+  renderTransport();
+  alert('✅ تم إرسال طلب النقل!\nسيتم التواصل معك لتأكيد الحجز.');
+}
+
+function renderClientTransport(){
+  var el=document.getElementById('c-transport-list');
+  if(!el)return;
+  var mine=transports.filter(function(t){return t.clientPhone===cu.phone;});
+  if(!mine.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">لا توجد طلبات نقل<br><br><button class="btn bg2 bsm" onclick="openClientTransport()">+ اطلب الآن</button></div>';return;}
+  el.innerHTML=mine.map(function(t){
+    var stColor=t.status==='done'?'var(--green)':t.status==='cancelled'?'var(--red)':'var(--amber)';
+    var stText=t.status==='done'?'مكتملة':t.status==='cancelled'?'ملغاة':'قيد التنفيذ';
+    var typeIcon=t.type==='مغادرة'?'🛫':'🛬';
+    return '<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:13px">'+typeIcon+' '+t.type+'</div><div style="font-size:12px;margin-top:4px">📍 '+t.from+' → 🏁 '+t.to+'</div><div style="font-size:11px;color:var(--text2);margin-top:3px">📅 '+t.date+(t.time?' | ⏰ '+t.time:'')+(t.pax?' | 👥 '+t.pax+' ركاب':'')+'</div>'+(t.car?'<div style="font-size:11px;color:var(--text2)">🚗 '+t.car+'</div>':'')+(t.notes?'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+t.notes+'</div>':'')+'</div><span style="font-size:11px;font-weight:600;color:'+stColor+'">'+stText+'</span></div></div>';
+  }).join('');
+}
 
 // ===== SETTINGS =====
 function renderSettings(){
