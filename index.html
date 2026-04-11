@@ -615,7 +615,11 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="pg" id="pg-c-requests">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
           <h3 style="font-size:15px;font-weight:700;color:var(--navy)">طلباتي</h3>
-          <button class="btn bg2 bsm" onclick="openReq()">+ طلب جديد</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn bd2 bsm" onclick="clientExportPDF()">📄 PDF</button>
+            <button class="btn bs3 bsm" onclick="clientExportExcel()">📊 Excel</button>
+            <button class="btn bg2 bsm" onclick="openReq()">+ طلب جديد</button>
+          </div>
         </div>
         <div id="c-reqs-full"><div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">لا توجد طلبات</div></div>
       </div>
@@ -3460,6 +3464,70 @@ function renderClientReqsFull(){
     }
     return '<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:13px">'+r.type+'</div><div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">'+r.id+' | '+r.date+'</div>'+(r.name_en?'<div style="font-size:11px;margin-top:3px">'+r.name+' / '+r.name_en+'</div>':'')+(r.passport?'<div style="font-size:11px;color:var(--text2)">جواز: '+r.passport+'</div>':'')+(r.route_from&&r.route_to?'<div style="font-size:11px;color:var(--text2)">✈️ '+r.route_from+' → '+r.route_to+(r.travel_date?' | '+r.travel_date:'')+'</div>':'')+docs+'</div><span class="badge '+badge+'">'+st+'</span></div></div>';
   }).join('');
+}
+
+// Client Export PDF
+function clientExportPDF(){
+  var mine=reqs.filter(function(r){return r.cid===cu.phone;});
+  if(!mine.length){alert('لا توجد طلبات للطباعة');return;}
+  var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+  var rows=mine.map(function(r,i){
+    var v=vmap[r.type]||{};
+    return '<tr>'
+      +'<td>'+(i+1)+'</td>'
+      +'<td style="font-weight:600">'+r.name+'</td>'
+      +'<td>'+(r.name_en||'-')+'</td>'
+      +'<td dir="ltr">'+(r.passport||'-')+'</td>'
+      +'<td>'+(r.dob||'-')+'</td>'
+      +'<td>'+(v.n||r.type)+'</td>'
+      +'<td>'+(r.airline||'-')+'</td>'
+      +'<td>'+((r.route_from&&r.route_to)?r.route_from+' → '+r.route_to:'-')+'</td>'
+      +'<td>'+(r.travel_date||'-')+'</td>'
+      +'<td>'+formatMoney(r.amt)+'</td>'
+      +'<td>'+(SL[r.status]||r.status)+'</td>'
+      +'</tr>';
+  }).join('');
+  var totalAmt=mine.reduce(function(s,r){return s+r.amt;},0);
+  var html='<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>كشف طلبات — '+cu.name+'</title>'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:30px;color:#1a1a2e}'
+    +'.header{text-align:center;margin-bottom:24px;border-bottom:3px solid #C49A3C;padding-bottom:16px}'
+    +'.header h1{font-size:20px;color:#0D1B3E}.header h2{font-size:14px;color:#C49A3C;margin-top:4px}'
+    +'.info{display:flex;justify-content:space-between;margin-bottom:16px;font-size:12px;color:#555}'
+    +'table{width:100%;border-collapse:collapse;font-size:11px}th{background:#0D1B3E;color:#fff;padding:8px 6px;text-align:right}'
+    +'td{padding:7px 6px;border-bottom:1px solid #ddd}tr:nth-child(even){background:#f9f9f9}'
+    +'.footer{margin-top:20px;text-align:center;font-size:10px;color:#999;border-top:2px solid #C49A3C;padding-top:12px}'
+    +'.total{text-align:left;margin-top:12px;font-size:13px;font-weight:700;color:#0D1B3E}'
+    +'@media print{body{padding:15px}}</style></head><body>'
+    +'<div class="header"><h1>اليامي للسفر والسياحة</h1><h2>كشف الأسماء والطلبات</h2></div>'
+    +'<div class="info"><span>العميل: <strong>'+cu.name+'</strong></span><span>الهاتف: '+(cu.phone||'-')+'</span><span>التاريخ: '+new Date().toLocaleDateString('ar-SA')+'</span><span>عدد الطلبات: '+mine.length+'</span></div>'
+    +'<table><thead><tr><th>#</th><th>الاسم (عربي)</th><th>الاسم (إنجليزي)</th><th>رقم الجواز</th><th>تاريخ الميلاد</th><th>نوع التأشيرة</th><th>خط الطيران</th><th>الرحلة</th><th>تاريخ السفر</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody>'
+    +rows
+    +'</tbody></table>'
+    +'<div class="total">الإجمالي: '+formatMoney(totalAmt)+'</div>'
+    +'<div class="footer">اليامي للسفر والسياحة — نظام إصدار التأشيرات<br>تم الإنشاء: '+new Date().toLocaleString('ar-SA')+'</div>'
+    +'</body></html>';
+  var w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){w.print();},500);
+}
+
+// Client Export Excel
+function clientExportExcel(){
+  var mine=reqs.filter(function(r){return r.cid===cu.phone;});
+  if(!mine.length){alert('لا توجد طلبات للتصدير');return;}
+  var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+  var header='#\tالاسم (عربي)\tالاسم (إنجليزي)\tرقم الجواز\tتاريخ الميلاد\tنوع التأشيرة\tخط الطيران\tمن\tإلى\tتاريخ السفر\tالمبلغ\tالحالة\n';
+  var rows=mine.map(function(r,i){
+    var v=vmap[r.type]||{};
+    return [(i+1),r.name,r.name_en||'',r.passport||'',r.dob||'',v.n||r.type,r.airline||'',r.route_from||'',r.route_to||'',r.travel_date||'',formatMoney(r.amt),SL[r.status]||r.status].join('\t');
+  }).join('\n');
+  var content='\uFEFF'+header+rows;
+  var blob=new Blob([content],{type:'text/tab-separated-values;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='طلبات-'+cu.name+'-'+new Date().toISOString().slice(0,10)+'.xls';
+  a.click();URL.revokeObjectURL(url);
 }
 
 // Client Transport
