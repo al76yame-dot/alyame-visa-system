@@ -505,12 +505,13 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
               <label for="sel-all" style="font-size:13px;font-weight:600;cursor:pointer">تحديد الكل</label>
               <span id="sel-count" style="font-size:12px;color:var(--text2);margin-right:auto">0 طلب محدد</span>
             </div>
-            <div style="overflow-x:auto"><table><thead><tr><th style="width:36px"><input type="checkbox" id="sel-all2" onchange="selAllReqs(this.checked)" style="width:14px;height:14px"></th><th>الرقم</th><th>العميل</th><th>الجواز</th><th>النوع</th><th>الحالة</th></tr></thead><tbody id="prov-reqs-tb"></tbody></table></div>
+            <div style="overflow-x:auto"><table><thead><tr><th style="width:36px"><input type="checkbox" id="sel-all2" onchange="selAllReqs(this.checked)" style="width:14px;height:14px"></th><th>الرقم</th><th>العميل</th><th>الجواز</th><th>النوع</th><th>المستندات</th><th>الحالة</th></tr></thead><tbody id="prov-reqs-tb"></tbody></table></div>
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px;align-items:center">
               <select class="fl" id="sel-provider" style="min-width:180px"><option value="">اختر المزود</option></select>
-              <button class="btn bd2" onclick="exportPDF()">📄 تحميل PDF</button>
-              <button class="btn bs3" onclick="exportExcel()">📊 تحميل Excel</button>
-              <button class="btn" style="background:#25D366;color:white" onclick="sendToProviderWA()">📱 إرسال واتساب</button>
+              <button class="btn bd2" onclick="exportPDF()">📄 PDF</button>
+              <button class="btn bs3" onclick="exportExcel()">📊 Excel</button>
+              <button class="btn" style="background:#25D366;color:white" onclick="sendToProviderWA()">📱 واتساب بيانات</button>
+              <button class="btn" style="background:#128C7E;color:white" onclick="sendDocsToProviderWA()">📎 واتساب + مستندات</button>
               <button class="btn bn2" onclick="printSelected()">🖨️ طباعة</button>
             </div>
           </div>
@@ -2495,7 +2496,8 @@ function renderProviderReqs(){
       document.getElementById('sel-count').textContent=selReqs.length+' طلب محدد';
     });
     var td0=document.createElement('td');td0.appendChild(cb);row.appendChild(td0);
-    row.innerHTML+='<td style="font-family:monospace;font-size:11px;color:var(--gold-d)">'+r.id+'</td><td style="font-weight:600">'+r.name+'</td><td style="font-size:11px" dir="ltr">'+(r.passport||'-')+'</td><td><span class="badge br2">'+(v.i||'')+' '+(v.n||r.type)+'</span></td><td><span class="badge '+(r.status==='approved'?'ba2':'bp')+'">'+( SL[r.status]||r.status)+'</span></td>';
+    var docIcons=(r.docUrls&&r.docUrls.passport?'🛂':'')+(r.docUrls&&r.docUrls.ticket?' 🎫':'');
+    row.innerHTML+='<td style="font-family:monospace;font-size:11px;color:var(--gold-d)">'+r.id+'</td><td style="font-weight:600">'+r.name+(r.name_en?'<br><span style="font-size:10px;color:var(--text2)">'+r.name_en+'</span>':'')+'</td><td style="font-size:11px" dir="ltr">'+(r.passport||'-')+'</td><td><span class="badge br2">'+(v.i||'')+' '+(v.n||r.type)+'</span></td><td style="font-size:14px">'+(docIcons||'<span style="font-size:10px;color:var(--text3)">—</span>')+'</td><td><span class="badge '+(r.status==='approved'?'ba2':'bp')+'">'+( SL[r.status]||r.status)+'</span></td>';
     tb.appendChild(row);
   });
 }
@@ -2783,9 +2785,45 @@ function sendToProviderWA(){
   var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
   var lines=selected.map(function(r,i){
     var v=vmap[r.type]||{};
-    return (i+1)+'. '+r.name+' | جواز: '+(r.passport||'-')+' | '+(v.n||r.type)+' | '+formatMoney(r.amt);
-  }).join('\n');
-  var msg='مرحباً '+prov.name+' 👋\n\nمن اليامي للسفر والسياحة\n\nيرجى معالجة الطلبات التالية:\n\n'+lines+'\n\nالإجمالي: '+selected.length+' طلب\nالتاريخ: '+new Date().toLocaleDateString('ar-SA');
+    var info=(i+1)+'. '+r.name+(r.name_en?' / '+r.name_en:'')+'\n   جواز: '+(r.passport||'-')+' | '+(v.n||r.type)+' | '+formatMoney(r.amt);
+    if(r.airline)info+='\n   ✈️ '+r.airline+(r.route_from&&r.route_to?' ('+r.route_from+' → '+r.route_to+')':'');
+    if(r.travel_date)info+='\n   📅 تاريخ السفر: '+r.travel_date;
+    if(r.dob)info+='\n   🎂 الميلاد: '+r.dob;
+    return info;
+  }).join('\n\n');
+  var msg='مرحباً '+prov.name+' 👋\n\nمن *اليامي للسفر والسياحة*\n\nيرجى معالجة الطلبات التالية:\n━━━━━━━━━━━━━━━━━━━━\n\n'+lines+'\n\n━━━━━━━━━━━━━━━━━━━━\nالإجمالي: *'+selected.length+' طلب*\nالتاريخ: '+new Date().toLocaleDateString('ar-SA');
+  var phone=prov.phone.replace(/\+/g,'').replace(/\s/g,'');
+  var url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+  showWA(prov.phone,msg,url);
+}
+
+function sendDocsToProviderWA(){
+  var selected=getSelectedReqs();
+  if(!selected)return;
+  var prov=getSelectedProvider();
+  if(!prov)return;
+  var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
+
+  // Build message with document links
+  var lines=selected.map(function(r,i){
+    var v=vmap[r.type]||{};
+    var info=(i+1)+'. *'+r.name+'*'+(r.name_en?' / '+r.name_en:'');
+    info+='\n   🛂 جواز: '+(r.passport||'-')+' | '+(v.n||r.type);
+    if(r.airline)info+='\n   ✈️ '+r.airline;
+    if(r.route_from&&r.route_to)info+='\n   🛫 '+r.route_from+' → '+r.route_to;
+    if(r.travel_date)info+='\n   📅 '+r.travel_date;
+    if(r.dob)info+='\n   🎂 '+r.dob;
+    // Add document links
+    var docs=[];
+    if(r.docUrls&&r.docUrls.passport)docs.push('🛂 صورة الجواز:\n   '+r.docUrls.passport);
+    if(r.docUrls&&r.docUrls.ticket)docs.push('🎫 صورة التذكرة:\n   '+r.docUrls.ticket);
+    if(r.docUrls&&r.docUrls.photo)docs.push('🖼️ الصورة الشخصية:\n   '+r.docUrls.photo);
+    if(docs.length)info+='\n   📎 *المستندات:*\n   '+docs.join('\n   ');
+    else info+='\n   ⚠️ لا توجد مستندات مرفوعة';
+    return info;
+  }).join('\n\n');
+
+  var msg='مرحباً '+prov.name+' 👋\n\nمن *اليامي للسفر والسياحة*\n\n📋 *الطلبات والمستندات المرفقة:*\n━━━━━━━━━━━━━━━━━━━━\n\n'+lines+'\n\n━━━━━━━━━━━━━━━━━━━━\n📊 الإجمالي: *'+selected.length+' طلب*\n📅 التاريخ: '+new Date().toLocaleDateString('ar-SA')+'\n\n💡 يرجى تحميل المستندات من الروابط أعلاه';
   var phone=prov.phone.replace(/\+/g,'').replace(/\s/g,'');
   var url='https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
   showWA(prov.phone,msg,url);
