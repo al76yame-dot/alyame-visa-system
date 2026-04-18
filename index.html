@@ -718,6 +718,14 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
                   <button class="btn bo2 bsm" onclick="changeFontSize(1)">A+</button>
                 </div>
               </div>
+              <div class="fg" style="margin-top:14px">
+                <label>شعار الشركة</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                  <img id="logo-preview" style="width:60px;height:60px;border-radius:8px;object-fit:contain;border:1px solid var(--border);background:#fff">
+                  <label class="btn bg2 bsm" style="cursor:pointer">📷 تغيير الشعار <input type="file" accept="image/*" style="display:none" onchange="changeLogo(this)"></label>
+                  <button class="btn bd2 bsm" onclick="resetLogo()">🔄 استعادة الافتراضي</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1148,6 +1156,89 @@ function changeFontSize(d){
   applyFontSize();
 }
 
+// LOGO MANAGEMENT
+var defaultLogoSrc=document.querySelector('.auth-logo img').src;
+function loadSavedLogo(){
+  try{var saved=localStorage.getItem('alyami_logo');if(saved){
+    document.querySelectorAll('.sb-head img,.auth-logo img').forEach(function(img){img.src=saved;});
+  }}catch(e){}
+  var prev=document.getElementById('logo-preview');
+  if(prev){var cur=document.querySelector('.sb-head img');if(cur)prev.src=cur.src;}
+}
+function changeLogo(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var src=e.target.result;
+    document.querySelectorAll('.sb-head img,.auth-logo img').forEach(function(img){img.src=src;});
+    var prev=document.getElementById('logo-preview');if(prev)prev.src=src;
+    try{localStorage.setItem('alyami_logo',src);}catch(ex){}
+    alert('تم تغيير الشعار بنجاح ✅');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function resetLogo(){
+  document.querySelectorAll('.sb-head img,.auth-logo img').forEach(function(img){img.src=defaultLogoSrc;});
+  var prev=document.getElementById('logo-preview');if(prev)prev.src=defaultLogoSrc;
+  try{localStorage.removeItem('alyami_logo');}catch(e){}
+  alert('تم استعادة الشعار الافتراضي ✅');
+}
+
+// CLIENT: Cancel & Edit requests
+function clientCancelReq(reqId){
+  if(!confirm('⚠️ هل تريد إلغاء هذا الطلب؟\n\nرقم الطلب: '+reqId+'\n\nلا يمكن التراجع عن هذا الإجراء.'))return;
+  var r=reqs.find(function(x){return x.id===reqId;});
+  if(!r)return;
+  if(r.status!=='pending'){alert('لا يمكن إلغاء طلب تم معالجته');return;}
+  // Refund wallet if paid
+  if(r.amt&&r.amt>0&&r.paidFromWallet){
+    wb=parseFloat((wb+(r.amt||0)).toFixed(2));
+    var wc=wcs.find(function(c){return c.phone===cu.phone;});
+    if(wc)wc.bal=wb;
+    try{localStorage.setItem('alyami_wcs',JSON.stringify(wcs));}catch(e){}
+    document.getElementById('w-bal').textContent=formatMoney(wb);
+    document.getElementById('bal-n').textContent=formatMoney(wb);
+  }
+  r.status='cancelled';
+  try{localStorage.setItem('alyami_reqs',JSON.stringify(reqs));}catch(e){}
+  alert('تم إلغاء الطلب ✅'+(r.paidFromWallet?'\nتم إرجاع المبلغ '+formatMoney(r.amt)+' إلى رصيدك':''));
+  renderClientReqsFull();renderClientReqs();renderClientDashboard();
+}
+
+function clientEditReq(reqId){
+  var r=reqs.find(function(x){return x.id===reqId;});
+  if(!r){alert('الطلب غير موجود');return;}
+  if(r.status!=='pending'){alert('لا يمكن تعديل طلب تم معالجته');return;}
+  // Open edit modal
+  var html='<div class="ov open" id="ov-client-edit"><div class="modal" style="max-width:480px"><div class="mh"><span class="mt2">تعديل الطلب '+r.id+'</span><button class="xb" onclick="document.getElementById(\'ov-client-edit\').remove()">×</button></div><div class="mb2"><div class="fgrid">'
+    +'<div class="fg full"><label>الاسم (عربي)</label><input type="text" id="ce-ar" value="'+(r.name||'')+'"></div>'
+    +'<div class="fg full"><label>Full Name (English)</label><input type="text" id="ce-en" dir="ltr" value="'+(r.name_en||'')+'"></div>'
+    +'<div class="fg"><label>رقم الجواز</label><input type="text" id="ce-pp" dir="ltr" value="'+(r.passport||'')+'"></div>'
+    +'<div class="fg"><label>تاريخ الميلاد</label><input type="date" id="ce-dob" value="'+(r.dob||'')+'"></div>'
+    +'<div class="fg"><label>خط الطيران</label><input type="text" id="ce-airline" value="'+(r.airline||'')+'"></div>'
+    +'<div class="fg"><label>من</label><input type="text" id="ce-from" value="'+(r.route_from||'')+'"></div>'
+    +'<div class="fg"><label>إلى</label><input type="text" id="ce-to" value="'+(r.route_to||'')+'"></div>'
+    +'<div class="fg"><label>تاريخ السفر</label><input type="date" id="ce-travel" value="'+(r.travel_date||'')+'"></div>'
+    +'</div></div><div class="mf"><button class="btn bo2" onclick="document.getElementById(\'ov-client-edit\').remove()">إلغاء</button><button class="btn bn2" onclick="saveClientEdit(\''+r.id+'\')">حفظ التعديلات</button></div></div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function saveClientEdit(reqId){
+  var r=reqs.find(function(x){return x.id===reqId;});if(!r)return;
+  r.name=document.getElementById('ce-ar').value.trim()||r.name;
+  r.name_en=document.getElementById('ce-en').value.trim();
+  r.passport=document.getElementById('ce-pp').value.trim()||r.passport;
+  r.dob=document.getElementById('ce-dob').value||r.dob;
+  r.airline=document.getElementById('ce-airline').value.trim();
+  r.route_from=document.getElementById('ce-from').value.trim();
+  r.route_to=document.getElementById('ce-to').value.trim();
+  r.travel_date=document.getElementById('ce-travel').value;
+  try{localStorage.setItem('alyami_reqs',JSON.stringify(reqs));}catch(e){}
+  document.getElementById('ov-client-edit').remove();
+  alert('تم تعديل الطلب بنجاح ✅');
+  renderClientReqsFull();renderClientReqs();
+}
+
 // CURRENCY SYSTEM
 var curCurrency='USD'; // USD or LYD
 try{var sc=localStorage.getItem('alyami_currency');if(sc)curCurrency=sc;}catch(e){}
@@ -1451,7 +1542,7 @@ var ccs=[
   {f:'🇯🇵',n:'اليابان',c:'+81'},{f:'🇳🇬',n:'نيجيريا',c:'+234'},{f:'🇰🇪',n:'كينيا',c:'+254'},
   {f:'🇿🇦',n:'جنوب أفريقيا',c:'+27'},{f:'🇦🇺',n:'أستراليا',c:'+61'},{f:'🇨🇦',n:'كندا',c:'+1'},
 ];
-var SL={pending:'قيد المراجعة',review:'مراجعة',approved:'موافق عليه',rejected:'مرفوض'};
+var SL={pending:'قيد المراجعة',review:'مراجعة',approved:'موافق عليه',rejected:'مرفوض',cancelled:'ملغى'};
 var VB={hajj:'bp',umra:'ba2',egypt:'bp',tourist:'br2',work:'br2',transit:'br2'};
 
 // INIT
@@ -1524,7 +1615,7 @@ function hideErr(id){var e=document.getElementById(id);if(e)e.style.display='non
 function setBtn(id,txt,dis){var b=document.getElementById(id);if(b){b.textContent=txt;b.disabled=dis;}}
 
 async function doFetch(url,body){
-  var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','apikey':SK},body:JSON.stringify(body)});
+  var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},body:JSON.stringify(body)});
   return {r:r,d:await r.json()};
 }
 
@@ -1576,7 +1667,12 @@ async function regStaff(){
   try{
     var res=await doFetch(SB+'/auth/v1/signup',{email:email,password:pass,data:{full_name:name,phone:fp}});
     if(!res.r.ok){showErr('e-staff',res.d.error_description||'خطأ');setBtn('btn-sr','إنشاء حساب موظف',false);return;}
-    tok=res.d.access_token;cu={phone:fp,name:name,email:email};cr='staff';
+    if(!res.d.access_token){
+      var lr=await doFetch(SB+'/auth/v1/token?grant_type=password',{email:email,password:pass});
+      if(!lr.r.ok||!lr.d.access_token){showErr('e-staff','تم إنشاء الحساب. سجّل دخولك الآن');setBtn('btn-sr','إنشاء حساب موظف',false);return;}
+      tok=lr.d.access_token;
+    }else{tok=res.d.access_token;}
+    cu={phone:fp,name:name,email:email};cr='staff';
     // Add to users list and notify
     allUsers&&allUsers.push({id:Date.now(),name:name,phone:fp,role:'staff',on:true});
     addNotif('staff','👤 تسجيل موظف جديد — '+name,'سجّل موظف جديد برقم '+fp,'👤');
@@ -1615,7 +1711,12 @@ async function regClient(){
   try{
     var res=await doFetch(SB+'/auth/v1/signup',{email:email,password:pass,data:{full_name:name,phone:fp}});
     if(!res.r.ok){showErr('e-client',res.d.error_description||'خطأ');setBtn('btn-cr','إنشاء حساب عميل',false);return;}
-    tok=res.d.access_token;cu={phone:fp,name:name,email:email};cr='client';
+    if(!res.d.access_token){
+      var lr=await doFetch(SB+'/auth/v1/token?grant_type=password',{email:email,password:pass});
+      if(!lr.r.ok||!lr.d.access_token){showErr('e-client','تم إنشاء الحساب. سجّل دخولك الآن');setBtn('btn-cr','إنشاء حساب عميل',false);return;}
+      tok=lr.d.access_token;
+    }else{tok=res.d.access_token;}
+    cu={phone:fp,name:name,email:email};cr='client';
     setBtn('btn-cr','إنشاء حساب عميل',false);startApp();
   }catch(e){showErr('e-client','خطأ: '+e.message);setBtn('btn-cr','إنشاء حساب عميل',false);}
 }
@@ -1642,10 +1743,10 @@ function startApp(){
   // Show loading
   document.getElementById('tb-title').textContent='جاري التحميل...';
   loadData().then(function(){
-    setupNav();
+    setupNav();loadSavedLogo();
   }).catch(function(){
     lsLoad();
-    setupNav();
+    setupNav();loadSavedLogo();
   });
 }
 
@@ -3502,6 +3603,11 @@ function renderClientReqsFull(){
     if(r.status==='approved'){
       btns.push('<button class="btn bsm bg2" style="font-size:10px;background:var(--green);color:#fff" onclick="clientPrintVisa('+idx+')">📄 استخراج التأشيرة</button>');
     }
+    if(r.status==='pending'){
+      btns.push('<button class="btn bsm bo2" style="font-size:10px" onclick="clientEditReq(\''+r.id+'\')">✏️ تعديل</button>');
+      btns.push('<button class="btn bsm bd2" style="font-size:10px" onclick="clientCancelReq(\''+r.id+'\')">❌ إلغاء</button>');
+    }
+    if(r.status==='cancelled'){badge='bx';st='ملغى';}
     var docs=btns.length?'<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">'+btns.join('')+'</div>':'';
     return '<div class="card" style="padding:12px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:13px">'+r.type+'</div><div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px">'+r.id+' | '+r.date+'</div>'+(r.name_en?'<div style="font-size:11px;margin-top:3px">'+r.name+' / '+r.name_en+'</div>':'')+(r.passport?'<div style="font-size:11px;color:var(--text2)">جواز: '+r.passport+'</div>':'')+(r.route_from&&r.route_to?'<div style="font-size:11px;color:var(--text2)">✈️ '+r.route_from+' → '+r.route_to+(r.travel_date?' | '+r.travel_date:'')+'</div>':'')+docs+'</div><span class="badge '+badge+'">'+st+'</span></div></div>';
   }).join('');
@@ -3661,6 +3767,9 @@ function renderSettings(){
   var ri=document.getElementById('rate-input');if(ri)ri.value=usdToLyd;
   var ei=document.getElementById('egp-rate-input');if(ei)ei.value=usdToEgp;
   var fl=document.getElementById('font-size-label');if(fl)fl.textContent=fontSize;
+  // Logo preview
+  var prev=document.getElementById('logo-preview');
+  if(prev){var cur=document.querySelector('.sb-head img');if(cur)prev.src=cur.src;}
   // Currency buttons highlight
   ['usd','lyd','egp'].forEach(function(c){
     var btn=document.getElementById('cur-'+c);
