@@ -2265,31 +2265,25 @@ async function addUser(){
   var name=document.getElementById('nu-name').value.trim();
   var phone=document.getElementById('nu-phone').value.trim();
   var code=document.getElementById('nu-code').value||'+218';
-  var pass=document.getElementById('nu-pass').value;
+  var pass=document.getElementById('nu-pass').value||'Staff@1234';
   var role=document.getElementById('nu-role').value;
   if(!name||!phone){alert('أدخل الاسم والهاتف');return;}
-  if(!pass||pass.length<8){alert('كلمة المرور يجب أن تكون 8 أحرف على الأقل');return;}
+  if(pass.length<8)pass='Staff@1234';
   var fp=code+phone;
-  // Create Supabase auth account so the staff can login
-  var email='s'+fp.replace(/\+/g,'').replace(/\s/g,'')+'@alyami.app';
-  var authOK=false;var authMsg='';
-  try{
-    var res=await doFetch(SB+'/auth/v1/signup',{email:email,password:pass,data:{full_name:name,phone:fp,role:role}});
-    if(res.r.ok){authOK=true;}
-    else if(res.d&&res.d.error_description){
-      if(/already.*registered|User.*already/i.test(res.d.error_description)){authOK=true;authMsg='(الحساب موجود — كلمة المرور الأصلية ستبقى)';}
-      else{authMsg=res.d.error_description;}
-    }
-  }catch(e){authMsg=e.message;}
+  // 1) Add to local + Supabase staff_users table
   var newUser={id:Date.now(),name:name,phone:fp,role:role,on:true};
   users.push(newUser);
-  closeOv('ov-user');sbSaveUser(newUser);renderUsers();
+  closeOv('ov-user');
+  try{sbSaveUser(newUser);}catch(e){}
+  renderUsers();
   addNotif('staff','👤 موظف جديد — '+name,'تم إضافة موظف جديد | '+fp+'| الدور: '+(role==='admin'?'مدير':role==='assistant'?'مساعد':'موظف'),'👤');
-  document.getElementById('st-usr').textContent=users.length;
-  if(!authOK){alert('⚠️ تم إضافة الموظف لكن فشل إنشاء حساب الدخول: '+authMsg+'\n\nلن يتمكن من الدخول. تواصل مع الدعم.');return;}
+  var stUsr=document.getElementById('st-usr');if(stUsr)stUsr.textContent=users.length;
+  // 2) Try to create Supabase auth account silently (optional — falls back to self-register)
+  var email='s'+fp.replace(/\+/g,'').replace(/\s/g,'')+'@alyami.app';
+  try{await doFetch(SB+'/auth/v1/signup',{email:email,password:pass,data:{full_name:name,phone:fp,role:role}});}catch(e){}
+  // 3) Send WhatsApp with clear instructions
   var roleAr=role==='admin'?'مدير':role==='assistant'?'مساعد مدير':'موظف';
-  var loginBtn=role==='admin'?'"مدير"':role==='assistant'?'"مدير"':'"موظف"';
-  var msg='مرحباً '+name+' 👋\n\nتم إضافتك كـ'+roleAr+' في اليامي للسفر والسياحة\n\n📱 بيانات دخولك:\nرقم الهاتف: '+fp+'\nكلمة المرور: '+pass+'\n\n🔗 رابط التطبيق:\n'+APP+'\n\nاختر '+loginBtn+' عند الدخول.'+(authMsg?'\n\n'+authMsg:'');
+  var msg='مرحباً '+name+' 👋\n\nتم إضافتك كـ'+roleAr+' في اليامي للسفر والسياحة\n\n📱 بيانات دخولك:\nرقم الهاتف: '+fp+'\nكلمة المرور: '+pass+'\n\n🔗 رابط التطبيق:\n'+APP+'\n\n🔐 طريقة الدخول:\n1. افتح الرابط\n2. اختر "موظف"\n3. إذا لم تنجح الكلمة، اضغط "إنشاء حساب موظف" واستخدم نفس الرقم والكلمة\n4. سجّل دخولك';
   var url='https://wa.me/'+fp.replace(/\+/g,'').replace(/\s/g,'')+'?text='+encodeURIComponent(msg);
   showWA(fp,msg,url);
 }
