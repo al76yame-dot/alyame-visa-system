@@ -674,6 +674,63 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
         </div>
       </div>
 
+      <!-- FLIGHTS (CAI ⇄ BEN) -->
+      <div class="pg" id="pg-flights">
+        <div style="background:linear-gradient(135deg,var(--navy),#1a2f5a);border-radius:11px;padding:18px;color:#fff;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <span style="font-size:22px">✈️</span>
+            <h2 style="font-size:17px;font-weight:700;color:var(--gold-l);margin:0">عرض رحلات الطيران</h2>
+          </div>
+          <p style="font-size:12px;color:rgba(255,255,255,.6)">القاهرة (CAI) ⇄ بنينا - بنغازي (BEN)</p>
+        </div>
+
+        <div class="card">
+          <div class="cb">
+            <div class="rtabs" style="max-width:520px;margin:0 0 16px 0">
+              <button class="rtab on" id="ft-round" onclick="switchFlightTab('round')">🔄 ذهاب وعودة</button>
+              <button class="rtab" id="ft-oneway" onclick="switchFlightTab('oneway')">➡️ ذهاب فقط</button>
+              <button class="rtab" id="ft-return" onclick="switchFlightTab('return')">⬅️ عودة فقط</button>
+            </div>
+
+            <div class="fgrid" style="gap:11px">
+              <div class="fg"><label>من</label>
+                <input type="text" id="fl-from" value="القاهرة (CAI)" readonly style="background:#f8f7f3">
+              </div>
+              <div class="fg"><label>إلى</label>
+                <input type="text" id="fl-to" value="بنينا - بنغازي (BEN)" readonly style="background:#f8f7f3">
+              </div>
+              <div class="fg" id="fl-dep-wrap"><label>تاريخ الذهاب</label>
+                <input type="date" id="fl-dep" dir="ltr">
+              </div>
+              <div class="fg" id="fl-ret-wrap"><label>تاريخ العودة</label>
+                <input type="date" id="fl-ret" dir="ltr">
+              </div>
+              <div class="fg"><label>عدد المسافرين</label>
+                <select id="fl-pax">
+                  <option value="1">1 مسافر</option>
+                  <option value="2">2 مسافر</option>
+                  <option value="3">3 مسافرين</option>
+                  <option value="4">4 مسافرين</option>
+                  <option value="5">5 مسافرين</option>
+                </select>
+              </div>
+              <div class="fg"><label>درجة السفر</label>
+                <select id="fl-cls">
+                  <option value="اقتصادية">اقتصادية</option>
+                  <option value="رجال أعمال">رجال أعمال</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+              <button class="btn bo2" onclick="swapFlightRoute()">🔀 عكس الاتجاه</button>
+              <button class="btn bg2" onclick="searchFlights()">🔍 بحث عن الرحلات</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="fl-results"></div>
+      </div>
+
       <!-- SETTINGS -->
       <div class="pg" id="pg-settings">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -894,6 +951,8 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="fg"><label>مدة الإنجاز</label><input type="text" id="pr-duration" placeholder="7-14 يوم"></div>
       <div class="fg"><label>السعر ($)</label><input type="number" id="pr-price" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
       <div class="fg"><label>السعر (د.ل) - اختياري</label><input type="number" id="pr-price-lyd" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
+      <div class="fg"><label>السعر (ج.م) - اختياري</label><input type="number" id="pr-price-egp" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
+      <div class="fg"><label>مدة صلاحية التأشيرة</label><input type="text" id="pr-validity" placeholder="30 يوم / 90 يوم"></div>
       <div class="fg full"><label>ملاحظات</label><input type="text" id="pr-notes" placeholder="أي ملاحظات إضافية..."></div>
     </div>
   </div>
@@ -1757,7 +1816,7 @@ function setupNav(){
     rb.className='sb-badge ba';rb.textContent='مدير';
     document.getElementById('btn-new').style.display='inline-flex';
     document.getElementById('bal-pill').classList.add('hidden');
-    nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div><div class="ns">النظام</div><div class="ni" onclick="goP(\'settings\',this)"><span>⚙️</span>الإعدادات</div>';
+    nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل والطيران</div><div class="ni" onclick="goP(\'flights\',this)"><span>✈️</span>عرض الرحلات</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div><div class="ns">النظام</div><div class="ni" onclick="goP(\'settings\',this)"><span>⚙️</span>الإعدادات</div>';
     goP('dash');renderReqs();renderUsers();renderVisas();renderAdvancedStats();startRealtime();
   }else if(cr==='assistant'){
     // مساعد المدير - صلاحيات: الطلبات + الأسعار + الأرصدة
@@ -1782,7 +1841,7 @@ function setupNav(){
     if(myWC)wb=myWC.bal||0;
     document.getElementById('w-bal').textContent=formatMoney(wb);
     document.getElementById('bal-n').textContent=formatMoney(wb);
-    nav.innerHTML='<div class="ns">بوابتي</div><div class="ni on" onclick="goP(\'portal\',this)"><span>🏠</span>الرئيسية</div><div class="ni" onclick="goP(\'c-requests\',this)"><span>📋</span>طلباتي</div><div class="ni" onclick="goP(\'c-transport\',this)"><span>🚗</span>نقل واستقبال</div><div class="ns">المحفظة</div><div class="ni" onclick="goP(\'wallet\',this)"><span>💰</span>محفظتي</div>';
+    nav.innerHTML='<div class="ns">بوابتي</div><div class="ni on" onclick="goP(\'portal\',this)"><span>🏠</span>الرئيسية</div><div class="ni" onclick="goP(\'c-requests\',this)"><span>📋</span>طلباتي</div><div class="ni" onclick="goP(\'c-transport\',this)"><span>🚗</span>نقل واستقبال</div><div class="ni" onclick="goP(\'flights\',this)"><span>✈️</span>عرض الرحلات</div><div class="ns">المحفظة</div><div class="ni" onclick="goP(\'wallet\',this)"><span>💰</span>محفظتي</div>';
     goP('portal');renderClientReqs();renderClientTransport();
   }
 }
@@ -1793,7 +1852,7 @@ function goP(id,el){
   if(pg)pg.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
   if(el)el.classList.add('on');
-  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'الرئيسية',wallet:'محفظتي','c-requests':'طلباتي','c-transport':'نقل واستقبال',settings:'الإعدادات'};
+  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'الرئيسية',wallet:'محفظتي','c-requests':'طلباتي','c-transport':'نقل واستقبال',flights:'عرض رحلات الطيران',settings:'الإعدادات'};
   document.getElementById('tb-title').textContent=titles[id]||'';
   if(id==='providers'){renderProviders();renderProviderReqs();updateProviderSelect();}
   if(id==='wallets'){renderWCs();renderAdminTopupRequests();}
@@ -1804,7 +1863,171 @@ function goP(id,el){
   if(id==='c-requests'){renderClientReqsFull();}
   if(id==='c-transport'){renderClientTransport();}
   if(id==='settings'){renderSettings();}
+  if(id==='flights'){initFlightsPage();}
 }
+
+// ===== FLIGHTS MODULE (CAI ⇄ BEN) =====
+var flightTab='round';
+var flightRoute={from:{code:'CAI',city:'القاهرة',ar:'القاهرة (CAI)'},to:{code:'BEN',city:'بنغازي',ar:'بنينا - بنغازي (BEN)'}};
+
+var flightCatalog=[
+  {airline:'الخطوط الليبية',code:'LN',logo:'🇱🇾',no:'LN112',depT:'08:30',arrT:'10:05',dur:'1س 35د',stops:0,base:185,cls:'اقتصادية',aircraft:'Airbus A320',days:[1,3,5,7]},
+  {airline:'الخطوط الليبية',code:'LN',logo:'🇱🇾',no:'LN116',depT:'15:20',arrT:'16:55',dur:'1س 35د',stops:0,base:175,cls:'اقتصادية',aircraft:'Airbus A320',days:[2,4,6]},
+  {airline:'برنيق للطيران',code:'DNA',logo:'🛫',no:'DNA204',depT:'09:45',arrT:'11:25',dur:'1س 40د',stops:0,base:195,cls:'اقتصادية',aircraft:'Airbus A319',days:[1,2,4,6,7]},
+  {airline:'برنيق للطيران',code:'DNA',logo:'🛫',no:'DNA208',depT:'18:10',arrT:'19:45',dur:'1س 35د',stops:0,base:210,cls:'اقتصادية',aircraft:'Airbus A319',days:[3,5,7]},
+  {airline:'الأجنحة الليبية',code:'YL',logo:'✈️',no:'YL301',depT:'11:00',arrT:'12:40',dur:'1س 40د',stops:0,base:205,cls:'اقتصادية',aircraft:'ATR 72',days:[1,2,3,4,5,6,7]},
+  {airline:'الأجنحة الليبية',code:'YL',logo:'✈️',no:'YL305',depT:'20:30',arrT:'22:10',dur:'1س 40د',stops:0,base:220,cls:'اقتصادية',aircraft:'ATR 72',days:[1,3,5]},
+  {airline:'الأفريقية',code:'8U',logo:'🌍',no:'8U452',depT:'13:15',arrT:'14:55',dur:'1س 40د',stops:0,base:190,cls:'اقتصادية',aircraft:'Airbus A320',days:[2,4,6,7]},
+  {airline:'مصر للطيران',code:'MS',logo:'🇪🇬',no:'MS870',depT:'07:00',arrT:'08:40',dur:'1س 40د',stops:0,base:240,cls:'اقتصادية',aircraft:'Boeing 737',days:[1,3,5,7]},
+  {airline:'إير كايرو',code:'SM',logo:'✈️',no:'SM540',depT:'16:45',arrT:'18:25',dur:'1س 40د',stops:0,base:165,cls:'اقتصادية',aircraft:'Airbus A320',days:[2,4,6]}
+];
+
+function initFlightsPage(){
+  var dep=document.getElementById('fl-dep');
+  var ret=document.getElementById('fl-ret');
+  if(dep&&!dep.value){
+    var t=new Date();t.setDate(t.getDate()+3);
+    dep.value=t.toISOString().slice(0,10);
+  }
+  if(ret&&!ret.value){
+    var r=new Date();r.setDate(r.getDate()+10);
+    ret.value=r.toISOString().slice(0,10);
+  }
+  switchFlightTab(flightTab);
+}
+
+function switchFlightTab(tab){
+  flightTab=tab;
+  ['round','oneway','return'].forEach(function(t){
+    var b=document.getElementById('ft-'+t);
+    if(b)b.classList.toggle('on',t===tab);
+  });
+  var depW=document.getElementById('fl-dep-wrap');
+  var retW=document.getElementById('fl-ret-wrap');
+  var depLabel=depW?depW.querySelector('label'):null;
+  if(tab==='round'){
+    depW.style.display='';retW.style.display='';
+    if(depLabel)depLabel.textContent='تاريخ الذهاب';
+    setRoute('CAI','BEN');
+  }else if(tab==='oneway'){
+    depW.style.display='';retW.style.display='none';
+    if(depLabel)depLabel.textContent='تاريخ الذهاب';
+    setRoute('CAI','BEN');
+  }else{
+    depW.style.display='';retW.style.display='none';
+    if(depLabel)depLabel.textContent='تاريخ العودة';
+    setRoute('BEN','CAI');
+  }
+  document.getElementById('fl-results').innerHTML='';
+}
+
+function setRoute(fromCode,toCode){
+  var CAI={code:'CAI',city:'القاهرة',ar:'القاهرة (CAI)'};
+  var BEN={code:'BEN',city:'بنغازي',ar:'بنينا - بنغازي (BEN)'};
+  flightRoute.from=fromCode==='CAI'?CAI:BEN;
+  flightRoute.to=toCode==='BEN'?BEN:CAI;
+  var fi=document.getElementById('fl-from');
+  var ti=document.getElementById('fl-to');
+  if(fi)fi.value=flightRoute.from.ar;
+  if(ti)ti.value=flightRoute.to.ar;
+}
+
+function swapFlightRoute(){
+  var f=flightRoute.from,t=flightRoute.to;
+  setRoute(t.code,f.code);
+}
+
+function formatFlightDate(d){
+  try{
+    var dt=new Date(d);
+    var days=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    var months=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    return days[dt.getDay()]+' '+dt.getDate()+' '+months[dt.getMonth()]+' '+dt.getFullYear();
+  }catch(e){return d;}
+}
+
+function generateFlightsForDate(fromCode,toCode,date,pax,cls){
+  if(!date)return [];
+  var dt=new Date(date);
+  var dow=dt.getDay();dow=dow===0?7:dow;
+  var seed=dt.getTime()/86400000;
+  return flightCatalog.filter(function(f){return f.days.indexOf(dow)!==-1;}).map(function(f,i){
+    var dayVar=((seed+i*7)%9)-4;
+    var clsMult=cls==='رجال أعمال'?2.3:1;
+    var price=Math.round((f.base+dayVar*5)*clsMult);
+    return {
+      id:f.no+'-'+date,
+      airline:f.airline,logo:f.logo,code:f.code,no:f.no,
+      from:fromCode,to:toCode,
+      depT:f.depT,arrT:f.arrT,dur:f.dur,stops:f.stops,
+      price:price,ppp:price,total:price*parseInt(pax,10),
+      aircraft:f.aircraft,cls:cls,date:date
+    };
+  }).sort(function(a,b){return a.depT.localeCompare(b.depT);});
+}
+
+function searchFlights(){
+  var dep=document.getElementById('fl-dep').value;
+  var ret=document.getElementById('fl-ret').value;
+  var pax=document.getElementById('fl-pax').value;
+  var cls=document.getElementById('fl-cls').value;
+  var out=document.getElementById('fl-results');
+
+  if(flightTab==='round'){
+    if(!dep||!ret){out.innerHTML=errBox('يرجى تحديد تاريخ الذهاب والعودة');return;}
+    if(new Date(ret)<new Date(dep)){out.innerHTML=errBox('تاريخ العودة يجب أن يكون بعد تاريخ الذهاب');return;}
+    var outF=generateFlightsForDate('CAI','BEN',dep,pax,cls);
+    var retF=generateFlightsForDate('BEN','CAI',ret,pax,cls);
+    out.innerHTML=
+      flightSectionHtml('🛫 رحلات الذهاب — '+formatFlightDate(dep),'القاهرة → بنينا بنغازي',outF,pax,'out')+
+      flightSectionHtml('🛬 رحلات العودة — '+formatFlightDate(ret),'بنينا بنغازي → القاهرة',retF,pax,'ret');
+  }else if(flightTab==='oneway'){
+    if(!dep){out.innerHTML=errBox('يرجى تحديد تاريخ الذهاب');return;}
+    var f1=generateFlightsForDate('CAI','BEN',dep,pax,cls);
+    out.innerHTML=flightSectionHtml('🛫 رحلات الذهاب — '+formatFlightDate(dep),'القاهرة → بنينا بنغازي',f1,pax,'out');
+  }else{
+    if(!dep){out.innerHTML=errBox('يرجى تحديد تاريخ العودة');return;}
+    var f2=generateFlightsForDate('BEN','CAI',dep,pax,cls);
+    out.innerHTML=flightSectionHtml('🛬 رحلات العودة — '+formatFlightDate(dep),'بنينا بنغازي → القاهرة',f2,pax,'ret');
+  }
+}
+
+function errBox(msg){
+  return '<div class="card"><div class="cb" style="text-align:center;color:var(--red);padding:20px;font-weight:600">⚠️ '+msg+'</div></div>';
+}
+
+function flightSectionHtml(title,subtitle,flights,pax,kind){
+  var h='<div class="card">'+
+    '<div class="ch"><span class="ct">'+title+'</span><span style="font-size:11px;color:var(--text2)">'+subtitle+' • '+flights.length+' رحلة</span></div>'+
+    '<div class="cb" style="padding:12px">';
+  if(!flights.length){
+    h+='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">لا توجد رحلات في هذا التاريخ — جرّب تاريخاً آخر</div>';
+  }else{
+    flights.forEach(function(f){h+=flightCardHtml(f,pax,kind);});
+  }
+  h+='</div></div>';
+  return h;
+}
+
+function flightCardHtml(f,pax,kind){
+  var arrow=kind==='ret'?'←':'→';
+  var color=kind==='ret'?'var(--blue)':'var(--gold-d)';
+  return '<div style="border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;transition:all .2s" onmouseover="this.style.borderColor=\'var(--gold)\';this.style.background=\'#fffbf0\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'white\'">'+
+    '<div style="text-align:center;min-width:70px"><div style="font-size:26px">'+f.logo+'</div><div style="font-size:10px;color:var(--text2);margin-top:2px">'+esc(f.airline)+'</div><div style="font-size:10px;color:'+color+';font-weight:700">'+esc(f.no)+'</div></div>'+
+    '<div style="display:flex;align-items:center;gap:10px">'+
+      '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--navy);direction:ltr">'+f.depT+'</div><div style="font-size:11px;color:var(--text2);font-weight:600">'+f.from+'</div></div>'+
+      '<div style="flex:1;text-align:center;min-width:110px"><div style="font-size:10px;color:var(--text3)">'+esc(f.dur)+'</div><div style="border-top:1px dashed var(--text3);margin:3px 0;position:relative"><span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:white;padding:0 4px;font-size:10px;color:'+color+'">'+arrow+'</span></div><div style="font-size:10px;color:var(--green)">'+(f.stops===0?'مباشرة':f.stops+' توقف')+'</div></div>'+
+      '<div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--navy);direction:ltr">'+f.arrT+'</div><div style="font-size:11px;color:var(--text2);font-weight:600">'+f.to+'</div></div>'+
+    '</div>'+
+    '<div style="text-align:center;min-width:100px"><div style="font-size:10px;color:var(--text3)">'+esc(f.aircraft)+'</div><div style="font-size:10px;color:var(--text2)">'+esc(f.cls)+'</div><div style="font-size:10px;color:var(--text3)">'+pax+' مسافر</div></div>'+
+    '<div style="text-align:center;min-width:120px"><div style="font-size:10px;color:var(--text3)">السعر للشخص</div><div style="font-size:18px;font-weight:700;color:'+color+'">$'+f.ppp+'</div>'+(parseInt(pax,10)>1?'<div style="font-size:10px;color:var(--text2)">الإجمالي: $'+f.total+'</div>':'')+'<button class="btn bg2 bsm" style="margin-top:5px;width:100%" onclick="bookFlight(\''+f.id+'\','+f.total+')">احجز</button></div>'+
+    '</div>';
+}
+
+function bookFlight(id,total){
+  alert('تم اختيار الرحلة: '+id+'\nالمبلغ الإجمالي: $'+total+'\n\nسيتم ربط الحجز بنظام الطلبات لاحقاً.');
+}
+// ===== END FLIGHTS MODULE =====
 
 // RENDER
 function renderReqs(){
@@ -3165,6 +3388,8 @@ function addPriceRow(){
   document.getElementById('pr-duration').value='';
   document.getElementById('pr-price').value='';
   document.getElementById('pr-price-lyd').value='';
+  document.getElementById('pr-price-egp').value='';
+  document.getElementById('pr-validity').value='';
   document.getElementById('pr-notes').value='';
   initPriceModal();
   document.getElementById('ov-price').classList.add('open');
@@ -3182,6 +3407,8 @@ function editPriceRow(id){
   document.getElementById('pr-duration').value=p.duration||'';
   document.getElementById('pr-price').value=p.price||'';
   document.getElementById('pr-price-lyd').value=p.priceLyd||'';
+  document.getElementById('pr-price-egp').value=p.priceEgp||'';
+  document.getElementById('pr-validity').value=p.validity||'';
   document.getElementById('pr-notes').value=p.notes||'';
   document.getElementById('ov-price').classList.add('open');
 }
@@ -3194,6 +3421,8 @@ function savePriceRow(){
   var duration=document.getElementById('pr-duration').value.trim();
   var price=parseFloat(document.getElementById('pr-price').value)||0;
   var priceLyd=parseFloat(document.getElementById('pr-price-lyd').value)||0;
+  var priceEgp=parseFloat(document.getElementById('pr-price-egp').value)||0;
+  var validity=document.getElementById('pr-validity').value.trim();
   var notes=document.getElementById('pr-notes').value.trim();
   if(!vname){alert('اكتب نوع التأشيرة');return;}
   // match visaId if name matches an existing visa
@@ -3201,9 +3430,9 @@ function savePriceRow(){
   var visaId=matched?matched.id:vname;
   if(editPriceId){
     var p=priceList.find(function(x){return x.id===editPriceId;});
-    if(p){p.nat=nat;p.visaId=visaId;p.visaName=vname;p.port=port;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.notes=notes;}
+    if(p){p.nat=nat;p.visaId=visaId;p.visaName=vname;p.port=port;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;}
   } else {
-    priceList.push({id:Date.now(),nat:nat,visaId:visaId,visaName:vname,port:port,type:type,duration:duration,price:price,priceLyd:priceLyd,notes:notes});
+    priceList.push({id:Date.now(),nat:nat,visaId:visaId,visaName:vname,port:port,type:type,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes});
   }
   try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
   closeOv('ov-price');renderPrices();
@@ -3224,11 +3453,13 @@ function renderPrices(){
   priceList.forEach(function(p){
     var row=document.createElement('tr');
     var lydHtml=p.priceLyd?'<div style="font-size:13px;color:var(--text2);font-weight:600">'+p.priceLyd+' د.ل</div>':'';
+    var egpHtml=p.priceEgp?'<div style="font-size:13px;color:var(--text2);font-weight:600">'+p.priceEgp+' ج.م</div>':'';
+    var validityHtml=p.validity?'<div style="font-size:11px;color:var(--green);margin-top:2px">صلاحية: '+p.validity+'</div>':'';
     row.innerHTML='<td style="font-size:15px">'+p.nat+'</td>'
-      +'<td style="font-weight:700;font-size:15px">'+p.visaName+'<div style="font-size:12px;color:var(--text2);font-weight:500">'+p.type+'</div></td>'
+      +'<td style="font-weight:700;font-size:15px">'+p.visaName+'<div style="font-size:12px;color:var(--text2);font-weight:500">'+p.type+'</div>'+validityHtml+'</td>'
       +'<td style="font-size:14px">'+(p.port||'-')+'</td>'
       +'<td style="color:var(--blue);font-size:14px">⏱ '+(p.duration||'-')+'</td>'
-      +'<td><div style="font-weight:700;color:var(--gold-d);font-size:17px">$'+p.price+'</div>'+lydHtml+'</td>'
+      +'<td><div style="font-weight:700;color:var(--gold-d);font-size:17px">$'+p.price+'</div>'+lydHtml+egpHtml+'</td>'
       +'<td style="font-size:13px;color:var(--text2)">'+(p.notes||'-')+'</td>'
       +'<td></td>';
     var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';
@@ -3243,7 +3474,9 @@ function printPriceList(){
   var logoSrc=logoEl?logoEl.src:'';
   var rows=priceList.map(function(p,i){
     var lydCell=p.priceLyd?'<div style="font-size:12px;color:#555">'+p.priceLyd+' د.ل</div>':'';
-    return '<tr><td>'+(i+1)+'</td><td>'+p.nat+'</td><td style="font-weight:700">'+p.visaName+'</td><td>'+(p.port||'-')+'</td><td>'+p.type+'</td><td style="color:#185FA5;font-weight:600">'+(p.duration||'-')+'</td><td style="font-weight:700;color:#8B6914;font-size:15px">$'+p.price+lydCell+'</td><td style="color:#666;font-size:12px">'+(p.notes||'-')+'</td></tr>';
+    var egpCell=p.priceEgp?'<div style="font-size:12px;color:#555">'+p.priceEgp+' ج.م</div>':'';
+    var validCell=p.validity?'<div style="font-size:11px;color:#2e7d32">صلاحية: '+p.validity+'</div>':'';
+    return '<tr><td>'+(i+1)+'</td><td>'+p.nat+'</td><td style="font-weight:700">'+p.visaName+validCell+'</td><td>'+(p.port||'-')+'</td><td>'+p.type+'</td><td style="color:#185FA5;font-weight:600">'+(p.duration||'-')+'</td><td style="font-weight:700;color:#8B6914;font-size:15px">$'+p.price+lydCell+egpCell+'</td><td style="color:#666;font-size:12px">'+(p.notes||'-')+'</td></tr>';
   }).join('');
   var win=window.open('','_blank');
   win.document.write('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة أسعار التأشيرات</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;direction:rtl;font-size:12px}.header{background:linear-gradient(135deg,#0D1B3E,#1A2F5A);color:white;padding:16px 20px;display:flex;align-items:center;gap:14px;border-radius:8px 8px 0 0;margin-bottom:0}.logo{width:60px;height:60px;object-fit:contain;background:white;border-radius:8px;padding:3px}.h-title h1{font-size:20px;color:#F5E8C0;margin-bottom:3px}.h-title p{font-size:11px;color:rgba(255,255,255,.6)}.gold-bar{background:#C49A3C;height:4px;margin-bottom:16px}.section-title{font-size:14px;font-weight:700;color:#0D1B3E;border-bottom:2px solid #C49A3C;padding-bottom:5px;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:14px}th{background:#0D1B3E;color:white;padding:10px 8px;text-align:right;font-size:13px}td{padding:9px 8px;border-bottom:1px solid #E5E0D5;vertical-align:middle;font-size:14px}tr:nth-child(even) td{background:#F8F7F3}.footer{margin-top:16px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:10px}@media print{.no-print{display:none}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>');
