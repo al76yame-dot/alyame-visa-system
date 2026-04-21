@@ -2937,8 +2937,17 @@ function printVisa(r){
   var logoEl=document.querySelector('.sb-head img')||document.querySelector('.auth-logo img');
   var logoSrc=logoEl?logoEl.src:'';
 
-  // QR = approval number only
-  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(r.id);
+  // Generate unique document number on first print (persists on request)
+  if(!r.docNo){
+    var d=new Date();
+    var ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+    var rand=Math.floor(100000+Math.random()*900000);
+    r.docNo='ALY-'+ymd+'-'+rand;
+    try{localStorage.setItem('alyami_reqs',JSON.stringify(reqs));}catch(e){}
+    if(typeof sbSaveReq==='function'){try{sbSaveReq(r);}catch(e){}}
+  }
+  // QR contains document number only (specific to this printed document)
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(r.docNo);
 
   var printDate=new Date().toLocaleDateString('ar-SA');
   var approvedDate=r.approvedDate||printDate;
@@ -3102,8 +3111,10 @@ function printVisa(r){
       <div class="co-name">اليامي للسفر والسياحة</div>\
       <div class="co-name-en">ALYAME TRAVEL & TOURISM</div>\
     </div>\
-    <div class="bottom-qr">\
+    <div class="bottom-qr" style="text-align:center">\
       <img src="'+qrUrl+'" alt="QR Code" onerror="this.style.display=\'none\'">\
+      <div style="font-size:10px;color:'+mainBlue+';font-weight:700;margin-top:4px;font-family:monospace;letter-spacing:0.5px">'+r.docNo+'</div>\
+      <div style="font-size:9px;color:#666;margin-top:1px">رقم الوثيقة / Doc No.</div>\
     </div>\
   </div>\
   \
