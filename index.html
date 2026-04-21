@@ -677,63 +677,6 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
         </div>
       </div>
 
-      <!-- FLIGHTS (CAI ⇄ BEN) -->
-      <div class="pg" id="pg-flights">
-        <div style="background:linear-gradient(135deg,var(--navy),#1a2f5a);border-radius:11px;padding:18px;color:#fff;margin-bottom:14px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <span style="font-size:22px">✈️</span>
-            <h2 style="font-size:17px;font-weight:700;color:var(--gold-l);margin:0">عرض رحلات الطيران</h2>
-          </div>
-          <p style="font-size:12px;color:rgba(255,255,255,.6)">القاهرة (CAI) ⇄ بنينا - بنغازي (BEN)</p>
-        </div>
-
-        <div class="card">
-          <div class="cb">
-            <div class="rtabs" style="max-width:520px;margin:0 0 16px 0">
-              <button class="rtab on" id="ft-round" onclick="switchFlightTab('round')">🔄 ذهاب وعودة</button>
-              <button class="rtab" id="ft-oneway" onclick="switchFlightTab('oneway')">➡️ ذهاب فقط</button>
-              <button class="rtab" id="ft-return" onclick="switchFlightTab('return')">⬅️ عودة فقط</button>
-            </div>
-
-            <div class="fgrid" style="gap:11px">
-              <div class="fg"><label>من</label>
-                <input type="text" id="fl-from" value="القاهرة (CAI)" readonly style="background:#f8f7f3">
-              </div>
-              <div class="fg"><label>إلى</label>
-                <input type="text" id="fl-to" value="بنينا - بنغازي (BEN)" readonly style="background:#f8f7f3">
-              </div>
-              <div class="fg" id="fl-dep-wrap"><label>تاريخ الذهاب</label>
-                <input type="date" id="fl-dep" dir="ltr">
-              </div>
-              <div class="fg" id="fl-ret-wrap"><label>تاريخ العودة</label>
-                <input type="date" id="fl-ret" dir="ltr">
-              </div>
-              <div class="fg"><label>عدد المسافرين</label>
-                <select id="fl-pax">
-                  <option value="1">1 مسافر</option>
-                  <option value="2">2 مسافر</option>
-                  <option value="3">3 مسافرين</option>
-                  <option value="4">4 مسافرين</option>
-                  <option value="5">5 مسافرين</option>
-                </select>
-              </div>
-              <div class="fg"><label>درجة السفر</label>
-                <select id="fl-cls">
-                  <option value="اقتصادية">اقتصادية</option>
-                  <option value="رجال أعمال">رجال أعمال</option>
-                </select>
-              </div>
-            </div>
-            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
-              <button class="btn bo2" onclick="swapFlightRoute()">🔀 عكس الاتجاه</button>
-              <button class="btn bg2" onclick="searchFlights()">🔍 بحث عن الرحلات</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="fl-results"></div>
-      </div>
-
       <!-- SETTINGS -->
       <div class="pg" id="pg-settings">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -1823,7 +1766,7 @@ function setupNav(){
     rb.className='sb-badge ba';rb.textContent='مدير';
     document.getElementById('btn-new').style.display='inline-flex';
     document.getElementById('bal-pill').classList.add('hidden');
-    nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل والطيران</div><div class="ni" onclick="goP(\'flights\',this)"><span>✈️</span>عرض الرحلات</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div><div class="ns">النظام</div><div class="ni" onclick="goP(\'settings\',this)"><span>⚙️</span>الإعدادات</div>';
+    nav.innerHTML='<div class="ns">الرئيسية</div><div class="ni on" onclick="goP(\'dash\',this)"><span>📊</span>لوحة التحكم</div><div class="ns">الفريق</div><div class="ni" onclick="goP(\'users\',this)"><span>👥</span>الموظفون</div><div class="ns">التأشيرات</div><div class="ni" onclick="goP(\'visas\',this)"><span>🗂️</span>إدارة التأشيرات</div><div class="ni" onclick="goP(\'prices\',this)"><span>💲</span>قائمة الأسعار</div><div class="ns">النقل</div><div class="ni" onclick="goP(\'transport\',this)"><span>🚗</span>حجوزات النقل</div><div class="ns">المزودون</div><div class="ni" onclick="goP(\'providers\',this)"><span>🤝</span>المزودون</div><div class="ns">المدفوعات</div><div class="ni" onclick="goP(\'wallets\',this)"><span>💰</span>الأرصدة والعملاء</div><div class="ns">إدارة العملاء</div><div class="ni" onclick="location.href=\'crm.html\'"><span>🧑‍💼</span>نظام CRM</div><div class="ns">النظام</div><div class="ni" onclick="goP(\'settings\',this)"><span>⚙️</span>الإعدادات</div>';
     goP('dash');renderReqs();renderUsers();renderVisas();renderAdvancedStats();startRealtime();
   }else if(cr==='assistant'){
     // مساعد المدير - صلاحيات: الطلبات + الأسعار + الأرصدة
@@ -1848,7 +1791,7 @@ function setupNav(){
     if(myWC)wb=myWC.bal||0;
     document.getElementById('w-bal').textContent=formatMoney(wb);
     document.getElementById('bal-n').textContent=formatMoney(wb);
-    nav.innerHTML='<div class="ns">بوابتي</div><div class="ni on" onclick="goP(\'portal\',this)"><span>🏠</span>الرئيسية</div><div class="ni" onclick="goP(\'c-requests\',this)"><span>📋</span>طلباتي</div><div class="ni" onclick="goP(\'c-transport\',this)"><span>🚗</span>نقل واستقبال</div><div class="ni" onclick="goP(\'flights\',this)"><span>✈️</span>عرض الرحلات</div><div class="ns">المحفظة</div><div class="ni" onclick="goP(\'wallet\',this)"><span>💰</span>محفظتي</div>';
+    nav.innerHTML='<div class="ns">بوابتي</div><div class="ni on" onclick="goP(\'portal\',this)"><span>🏠</span>الرئيسية</div><div class="ni" onclick="goP(\'c-requests\',this)"><span>📋</span>طلباتي</div><div class="ni" onclick="goP(\'c-transport\',this)"><span>🚗</span>نقل واستقبال</div><div class="ns">المحفظة</div><div class="ni" onclick="goP(\'wallet\',this)"><span>💰</span>محفظتي</div>';
     goP('portal');renderClientReqs();renderClientTransport();
   }
 }
@@ -1859,7 +1802,7 @@ function goP(id,el){
   if(pg)pg.classList.add('on');
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
   if(el)el.classList.add('on');
-  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'الرئيسية',wallet:'محفظتي','c-requests':'طلباتي','c-transport':'نقل واستقبال',flights:'عرض رحلات الطيران',settings:'الإعدادات'};
+  var titles={dash:'لوحة التحكم — الطلبات',staff:'طلباتي',users:'الموظفون',visas:'إدارة التأشيرات',prices:'قائمة الأسعار',transport:'حجوزات النقل',providers:'المزودون',wallets:'الأرصدة والعملاء',portal:'الرئيسية',wallet:'محفظتي','c-requests':'طلباتي','c-transport':'نقل واستقبال',settings:'الإعدادات'};
   document.getElementById('tb-title').textContent=titles[id]||'';
   if(id==='providers'){renderProviders();renderProviderReqs();updateProviderSelect();}
   if(id==='wallets'){renderWCs();renderAdminTopupRequests();}
@@ -1870,7 +1813,6 @@ function goP(id,el){
   if(id==='c-requests'){renderClientReqsFull();}
   if(id==='c-transport'){renderClientTransport();}
   if(id==='settings'){renderSettings();}
-  if(id==='flights'){initFlightsPage();}
 }
 
 // ===== FLIGHTS MODULE (CAI ⇄ BEN) =====
