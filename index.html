@@ -3469,6 +3469,33 @@ function deletePriceRow(id){
   renderPrices();
 }
 
+function movePriceRow(id,dir){
+  var i=priceList.findIndex(function(x){return x.id===id;});
+  if(i<0)return;
+  var j=i+dir;
+  if(j<0||j>=priceList.length)return;
+  var tmp=priceList[i];priceList[i]=priceList[j];priceList[j]=tmp;
+  try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
+  renderPrices();
+}
+
+var _dragPriceId=null;
+function priceDragStart(e,id){_dragPriceId=id;e.dataTransfer.effectAllowed='move';e.currentTarget.style.opacity='0.4';}
+function priceDragEnd(e){e.currentTarget.style.opacity='';_dragPriceId=null;document.querySelectorAll('#prices-tb tr').forEach(function(r){r.style.borderTop='';});}
+function priceDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';e.currentTarget.style.borderTop='3px solid var(--gold-d)';}
+function priceDragLeave(e){e.currentTarget.style.borderTop='';}
+function priceDrop(e,targetId){
+  e.preventDefault();e.currentTarget.style.borderTop='';
+  if(!_dragPriceId||_dragPriceId===targetId)return;
+  var from=priceList.findIndex(function(x){return x.id===_dragPriceId;});
+  var to=priceList.findIndex(function(x){return x.id===targetId;});
+  if(from<0||to<0)return;
+  var item=priceList.splice(from,1)[0];
+  priceList.splice(to,0,item);
+  try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
+  renderPrices();
+}
+
 function renderPrices(){
   var tb=document.getElementById('prices-tb');
   if(!tb)return;
@@ -3476,8 +3503,15 @@ function renderPrices(){
   tb.innerHTML='';
   var colspan=7+customCols.length;
   if(!priceList.length){tb.innerHTML='<tr><td colspan="'+colspan+'" style="text-align:center;padding:20px;color:var(--text3);font-size:14px">لا توجد أسعار — أضف أسعار التأشيرات</td></tr>';return;}
-  priceList.forEach(function(p){
+  priceList.forEach(function(p,idx){
     var row=document.createElement('tr');
+    row.setAttribute('draggable','true');
+    row.style.cursor='move';
+    row.addEventListener('dragstart',function(e){priceDragStart(e,p.id);});
+    row.addEventListener('dragend',priceDragEnd);
+    row.addEventListener('dragover',priceDragOver);
+    row.addEventListener('dragleave',priceDragLeave);
+    row.addEventListener('drop',function(e){priceDrop(e,p.id);});
     var lydHtml=p.priceLyd?'<div style="font-size:13px;color:var(--text2);font-weight:600">'+p.priceLyd+' د.ل</div>':'';
     var egpHtml=p.priceEgp?'<div style="font-size:13px;color:var(--text2);font-weight:600">'+p.priceEgp+' ج.م</div>':'';
     var validityHtml=p.validity?'<div style="font-size:11px;color:var(--green);margin-top:2px">صلاحية: '+p.validity+'</div>':'';
@@ -3494,10 +3528,12 @@ function renderPrices(){
       +customCellsHtml
       +'<td style="font-size:13px;color:var(--text2)">'+(p.notes||'-')+'</td>'
       +'<td></td>';
-    var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';
+    var td=row.lastElementChild;td.style.display='flex';td.style.gap='3px';td.style.flexWrap='wrap';
+    var btnUp=document.createElement('button');btnUp.className='btn bo2 bsm';btnUp.textContent='↑';btnUp.title='نقل لأعلى';btnUp.disabled=(idx===0);btnUp.addEventListener('click',function(){movePriceRow(p.id,-1);});
+    var btnDn=document.createElement('button');btnDn.className='btn bo2 bsm';btnDn.textContent='↓';btnDn.title='نقل لأسفل';btnDn.disabled=(idx===priceList.length-1);btnDn.addEventListener('click',function(){movePriceRow(p.id,1);});
     var btnE=document.createElement('button');btnE.className='btn bg2 bsm';btnE.textContent='تعديل';btnE.addEventListener('click',function(){editPriceRow(p.id);});
     var btnD=document.createElement('button');btnD.className='btn bd2 bsm';btnD.textContent='حذف';btnD.addEventListener('click',function(){deletePriceRow(p.id);});
-    td.appendChild(btnE);td.appendChild(btnD);tb.appendChild(row);
+    td.appendChild(btnUp);td.appendChild(btnDn);td.appendChild(btnE);td.appendChild(btnD);tb.appendChild(row);
   });
 }
 
