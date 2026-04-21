@@ -2261,20 +2261,35 @@ function renderWCs(){
 
 // ADD USER
 function openAddUser(){document.getElementById('nu-name').value='';document.getElementById('nu-phone').value='';document.getElementById('nu-pass').value='Staff@1234';document.getElementById('ov-user').classList.add('open');}
-function addUser(){
+async function addUser(){
   var name=document.getElementById('nu-name').value.trim();
   var phone=document.getElementById('nu-phone').value.trim();
   var code=document.getElementById('nu-code').value||'+218';
   var pass=document.getElementById('nu-pass').value;
   var role=document.getElementById('nu-role').value;
   if(!name||!phone){alert('أدخل الاسم والهاتف');return;}
+  if(!pass||pass.length<8){alert('كلمة المرور يجب أن تكون 8 أحرف على الأقل');return;}
   var fp=code+phone;
+  // Create Supabase auth account so the staff can login
+  var email='s'+fp.replace(/\+/g,'').replace(/\s/g,'')+'@alyami.app';
+  var authOK=false;var authMsg='';
+  try{
+    var res=await doFetch(SB+'/auth/v1/signup',{email:email,password:pass,data:{full_name:name,phone:fp,role:role}});
+    if(res.r.ok){authOK=true;}
+    else if(res.d&&res.d.error_description){
+      if(/already.*registered|User.*already/i.test(res.d.error_description)){authOK=true;authMsg='(الحساب موجود — كلمة المرور الأصلية ستبقى)';}
+      else{authMsg=res.d.error_description;}
+    }
+  }catch(e){authMsg=e.message;}
   var newUser={id:Date.now(),name:name,phone:fp,role:role,on:true};
   users.push(newUser);
   closeOv('ov-user');sbSaveUser(newUser);renderUsers();
-  addNotif('staff','👤 موظف جديد — '+name,'تم إضافة موظف جديد | '+fp+'| الدور: '+(role==='admin'?'مدير':'موظف'),'👤');
+  addNotif('staff','👤 موظف جديد — '+name,'تم إضافة موظف جديد | '+fp+'| الدور: '+(role==='admin'?'مدير':role==='assistant'?'مساعد':'موظف'),'👤');
   document.getElementById('st-usr').textContent=users.length;
-  var msg='مرحباً '+name+' 👋\n\nتم إضافتك كموظف في اليامي للسفر والسياحة\n\n📱 بيانات دخولك:\nرقم الهاتف: '+fp+'\nكلمة المرور: '+pass+'\n\n🔗 رابط التطبيق:\n'+APP+'\n\nاختر "موظف" عند الدخول.';
+  if(!authOK){alert('⚠️ تم إضافة الموظف لكن فشل إنشاء حساب الدخول: '+authMsg+'\n\nلن يتمكن من الدخول. تواصل مع الدعم.');return;}
+  var roleAr=role==='admin'?'مدير':role==='assistant'?'مساعد مدير':'موظف';
+  var loginBtn=role==='admin'?'"مدير"':role==='assistant'?'"مدير"':'"موظف"';
+  var msg='مرحباً '+name+' 👋\n\nتم إضافتك كـ'+roleAr+' في اليامي للسفر والسياحة\n\n📱 بيانات دخولك:\nرقم الهاتف: '+fp+'\nكلمة المرور: '+pass+'\n\n🔗 رابط التطبيق:\n'+APP+'\n\nاختر '+loginBtn+' عند الدخول.'+(authMsg?'\n\n'+authMsg:'');
   var url='https://wa.me/'+fp.replace(/\+/g,'').replace(/\s/g,'')+'?text='+encodeURIComponent(msg);
   showWA(fp,msg,url);
 }
