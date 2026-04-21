@@ -446,7 +446,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <!-- VISA MGMT -->
       <div class="pg" id="pg-visas">
         <div class="card">
-          <div class="ch"><span class="ct">أنواع التأشيرات والأسعار</span><button class="btn bg2 bsm" onclick="openAddVisa()">+ إضافة</button></div>
+          <div class="ch"><span class="ct">أنواع التأشيرات والأسعار</span><div style="display:flex;gap:6px"><button class="btn bg2 bsm" onclick="openAddVisa()">+ إضافة</button><button class="btn bo2 bsm" onclick="restoreDefaultVisas()">🔄 استعادة الافتراضي</button></div></div>
           <div style="overflow-x:auto"><table><thead><tr><th>أيقونة</th><th>الاسم</th><th>أنواعها</th><th>الجنسيات</th><th>مدة الإنجاز</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="visa-tb"></tbody></table></div>
         </div>
       </div>
@@ -1591,6 +1591,7 @@ async function sbDeleteProvider(id){
 }
 
 var reqs=[],users=[{id:1,name:'أحمد اليامي',phone:'admin',role:'admin',on:true}],wcs=[],visas=defaultVisas.slice();
+var customCols=[];
 var nats=['أفغانية','ألبانية','جزائرية','أردنية','إماراتية','بحرينية','تونسية','تركية','جزائرية','جنوب أفريقية','سعودية','سودانية','سورية','صومالية','عراقية','عمانية','فلسطينية','قطرية','كويتية','لبنانية','ليبية','مصرية','مغربية','موريتانية','يمنية','إيرانية','باكستانية','بنغلاديشية','هندية','إندونيسية','ماليزية','نيجيرية','كينية','غانية','إثيوبية','أمريكية','بريطانية','فرنسية','ألمانية','إيطالية','إسبانية','هولندية','بلجيكية','سويسرية','سويدية','نرويجية','دنماركية','كندية','أسترالية','روسية','صينية','يابانية','كورية جنوبية','تركمانستانية','أوكرانية','برازيلية','أرجنتينية','أخرى'];
 var ccs=[
   {f:'🇱🇾',n:'ليبيا',c:'+218'},{f:'🇸🇦',n:'السعودية',c:'+966'},{f:'🇪🇬',n:'مصر',c:'+20'},
@@ -2256,6 +2257,17 @@ function renderVisas(){
 
 function toggleV(id){var v=visas.find(function(x){return x.id===id;});if(v){v.on=!v.on;sbSaveVisa(v);renderVisas();}}
 function delV(id){if(confirm('حذف هذا النوع؟')){visas=visas.filter(function(x){return x.id!==id;});sbDeleteVisa(id);renderVisas();}}
+function restoreDefaultVisas(){
+  if(!confirm('استعادة قائمة التأشيرات الافتراضية؟ سيتم دمجها مع قائمتك الحالية.'))return;
+  defaultVisas.forEach(function(d){
+    if(!visas.find(function(v){return v.id===d.id;})){
+      visas.push(JSON.parse(JSON.stringify(d)));
+      sbSaveVisa(d);
+    }
+  });
+  lsSave();renderVisas();
+  alert('✅ تم استعادة التأشيرات الافتراضية ('+defaultVisas.length+' نوع)');
+}
 
 function renderVisaGrid(){
   var g=document.getElementById('visa-grid');
@@ -3594,6 +3606,7 @@ function priceDrop(e,targetId){
 function renderPrices(){
   var tb=document.getElementById('prices-tb');
   if(!tb)return;
+  if(typeof customCols==='undefined'||!customCols)customCols=[];
   renderPricesHead();
   tb.innerHTML='';
   var colspan=7+customCols.length;
@@ -3659,9 +3672,8 @@ function printPriceList(){
 // Load saved prices
 try{var sp=localStorage.getItem('alyami_prices');if(sp)priceList=JSON.parse(sp);}catch(e){}
 
-// ===== CUSTOM COLUMNS =====
-var customCols=[];
-try{var sc=localStorage.getItem('alyami_price_cols');if(sc)customCols=JSON.parse(sc);}catch(e){}
+// ===== CUSTOM COLUMNS (initialized earlier, re-load here) =====
+try{var sc=localStorage.getItem('alyami_price_cols');if(sc)customCols=JSON.parse(sc)||[];}catch(e){customCols=[];}
 function saveCustomCols(){try{localStorage.setItem('alyami_price_cols',JSON.stringify(customCols));}catch(e){}}
 
 function addPriceColumn(){
@@ -3697,8 +3709,9 @@ function manageColumns(){
 function renderPricesHead(){
   var th=document.getElementById('prices-thead');
   if(!th)return;
+  var cc=(typeof customCols!=='undefined'&&customCols)?customCols:[];
   var html='<tr><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>مدة الإنجاز</th><th>السعر</th>';
-  customCols.forEach(function(c){html+='<th>'+c.name+'</th>';});
+  cc.forEach(function(c){html+='<th>'+c.name+'</th>';});
   html+='<th>ملاحظات</th><th>إجراء</th></tr>';
   th.innerHTML=html;
 }
