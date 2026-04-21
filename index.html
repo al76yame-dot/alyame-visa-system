@@ -438,7 +438,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <!-- USERS -->
       <div class="pg" id="pg-users">
         <div class="card">
-          <div class="ch"><span class="ct">الموظفون</span><button class="btn bg2 bsm" onclick="openAddUser()">+ إضافة</button></div>
+          <div class="ch"><span class="ct">الموظفون</span><div style="display:flex;gap:6px"><button class="btn bg2 bsm" onclick="openAddUser()">+ إضافة</button><button class="btn bd2 bsm" onclick="deleteAllUsers()">🗑️ حذف الكل</button></div></div>
           <div style="overflow-x:auto"><table><thead><tr><th>الاسم</th><th>الهاتف</th><th>الدور</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="user-tb"></tbody></table></div>
         </div>
       </div>
@@ -2139,9 +2139,27 @@ function deleteUser(id){
   if(!u)return;
   if(!confirm('هل تريد حذف الموظف "'+u.name+'" نهائياً؟'))return;
   users=users.filter(function(x){return x.id!==id;});
+  // Delete from Supabase staff_users table
+  try{fetch(SB+'/rest/v1/staff_users?id=eq.'+u.id,{method:'DELETE',headers:SB_HEADERS});}catch(e){}
   saveUsers();renderUsers();
-  document.getElementById('st-usr').textContent=users.length;
+  var stU=document.getElementById('st-usr');if(stU)stU.textContent=users.length;
   addNotif('staff','🗑️ حذف موظف — '+u.name,'تم حذف الموظف من النظام','🗑️');
+}
+
+async function deleteAllUsers(){
+  if(!users.length){alert('لا يوجد موظفون');return;}
+  if(!confirm('⚠️ هل أنت متأكد من حذف جميع الموظفين ('+users.length+')؟\n\nسيتم حذفهم محلياً ومن قاعدة البيانات.\nلا يمكن التراجع!'))return;
+  if(!confirm('تأكيد أخير: حذف '+users.length+' موظف؟'))return;
+  // Delete each from Supabase
+  for(var i=0;i<users.length;i++){
+    var u=users[i];
+    try{await fetch(SB+'/rest/v1/staff_users?id=eq.'+u.id,{method:'DELETE',headers:SB_HEADERS});}catch(e){}
+  }
+  users=[];
+  saveUsers();renderUsers();
+  var stU=document.getElementById('st-usr');if(stU)stU.textContent='0';
+  addNotif('staff','🗑️ حذف جميع الموظفين','تم حذف جميع الموظفين من النظام','🗑️');
+  alert('✅ تم حذف جميع الموظفين. يمكنك الآن إضافتهم من جديد.');
 }
 
 var editUserId=null;
