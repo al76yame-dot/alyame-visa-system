@@ -639,14 +639,16 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
         <div class="card">
           <div class="ch">
             <span class="ct">قائمة أسعار التأشيرات</span>
-            <div style="display:flex;gap:7px">
+            <div style="display:flex;gap:7px;flex-wrap:wrap">
               <button class="btn bg2 bsm" onclick="addPriceRow()">+ إضافة سعر</button>
+              <button class="btn bs3 bsm" onclick="addPriceColumn()">➕ إضافة عمود</button>
+              <button class="btn bo2 bsm" onclick="manageColumns()">⚙️ إدارة الأعمدة</button>
               <button class="btn bn2 bsm" onclick="printPriceList()">🖨️ طباعة PDF</button>
             </div>
           </div>
           <div style="overflow-x:auto">
-            <table>
-              <thead><tr><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>مدة الإنجاز</th><th>السعر</th><th>ملاحظات</th><th>إجراء</th></tr></thead>
+            <table id="prices-table">
+              <thead id="prices-thead"></thead>
               <tbody id="prices-tb" style="font-size:15px"></tbody>
             </table>
           </div>
@@ -954,6 +956,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="fg"><label>السعر (ج.م) - اختياري</label><input type="number" id="pr-price-egp" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
       <div class="fg"><label>مدة صلاحية التأشيرة</label><input type="text" id="pr-validity" placeholder="30 يوم / 90 يوم"></div>
       <div class="fg full"><label>ملاحظات</label><input type="text" id="pr-notes" placeholder="أي ملاحظات إضافية..."></div>
+      <div class="fg full" id="pr-custom-fields"></div>
     </div>
   </div>
   <div class="mf"><button class="btn bo2" onclick="closeOv('ov-price')">إلغاء</button><button class="btn bn2" onclick="savePriceRow()">حفظ</button></div>
@@ -3378,6 +3381,20 @@ function initPriceModal(){
   }
 }
 
+function renderCustomFieldsInModal(p){
+  var box=document.getElementById('pr-custom-fields');
+  if(!box)return;
+  if(!customCols.length){box.innerHTML='';return;}
+  var html='<div class="fgrid">';
+  customCols.forEach(function(c){
+    var val=(p&&p.custom&&p.custom[c.id])?p.custom[c.id]:'';
+    var type=c.type==='number'?'number':'text';
+    html+='<div class="fg full"><label>'+c.name+' <span style="color:var(--text3);font-size:10px">(عمود مخصص)</span></label><input type="'+type+'" data-col-id="'+c.id+'" class="pr-custom-input" value="'+val+'" placeholder="..."></div>';
+  });
+  html+='</div>';
+  box.innerHTML=html;
+}
+
 function addPriceRow(){
   editPriceId=null;
   document.getElementById('price-modal-t').textContent='إضافة سعر جديد';
@@ -3391,6 +3408,7 @@ function addPriceRow(){
   document.getElementById('pr-price-egp').value='';
   document.getElementById('pr-validity').value='';
   document.getElementById('pr-notes').value='';
+  renderCustomFieldsInModal(null);
   initPriceModal();
   document.getElementById('ov-price').classList.add('open');
 }
@@ -3410,6 +3428,7 @@ function editPriceRow(id){
   document.getElementById('pr-price-egp').value=p.priceEgp||'';
   document.getElementById('pr-validity').value=p.validity||'';
   document.getElementById('pr-notes').value=p.notes||'';
+  renderCustomFieldsInModal(p);
   document.getElementById('ov-price').classList.add('open');
 }
 
@@ -3424,15 +3443,20 @@ function savePriceRow(){
   var priceEgp=parseFloat(document.getElementById('pr-price-egp').value)||0;
   var validity=document.getElementById('pr-validity').value.trim();
   var notes=document.getElementById('pr-notes').value.trim();
+  var customVals={};
+  document.querySelectorAll('.pr-custom-input').forEach(function(inp){
+    var cid=inp.getAttribute('data-col-id');
+    if(cid&&inp.value.trim())customVals[cid]=inp.value.trim();
+  });
   if(!vname){alert('اكتب نوع التأشيرة');return;}
   // match visaId if name matches an existing visa
   var matched=visas.find(function(v){return v.n===vname;});
   var visaId=matched?matched.id:vname;
   if(editPriceId){
     var p=priceList.find(function(x){return x.id===editPriceId;});
-    if(p){p.nat=nat;p.visaId=visaId;p.visaName=vname;p.port=port;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;}
+    if(p){p.nat=nat;p.visaId=visaId;p.visaName=vname;p.port=port;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;p.custom=customVals;}
   } else {
-    priceList.push({id:Date.now(),nat:nat,visaId:visaId,visaName:vname,port:port,type:type,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes});
+    priceList.push({id:Date.now(),nat:nat,visaId:visaId,visaName:vname,port:port,type:type,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes,custom:customVals});
   }
   try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
   closeOv('ov-price');renderPrices();
@@ -3448,18 +3472,26 @@ function deletePriceRow(id){
 function renderPrices(){
   var tb=document.getElementById('prices-tb');
   if(!tb)return;
+  renderPricesHead();
   tb.innerHTML='';
-  if(!priceList.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3);font-size:14px">لا توجد أسعار — أضف أسعار التأشيرات</td></tr>';return;}
+  var colspan=7+customCols.length;
+  if(!priceList.length){tb.innerHTML='<tr><td colspan="'+colspan+'" style="text-align:center;padding:20px;color:var(--text3);font-size:14px">لا توجد أسعار — أضف أسعار التأشيرات</td></tr>';return;}
   priceList.forEach(function(p){
     var row=document.createElement('tr');
     var lydHtml=p.priceLyd?'<div style="font-size:13px;color:var(--text2);font-weight:600">'+p.priceLyd+' د.ل</div>':'';
     var egpHtml=p.priceEgp?'<div style="font-size:13px;color:var(--text2);font-weight:600">'+p.priceEgp+' ج.م</div>':'';
     var validityHtml=p.validity?'<div style="font-size:11px;color:var(--green);margin-top:2px">صلاحية: '+p.validity+'</div>':'';
+    var customCellsHtml='';
+    customCols.forEach(function(c){
+      var val=(p.custom&&p.custom[c.id])?p.custom[c.id]:'-';
+      customCellsHtml+='<td style="font-size:14px">'+val+'</td>';
+    });
     row.innerHTML='<td style="font-size:15px">'+p.nat+'</td>'
       +'<td style="font-weight:700;font-size:15px">'+p.visaName+'<div style="font-size:12px;color:var(--text2);font-weight:500">'+p.type+'</div>'+validityHtml+'</td>'
       +'<td style="font-size:14px">'+(p.port||'-')+'</td>'
       +'<td style="color:var(--blue);font-size:14px">⏱ '+(p.duration||'-')+'</td>'
       +'<td><div style="font-weight:700;color:var(--gold-d);font-size:17px">$'+p.price+'</div>'+lydHtml+egpHtml+'</td>'
+      +customCellsHtml
       +'<td style="font-size:13px;color:var(--text2)">'+(p.notes||'-')+'</td>'
       +'<td></td>';
     var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';
@@ -3476,14 +3508,17 @@ function printPriceList(){
     var lydCell=p.priceLyd?'<div style="font-size:12px;color:#555">'+p.priceLyd+' د.ل</div>':'';
     var egpCell=p.priceEgp?'<div style="font-size:12px;color:#555">'+p.priceEgp+' ج.م</div>':'';
     var validCell=p.validity?'<div style="font-size:11px;color:#2e7d32">صلاحية: '+p.validity+'</div>':'';
-    return '<tr><td>'+(i+1)+'</td><td>'+p.nat+'</td><td style="font-weight:700">'+p.visaName+validCell+'</td><td>'+(p.port||'-')+'</td><td>'+p.type+'</td><td style="color:#185FA5;font-weight:600">'+(p.duration||'-')+'</td><td style="font-weight:700;color:#8B6914;font-size:15px">$'+p.price+lydCell+egpCell+'</td><td style="color:#666;font-size:12px">'+(p.notes||'-')+'</td></tr>';
+    var customCellsP='';
+    customCols.forEach(function(c){var v=(p.custom&&p.custom[c.id])?p.custom[c.id]:'-';customCellsP+='<td>'+v+'</td>';});
+    return '<tr><td>'+(i+1)+'</td><td>'+p.nat+'</td><td style="font-weight:700">'+p.visaName+validCell+'</td><td>'+(p.port||'-')+'</td><td>'+p.type+'</td><td style="color:#185FA5;font-weight:600">'+(p.duration||'-')+'</td><td style="font-weight:700;color:#8B6914;font-size:15px">$'+p.price+lydCell+egpCell+'</td>'+customCellsP+'<td style="color:#666;font-size:12px">'+(p.notes||'-')+'</td></tr>';
   }).join('');
   var win=window.open('','_blank');
   win.document.write('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة أسعار التأشيرات</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;direction:rtl;font-size:12px}.header{background:linear-gradient(135deg,#0D1B3E,#1A2F5A);color:white;padding:16px 20px;display:flex;align-items:center;gap:14px;border-radius:8px 8px 0 0;margin-bottom:0}.logo{width:60px;height:60px;object-fit:contain;background:white;border-radius:8px;padding:3px}.h-title h1{font-size:20px;color:#F5E8C0;margin-bottom:3px}.h-title p{font-size:11px;color:rgba(255,255,255,.6)}.gold-bar{background:#C49A3C;height:4px;margin-bottom:16px}.section-title{font-size:14px;font-weight:700;color:#0D1B3E;border-bottom:2px solid #C49A3C;padding-bottom:5px;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:14px}th{background:#0D1B3E;color:white;padding:10px 8px;text-align:right;font-size:13px}td{padding:9px 8px;border-bottom:1px solid #E5E0D5;vertical-align:middle;font-size:14px}tr:nth-child(even) td{background:#F8F7F3}.footer{margin-top:16px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:10px}@media print{.no-print{display:none}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>');
   win.document.write('<div class="header"><img src="'+logoSrc+'" class="logo" onerror="this.style.display=\'none\'"><div class="h-title"><h1>اليامي للسفر والسياحة</h1><p>قائمة أسعار التأشيرات — ALYAME TRAVEL</p></div></div>');
   win.document.write('<div class="gold-bar"></div>');
   win.document.write('<div class="section-title">💲 قائمة الأسعار الرسمية — '+new Date().toLocaleDateString('ar-SA')+'</div>');
-  win.document.write('<table><thead><tr><th>#</th><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>نوع السفر</th><th>مدة الإنجاز</th><th>السعر</th><th>ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table>');
+  var customHeaders=customCols.map(function(c){return '<th>'+c.name+'</th>';}).join('');
+  win.document.write('<table><thead><tr><th>#</th><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>نوع السفر</th><th>مدة الإنجاز</th><th>السعر</th>'+customHeaders+'<th>ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table>');
   win.document.write('<div class="footer">اليامي للسفر والسياحة | الأسعار قابلة للتغيير | '+new Date().toLocaleDateString('ar-SA')+'</div>');
   win.document.write('<br class="no-print"><div class="no-print" style="text-align:center;padding:12px"><button onclick="window.print()" style="padding:9px 24px;background:#0D1B3E;color:white;border:none;border-radius:7px;cursor:pointer;font-size:13px">🖨️ طباعة / حفظ PDF</button></div>');
   win.document.write('</body></html>');
@@ -3492,6 +3527,50 @@ function printPriceList(){
 
 // Load saved prices
 try{var sp=localStorage.getItem('alyami_prices');if(sp)priceList=JSON.parse(sp);}catch(e){}
+
+// ===== CUSTOM COLUMNS =====
+var customCols=[];
+try{var sc=localStorage.getItem('alyami_price_cols');if(sc)customCols=JSON.parse(sc);}catch(e){}
+function saveCustomCols(){try{localStorage.setItem('alyami_price_cols',JSON.stringify(customCols));}catch(e){}}
+
+function addPriceColumn(){
+  var name=prompt('اسم العمود الجديد (مثال: رسوم الإصدار، خدمات إضافية...):');
+  if(!name||!name.trim())return;
+  name=name.trim();
+  var type=prompt('نوع البيانات:\n1 - نص (اكتب: text)\n2 - رقم (اكتب: number)','text');
+  if(!type)return;
+  type=(type.trim().toLowerCase()==='number'||type.trim()==='2')?'number':'text';
+  var colId='c'+Date.now();
+  customCols.push({id:colId,name:name,type:type});
+  saveCustomCols();
+  renderPrices();
+  alert('تمت إضافة العمود "'+name+'" بنجاح. يمكنك الآن تعبئته من زر "تعديل" لكل صف.');
+}
+
+function manageColumns(){
+  if(!customCols.length){alert('لا توجد أعمدة مخصصة. اضغط "➕ إضافة عمود" أولاً.');return;}
+  var list=customCols.map(function(c,i){return (i+1)+'. '+c.name+' ('+c.type+')';}).join('\n');
+  var idx=prompt('الأعمدة المخصصة:\n\n'+list+'\n\nاكتب رقم العمود لحذفه، أو اتركه فارغاً للإلغاء:');
+  if(!idx)return;
+  var i=parseInt(idx)-1;
+  if(i<0||i>=customCols.length){alert('رقم غير صحيح');return;}
+  if(!confirm('حذف العمود "'+customCols[i].name+'"؟ سيتم حذف بياناته من جميع الصفوف.'))return;
+  var colId=customCols[i].id;
+  customCols.splice(i,1);
+  priceList.forEach(function(p){if(p.custom)delete p.custom[colId];});
+  saveCustomCols();
+  try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
+  renderPrices();
+}
+
+function renderPricesHead(){
+  var th=document.getElementById('prices-thead');
+  if(!th)return;
+  var html='<tr><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>مدة الإنجاز</th><th>السعر</th>';
+  customCols.forEach(function(c){html+='<th>'+c.name+'</th>';});
+  html+='<th>ملاحظات</th><th>إجراء</th></tr>';
+  th.innerHTML=html;
+}
 
 // ===== TRANSPORT =====
 var transports=[];
