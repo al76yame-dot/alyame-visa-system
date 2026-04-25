@@ -24,5 +24,5 @@ git push origin master
 
 echo ""
 echo "✅ تم الرفع على GitHub بنجاح"
-echo "🌐 Netlify سيقوم بالنشر التلقائي خلال 1-2 دقيقة"
-echo "🔗 الرابط: https://alyam-evisa-travel2026-system.netlify.app"
+echo "🌐 GitHub Pages سيقوم بالنشر التلقائي خلال 1-2 دقيقة"
+echo "🔗 الرابط: https://al76yame-dot.github.io/alyame-visa-system/"

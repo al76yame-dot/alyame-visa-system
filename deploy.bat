@@ -39,8 +39,8 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 echo ============================================
 echo   تم الرفع على GitHub بنجاح
-echo   Netlify سينشر تلقائياً خلال 1-2 دقيقة
-echo   الرابط: https://alyam-evisa-travel2026-system.netlify.app
+echo   GitHub Pages سينشر تلقائياً خلال 1-2 دقيقة
+echo   الرابط: https://al76yame-dot.github.io/alyame-visa-system/
 echo ============================================
 echo.
 
