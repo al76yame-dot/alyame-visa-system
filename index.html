@@ -1506,7 +1506,7 @@ async function sbUpdateReqStatus(id,status){
   lsSave();
 }
 async function sbSaveUser(user){
-  await sbUpsert('staff_users',{id:user.id,name:user.name,phone:user.phone,role:user.role,active:user.on});
+  await sbUpsert('staff_users',{id:user.id,name:user.name,phone:user.phone,role:user.role,active:user.on,notes:user.pass||''});
   lsSave();
 }
 async function sbSaveWC(wc){
@@ -1651,15 +1651,18 @@ async function loginStaff(){
   hideErr('e-staff');
   if(!phone||!pass){showErr('e-staff','أدخل رقم الهاتف وكلمة المرور');return;}
   var fp=code+phone;
-  var email='s'+fp.replace(/\+/g,'').replace(/\s/g,'')+'@alyami.app';
   setBtn('btn-s','جاري الدخول...',true);
   try{
-    var res=await doFetch(SB+'/auth/v1/token?grant_type=password',{email:email,password:pass});
-    if(!res.r.ok){showErr('e-staff',res.d.error_description||'بيانات غير صحيحة');setBtn('btn-s','دخول كموظف',false);return;}
-    tok=res.d.access_token;
+    // Refresh users list from Supabase before checking
+    try{var uRes=await sbGet('staff_users');if(uRes&&uRes.length){users=uRes.map(function(u){return {id:u.id,name:u.name,phone:u.phone,role:u.role,on:u.active!==false,pass:u.notes||''};});lsSave();}}catch(e){}
     var foundU=users.find(function(u){return u.phone===fp;});
-    var detRole=foundU&&foundU.role==='assistant'?'assistant':'staff';
-    cu={phone:fp,name:foundU?foundU.name:'موظف',email:email};cr=detRole;
+    if(!foundU){showErr('e-staff','الرقم غير مسجل. تواصل مع المدير لإضافتك');setBtn('btn-s','دخول كموظف',false);return;}
+    if(foundU.on===false){showErr('e-staff','الحساب معطّل');setBtn('btn-s','دخول كموظف',false);return;}
+    if(foundU.pass&&foundU.pass!==pass){showErr('e-staff','كلمة المرور غير صحيحة');setBtn('btn-s','دخول كموظف',false);return;}
+    if(!foundU.pass&&pass!=='Staff@1234'){showErr('e-staff','استخدم كلمة المرور: Staff@1234');setBtn('btn-s','دخول كموظف',false);return;}
+    tok='local-'+Date.now();
+    var detRole=foundU.role==='assistant'?'assistant':foundU.role==='admin'?'admin':'staff';
+    cu={phone:fp,name:foundU.name,email:''};cr=detRole;
     setBtn('btn-s','دخول كموظف',false);startApp();
   }catch(e){showErr('e-staff','خطأ: '+e.message);setBtn('btn-s','دخول كموظف',false);}
 }
@@ -1673,20 +1676,28 @@ async function regStaff(){
   if(!name||!phone||!pass){showErr('e-staff','أكمل الحقول');return;}
   if(pass.length<8){showErr('e-staff','كلمة المرور 8 أحرف+');return;}
   var fp=code+phone;
-  var email='s'+fp.replace(/\+/g,'').replace(/\s/g,'')+'@alyami.app';
   setBtn('btn-sr','جاري الإنشاء...',true);
   try{
-    var res=await doFetch(SB+'/auth/v1/signup',{email:email,password:pass,data:{full_name:name,phone:fp}});
-    if(!res.r.ok){showErr('e-staff',res.d.error_description||'خطأ');setBtn('btn-sr','إنشاء حساب موظف',false);return;}
-    if(!res.d.access_token){
-      var lr=await doFetch(SB+'/auth/v1/token?grant_type=password',{email:email,password:pass});
-      if(!lr.r.ok||!lr.d.access_token){showErr('e-staff','تم إنشاء الحساب. سجّل دخولك الآن');setBtn('btn-sr','إنشاء حساب موظف',false);return;}
-      tok=lr.d.access_token;
-    }else{tok=res.d.access_token;}
-    cu={phone:fp,name:name,email:email};cr='staff';
-    // Add to users list and notify
-    allUsers&&allUsers.push({id:Date.now(),name:name,phone:fp,role:'staff',on:true});
+    // Refresh from Supabase
+    try{var uRes=await sbGet('staff_users');if(uRes&&uRes.length){users=uRes.map(function(u){return {id:u.id,name:u.name,phone:u.phone,role:u.role,on:u.active!==false,pass:u.notes||''};});}}catch(e){}
+    var existing=users.find(function(u){return u.phone===fp;});
+    if(existing){
+      // Already added by admin — set password and login
+      existing.pass=pass;existing.name=name;
+      try{await sbSaveUser(existing);}catch(e){}
+      tok='local-'+Date.now();
+      var detRole=existing.role==='assistant'?'assistant':'staff';
+      cu={phone:fp,name:name,email:''};cr=detRole;
+    } else {
+      // Brand new self-registration
+      var newUser={id:Date.now(),name:name,phone:fp,role:'staff',on:true,pass:pass};
+      users.push(newUser);
+      try{await sbSaveUser(newUser);}catch(e){}
+      tok='local-'+Date.now();
+      cu={phone:fp,name:name,email:''};cr='staff';
+    }
     addNotif('staff','👤 تسجيل موظف جديد — '+name,'سجّل موظف جديد برقم '+fp,'👤');
+    lsSave();
     setBtn('btn-sr','إنشاء حساب موظف',false);startApp();
   }catch(e){showErr('e-staff','خطأ: '+e.message);setBtn('btn-sr','إنشاء حساب موظف',false);}
 }
@@ -2354,7 +2365,7 @@ async function addUser(){
   if(pass.length<8)pass='Staff@1234';
   var fp=code+phone;
   // 1) Add to local + Supabase staff_users table
-  var newUser={id:Date.now(),name:name,phone:fp,role:role,on:true};
+  var newUser={id:Date.now(),name:name,phone:fp,role:role,on:true,pass:pass};
   users.push(newUser);
   closeOv('ov-user');
   try{sbSaveUser(newUser);}catch(e){}
