@@ -446,7 +446,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <!-- VISA MGMT -->
       <div class="pg" id="pg-visas">
         <div class="card">
-          <div class="ch"><span class="ct">أنواع التأشيرات والأسعار</span><div style="display:flex;gap:6px"><button class="btn bg2 bsm" onclick="openAddVisa()">+ إضافة</button><button class="btn bo2 bsm" onclick="restoreDefaultVisas()">🔄 استعادة الافتراضي</button></div></div>
+          <div class="ch"><span class="ct">أنواع التأشيرات والأسعار</span><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn bg2 bsm" onclick="openAddVisa()">+ إضافة</button><button class="btn bo2 bsm" onclick="restoreDefaultVisas()">🔄 استعادة الافتراضي</button><button class="btn bs3 bsm" onclick="exportVisas()">⬇️ تنزيل JSON</button><label class="btn bs3 bsm" style="cursor:pointer">⬆️ رفع JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importVisas(this)"></label></div></div>
           <div style="overflow-x:auto"><table><thead><tr><th>أيقونة</th><th>الاسم</th><th>أنواعها</th><th>الجنسيات</th><th>مدة الإنجاز</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="visa-tb"></tbody></table></div>
         </div>
       </div>
@@ -645,6 +645,8 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
               <button class="btn bs3 bsm" onclick="addPriceColumn()">➕ إضافة عمود</button>
               <button class="btn bo2 bsm" onclick="manageColumns()">⚙️ إدارة الأعمدة</button>
               <button class="btn bn2 bsm" onclick="printPriceList()">🖨️ طباعة PDF</button>
+              <button class="btn bs3 bsm" onclick="exportPrices()">⬇️ تنزيل JSON</button>
+              <label class="btn bs3 bsm" style="cursor:pointer">⬆️ رفع JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importPrices(this)"></label>
             </div>
           </div>
           <div style="overflow-x:auto">
@@ -2217,6 +2219,69 @@ function renderVisas(){
 
 function toggleV(id){var v=visas.find(function(x){return x.id===id;});if(v){v.on=!v.on;sbSaveVisa(v);renderVisas();}}
 function delV(id){if(confirm('حذف هذا النوع؟')){visas=visas.filter(function(x){return x.id!==id;});sbDeleteVisa(id);renderVisas();}}
+// ===== EXPORT / IMPORT =====
+function downloadJSON(data,filename){
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+}
+function readJSONFile(input,onLoad){
+  var f=input.files&&input.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(e){
+    try{var data=JSON.parse(e.target.result);onLoad(data);}
+    catch(err){alert('ملف JSON غير صالح: '+err.message);}
+    input.value='';
+  };
+  rd.readAsText(f);
+}
+
+function exportPrices(){
+  var ts=new Date().toISOString().slice(0,10);
+  downloadJSON({version:1,exportedAt:new Date().toISOString(),prices:priceList,customCols:customCols},'alyami-prices-'+ts+'.json');
+}
+function importPrices(input){
+  readJSONFile(input,function(data){
+    var prices=data.prices||(Array.isArray(data)?data:null);
+    if(!prices||!Array.isArray(prices)){alert('الملف لا يحتوي على قائمة أسعار');return;}
+    var mode=confirm('استبدال القائمة الحالية ('+priceList.length+' سعر) بـ '+prices.length+' سعر؟\n\nاضغط موافق = استبدال\nإلغاء = دمج (إضافة على الموجود)')?'replace':'merge';
+    if(mode==='replace'){priceList=prices.slice();}
+    else{prices.forEach(function(p){if(!p.id)p.id=Date.now()+Math.random();priceList.push(p);});}
+    if(data.customCols&&Array.isArray(data.customCols)){
+      data.customCols.forEach(function(c){if(!customCols.find(function(x){return x.id===c.id;}))customCols.push(c);});
+      saveCustomCols();
+    }
+    try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
+    renderPrices();
+    alert('✅ تم الاستيراد: '+prices.length+' سعر');
+  });
+}
+
+function exportVisas(){
+  var ts=new Date().toISOString().slice(0,10);
+  downloadJSON({version:1,exportedAt:new Date().toISOString(),visas:visas},'alyami-visas-'+ts+'.json');
+}
+function importVisas(input){
+  readJSONFile(input,function(data){
+    var imported=data.visas||(Array.isArray(data)?data:null);
+    if(!imported||!Array.isArray(imported)){alert('الملف لا يحتوي على قائمة تأشيرات');return;}
+    var mode=confirm('استبدال التأشيرات الحالية ('+visas.length+') بـ '+imported.length+'؟\n\nموافق = استبدال\nإلغاء = دمج')?'replace':'merge';
+    if(mode==='replace'){
+      visas=imported.slice();
+      imported.forEach(function(v){try{sbSaveVisa(v);}catch(e){}});
+    } else {
+      imported.forEach(function(v){
+        var ex=visas.find(function(x){return x.id===v.id;});
+        if(ex){Object.assign(ex,v);}else{visas.push(v);}
+        try{sbSaveVisa(v);}catch(e){}
+      });
+    }
+    lsSave();renderVisas();
+    alert('✅ تم الاستيراد: '+imported.length+' تأشيرة');
+  });
+}
+
 function restoreDefaultVisas(){
   if(!confirm('استعادة قائمة التأشيرات الافتراضية؟ سيتم دمجها مع قائمتك الحالية.'))return;
   defaultVisas.forEach(function(d){
