@@ -929,7 +929,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       </div>
       <div class="fg"><label>عدد الركاب</label><input type="number" id="tr-pax" placeholder="1" min="1" value="1"></div>
       <div class="fg"><label>تاريخ الرحلة</label><input type="date" id="tr-date" dir="ltr"></div>
-      <div class="fg"><label>وقت الانطلاق</label><input type="time" id="tr-time" dir="ltr"></div>
+      <div class="fg"><label>وقت الانطلاق</label><input type="text" id="tr-time" dir="ltr" placeholder="14:30 أو 2:30 PM"></div>
       <div class="fg"><label>السعر ($)</label><input type="number" id="tr-price" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
       <div class="fg full"><label>ملاحظات</label><textarea id="tr-notes" style="height:55px;resize:vertical" placeholder="أي تفاصيل إضافية..."></textarea></div>
     </div>
@@ -951,8 +951,8 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
     <div class="fgrid">
       <div class="fg"><label>من (نقطة الانطلاق) *</label><input type="text" id="ct-from" placeholder="المطار / الفندق"></div>
       <div class="fg"><label>إلى (الوجهة) *</label><input type="text" id="ct-to" placeholder="الفندق / المطار"></div>
-      <div class="fg"><label>التاريخ *</label><input type="date" id="ct-date"></div>
-      <div class="fg"><label>الوقت</label><input type="time" id="ct-time"></div>
+      <div class="fg"><label>التاريخ *</label><input type="date" id="ct-date" dir="ltr"></div>
+      <div class="fg"><label>الوقت</label><input type="text" id="ct-time" dir="ltr" placeholder="14:30 أو 2:30 PM"></div>
       <div class="fg"><label>عدد الركاب</label><input type="number" id="ct-pax" value="1" min="1" max="20"></div>
       <div class="fg"><label>نوع السيارة</label>
         <select id="ct-car"><option>سيارة عادية</option><option>فان عائلي</option><option>حافلة صغيرة</option></select>
