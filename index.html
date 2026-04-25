@@ -2114,11 +2114,18 @@ function renderStaff(){
     var st=r.status==='approved'?'ba2':r.status==='rejected'?'bx':'bp';
     row.innerHTML='<td style="font-family:monospace;font-weight:700;color:var(--gold-d);font-size:11px">'+r.id+'</td><td style="font-weight:600">'+r.name+'</td><td><span class="badge br2">'+(v.i||'')+' '+(v.n||r.type)+'</span></td><td><span class="badge '+st+'">'+(SL[r.status]||r.status)+'</span></td><td></td>';
     var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';
-    var btnA=document.createElement('button');btnA.className='btn bs3 bsm';btnA.textContent='✓ موافقة';
-    btnA.addEventListener('click',function(){approveR(r.id);});
-    var btnR=document.createElement('button');btnR.className='btn bd2 bsm';btnR.textContent='✗ رفض';
-    btnR.addEventListener('click',function(){rejectR(r.id);});
-    td.appendChild(btnA);td.appendChild(btnR);tb.appendChild(row);
+    if(r.status==='approved'){
+      var btnP=document.createElement('button');btnP.className='btn bn2 bsm';btnP.textContent='📄 طباعة';
+      btnP.addEventListener('click',function(){printVisa(r);});
+      td.appendChild(btnP);
+    } else if(r.status!=='rejected'){
+      var btnA=document.createElement('button');btnA.className='btn bs3 bsm';btnA.textContent='✓ موافقة';
+      btnA.addEventListener('click',function(){approveR(r.id);});
+      var btnR=document.createElement('button');btnR.className='btn bd2 bsm';btnR.textContent='✗ رفض';
+      btnR.addEventListener('click',function(){rejectR(r.id);});
+      td.appendChild(btnA);td.appendChild(btnR);
+    }
+    tb.appendChild(row);
   });
 }
 
@@ -3963,9 +3970,9 @@ function renderRecentActivity(){
 
 // ===== ADVANCED PERMISSIONS SYSTEM =====
 var PERMS={
-  admin:{pages:['dash','users','visas','prices','transport','providers','wallets','crm'],actions:['approve','reject','delete','edit','add','export','settings']},
-  assistant:{pages:['dash','visas','wallets'],actions:['approve','reject','edit','add']},
-  staff:{pages:['staff','dash'],actions:['approve','reject']},
+  admin:{pages:['dash','users','visas','prices','transport','providers','wallets','crm'],actions:['approve','reject','delete','edit','add','export','settings','print']},
+  assistant:{pages:['dash','visas','wallets'],actions:['approve','reject','edit','add','print']},
+  staff:{pages:['staff','dash'],actions:['approve','reject','print']},
   client:{pages:['portal','wallet','c-requests','c-transport'],actions:['request','transport']}
 };
 
