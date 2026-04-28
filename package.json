@@ -10,5 +10,8 @@
     "open": "netlify open"
   },
   "author": "Ghith Alyame",
-  "license": "PRIVATE"
+  "license": "PRIVATE",
+  "devDependencies": {
+    "html-minifier-terser": "^7.2.0"
+  }
 }
