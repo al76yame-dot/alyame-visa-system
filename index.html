@@ -891,6 +891,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
   <div class="mb2">
     <div class="fgrid">
       <div class="fg full"><label>الجنسية (إدخال يدوي أو اختيار)</label><input type="text" id="pr-nat" list="pr-nat-list" placeholder="مثال: ليبيا" value="جميع الجنسيات"><datalist id="pr-nat-list"></datalist></div>
+      <div class="fg full"><label>الجهة المنفذة</label><input type="text" id="pr-entity" list="pr-entity-list" placeholder="مثال: مكتب اليامي / وزارة الداخلية / السفارة..."><datalist id="pr-entity-list"><option value="مكتب اليامي"><option value="وزارة الداخلية المصرية"><option value="السفارة المصرية"><option value="القنصلية"></datalist></div>
       <div class="fg full"><label>نوع التأشيرة (إدخال يدوي أو اختيار)</label><input type="text" id="pr-visa" list="pr-visa-list" placeholder="اكتب نوع التأشيرة"><datalist id="pr-visa-list"></datalist></div>
       <div class="fg full"><label>منفذ الدخول</label><input type="text" id="pr-port" list="pr-port-list" placeholder="مثال: مطار القاهرة الدولي"><datalist id="pr-port-list"><option value="مطار القاهرة الدولي"><option value="مطار برج العرب"><option value="مطار شرم الشيخ"><option value="مطار الغردقة"><option value="مطار الأقصر"><option value="مطار أسوان"><option value="مطار جدة"><option value="مطار المدينة المنورة"><option value="منفذ رأس جدير"></datalist></div>
       <div class="fg"><label>نوع السفر</label>
@@ -903,6 +904,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="fg"><label>السعر (د.ل) - اختياري</label><input type="number" id="pr-price-lyd" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
       <div class="fg"><label>السعر (ج.م) - اختياري</label><input type="number" id="pr-price-egp" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
       <div class="fg"><label>مدة صلاحية التأشيرة</label><input type="text" id="pr-validity" placeholder="30 يوم / 90 يوم"></div>
+      <div class="fg full"><label>الخطوط (الناقل / الطيران)</label><input type="text" id="pr-airline" list="pr-airline-list" placeholder="مثال: الخطوط الليبية / مصر للطيران"><datalist id="pr-airline-list"><option value="الخطوط الليبية"><option value="مصر للطيران"><option value="البراق"><option value="الأفريقية"><option value="بدر للطيران"><option value="نسما"><option value="نايل اير"></datalist></div>
       <div class="fg full"><label>ملاحظات</label><input type="text" id="pr-notes" placeholder="أي ملاحظات إضافية..."></div>
       <div class="fg full" id="pr-custom-fields"></div>
     </div>
@@ -3574,6 +3576,7 @@ function addPriceRow(){
   editPriceId=null;
   document.getElementById('price-modal-t').textContent='إضافة سعر جديد';
   document.getElementById('pr-nat').value='جميع الجنسيات';
+  document.getElementById('pr-entity').value='';
   document.getElementById('pr-visa').value='';
   document.getElementById('pr-port').value='';
   document.getElementById('pr-type').value='فردي';
@@ -3582,6 +3585,7 @@ function addPriceRow(){
   document.getElementById('pr-price-lyd').value='';
   document.getElementById('pr-price-egp').value='';
   document.getElementById('pr-validity').value='';
+  document.getElementById('pr-airline').value='';
   document.getElementById('pr-notes').value='';
   renderCustomFieldsInModal(null);
   initPriceModal();
@@ -3594,6 +3598,7 @@ function editPriceRow(id){
   document.getElementById('price-modal-t').textContent='تعديل السعر';
   initPriceModal();
   document.getElementById('pr-nat').value=p.nat||'جميع الجنسيات';
+  document.getElementById('pr-entity').value=p.entity||'';
   document.getElementById('pr-visa').value=p.visaName||'';
   document.getElementById('pr-port').value=p.port||'';
   document.getElementById('pr-type').value=p.type||'فردي';
@@ -3602,6 +3607,7 @@ function editPriceRow(id){
   document.getElementById('pr-price-lyd').value=p.priceLyd||'';
   document.getElementById('pr-price-egp').value=p.priceEgp||'';
   document.getElementById('pr-validity').value=p.validity||'';
+  document.getElementById('pr-airline').value=p.airline||'';
   document.getElementById('pr-notes').value=p.notes||'';
   renderCustomFieldsInModal(p);
   document.getElementById('ov-price').classList.add('open');
@@ -3609,8 +3615,10 @@ function editPriceRow(id){
 
 function savePriceRow(){
   var nat=document.getElementById('pr-nat').value.trim()||'جميع الجنسيات';
+  var entity=document.getElementById('pr-entity').value.trim();
   var vname=document.getElementById('pr-visa').value.trim();
   var port=document.getElementById('pr-port').value.trim();
+  var airline=document.getElementById('pr-airline').value.trim();
   var type=document.getElementById('pr-type').value;
   var duration=document.getElementById('pr-duration').value.trim();
   var price=parseFloat(document.getElementById('pr-price').value)||0;
@@ -3629,9 +3637,9 @@ function savePriceRow(){
   var visaId=matched?matched.id:vname;
   if(editPriceId){
     var p=priceList.find(function(x){return x.id===editPriceId;});
-    if(p){p.nat=nat;p.visaId=visaId;p.visaName=vname;p.port=port;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;p.custom=customVals;}
+    if(p){p.nat=nat;p.entity=entity;p.visaId=visaId;p.visaName=vname;p.port=port;p.airline=airline;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;p.custom=customVals;}
   } else {
-    priceList.push({id:Date.now(),nat:nat,visaId:visaId,visaName:vname,port:port,type:type,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes,custom:customVals});
+    priceList.push({id:Date.now(),nat:nat,entity:entity,visaId:visaId,visaName:vname,port:port,airline:airline,type:type,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes,custom:customVals});
   }
   try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
   closeOv('ov-price');renderPrices();
@@ -3677,7 +3685,7 @@ function renderPrices(){
   if(typeof customCols==='undefined'||!customCols)customCols=[];
   renderPricesHead();
   tb.innerHTML='';
-  var colspan=7+customCols.length;
+  var colspan=9+customCols.length;
   if(!priceList.length){tb.innerHTML='<tr><td colspan="'+colspan+'" style="text-align:center;padding:20px;color:var(--text3);font-size:14px">لا توجد أسعار — أضف أسعار التأشيرات</td></tr>';return;}
   priceList.forEach(function(p,idx){
     var row=document.createElement('tr');
@@ -3697,10 +3705,12 @@ function renderPrices(){
       customCellsHtml+='<td style="font-size:14px">'+val+'</td>';
     });
     row.innerHTML='<td style="font-size:15px">'+p.nat+'</td>'
+      +'<td style="font-size:14px">'+(p.entity||'-')+'</td>'
       +'<td style="font-weight:700;font-size:15px">'+p.visaName+'<div style="font-size:12px;color:var(--text2);font-weight:500">'+p.type+'</div>'+validityHtml+'</td>'
       +'<td style="font-size:14px">'+(p.port||'-')+'</td>'
       +'<td style="color:var(--blue);font-size:14px">⏱ '+(p.duration||'-')+'</td>'
       +'<td><div style="font-weight:700;color:var(--gold-d);font-size:17px">$'+p.price+'</div>'+lydHtml+egpHtml+'</td>'
+      +'<td style="font-size:14px">'+(p.airline||'-')+'</td>'
       +customCellsHtml
       +'<td style="font-size:13px;color:var(--text2)">'+(p.notes||'-')+'</td>'
       +'<td></td>';
@@ -3722,7 +3732,7 @@ function printPriceList(){
     var validCell=p.validity?'<div style="font-size:11px;color:#2e7d32">صلاحية: '+p.validity+'</div>':'';
     var customCellsP='';
     customCols.forEach(function(c){var v=(p.custom&&p.custom[c.id])?p.custom[c.id]:'-';customCellsP+='<td>'+v+'</td>';});
-    return '<tr><td>'+(i+1)+'</td><td>'+p.nat+'</td><td style="font-weight:700">'+p.visaName+validCell+'</td><td>'+(p.port||'-')+'</td><td>'+p.type+'</td><td style="color:#185FA5;font-weight:600">'+(p.duration||'-')+'</td><td style="font-weight:700;color:#8B6914;font-size:15px">$'+p.price+lydCell+egpCell+'</td>'+customCellsP+'<td style="color:#666;font-size:12px">'+(p.notes||'-')+'</td></tr>';
+    return '<tr><td>'+(i+1)+'</td><td>'+p.nat+'</td><td>'+(p.entity||'-')+'</td><td style="font-weight:700">'+p.visaName+validCell+'</td><td>'+(p.port||'-')+'</td><td style="color:#185FA5;font-weight:600">'+(p.duration||'-')+'</td><td style="font-weight:700;color:#8B6914;font-size:15px">$'+p.price+lydCell+egpCell+'</td><td>'+(p.airline||'-')+'</td>'+customCellsP+'<td style="color:#666;font-size:12px">'+(p.notes||'-')+'</td></tr>';
   }).join('');
   var win=window.open('','_blank');
   win.document.write('<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة أسعار التأشيرات</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;direction:rtl;font-size:12px}.header{background:linear-gradient(135deg,#0D1B3E,#1A2F5A);color:white;padding:16px 20px;display:flex;align-items:center;gap:14px;border-radius:8px 8px 0 0;margin-bottom:0}.logo{width:60px;height:60px;object-fit:contain;background:white;border-radius:8px;padding:3px}.h-title h1{font-size:20px;color:#F5E8C0;margin-bottom:3px}.h-title p{font-size:11px;color:rgba(255,255,255,.6)}.gold-bar{background:#C49A3C;height:4px;margin-bottom:16px}.section-title{font-size:14px;font-weight:700;color:#0D1B3E;border-bottom:2px solid #C49A3C;padding-bottom:5px;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:14px}th{background:#0D1B3E;color:white;padding:10px 8px;text-align:right;font-size:13px}td{padding:9px 8px;border-bottom:1px solid #E5E0D5;vertical-align:middle;font-size:14px}tr:nth-child(even) td{background:#F8F7F3}.footer{margin-top:16px;text-align:center;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:10px}@media print{.no-print{display:none}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>');
@@ -3730,7 +3740,7 @@ function printPriceList(){
   win.document.write('<div class="gold-bar"></div>');
   win.document.write('<div class="section-title">💲 قائمة الأسعار الرسمية — '+new Date().toLocaleDateString('ar-SA')+'</div>');
   var customHeaders=customCols.map(function(c){return '<th>'+c.name+'</th>';}).join('');
-  win.document.write('<table><thead><tr><th>#</th><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>نوع السفر</th><th>مدة الإنجاز</th><th>السعر</th>'+customHeaders+'<th>ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table>');
+  win.document.write('<table><thead><tr><th>#</th><th>الجنسية</th><th>الجهة المنفذة</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>مدة الإنجاز</th><th>السعر</th><th>الخطوط</th>'+customHeaders+'<th>ملاحظات</th></tr></thead><tbody>'+rows+'</tbody></table>');
   win.document.write('<div class="footer">اليامي للسفر والسياحة | الأسعار قابلة للتغيير | '+new Date().toLocaleDateString('ar-SA')+'</div>');
   win.document.write('<br class="no-print"><div class="no-print" style="text-align:center;padding:12px"><button onclick="window.print()" style="padding:9px 24px;background:#0D1B3E;color:white;border:none;border-radius:7px;cursor:pointer;font-size:13px">🖨️ طباعة / حفظ PDF</button></div>');
   win.document.write('</body></html>');
@@ -3778,7 +3788,7 @@ function renderPricesHead(){
   var th=document.getElementById('prices-thead');
   if(!th)return;
   var cc=(typeof customCols!=='undefined'&&customCols)?customCols:[];
-  var html='<tr><th>الجنسية</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>مدة الإنجاز</th><th>السعر</th>';
+  var html='<tr><th>الجنسية</th><th>الجهة المنفذة</th><th>نوع التأشيرة</th><th>منفذ الدخول</th><th>مدة الإنجاز</th><th>السعر</th><th>الخطوط</th>';
   cc.forEach(function(c){html+='<th>'+c.name+'</th>';});
   html+='<th>ملاحظات</th><th>إجراء</th></tr>';
   th.innerHTML=html;
