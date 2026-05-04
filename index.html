@@ -447,7 +447,7 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="pg" id="pg-visas">
         <div class="card">
           <div class="ch"><span class="ct">أنواع التأشيرات والأسعار</span><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn bg2 bsm" onclick="openAddVisa()">+ إضافة</button><button class="btn bo2 bsm" onclick="restoreDefaultVisas()">🔄 استعادة الافتراضي</button><button class="btn bs3 bsm" onclick="exportVisas()">⬇️ تنزيل JSON</button><label class="btn bs3 bsm" style="cursor:pointer">⬆️ رفع JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importVisas(this)"></label></div></div>
-          <div style="overflow-x:auto"><table><thead><tr><th>أيقونة</th><th>الاسم</th><th>أنواعها</th><th>الجنسيات</th><th>مدة الإنجاز</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="visa-tb"></tbody></table></div>
+          <div style="overflow-x:auto"><table><thead><tr><th>الجنسية</th><th>التأشيرة</th><th>نوعها</th><th>السعر</th><th>مدة الإنجاز</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="visa-tb"></tbody></table></div>
         </div>
       </div>
 
@@ -2220,12 +2220,11 @@ function renderVisas(){
       (v.nationalities[0]==='جميع الجنسيات'?'<span class="badge ba2">الكل</span>':v.nationalities.slice(0,2).join('، ')+(v.nationalities.length>2?'...':'')):
       '<span class="badge ba2">الكل</span>';
     var durStr=v.duration||'-';
-    row.innerHTML='<td style="font-size:20px">'+v.i+'</td>'
-      +'<td style="font-weight:600">'+v.n+'<div style="font-size:10px;color:var(--text2)">'+( v.desc||'')+'</div></td>'
+    row.innerHTML='<td style="font-size:11px">'+natsStr+'</td>'
+      +'<td style="font-weight:600"><span style="font-size:18px;margin-left:4px">'+v.i+'</span>'+v.n+'<div style="font-size:10px;color:var(--text2)">'+( v.desc||'')+'</div></td>'
       +'<td style="font-size:11px;color:var(--text2)">'+typesStr+'</td>'
-      +'<td style="font-size:11px">'+natsStr+'</td>'
-      +'<td style="font-size:11px;color:var(--blue)">⏱ '+durStr+'</td>'
       +'<td><span style="background:var(--gold-l);color:var(--gold-d);border-radius:6px;padding:2px 9px;font-weight:700;font-size:12px">'+formatMoney(v.p)+'</span></td>'
+      +'<td style="font-size:11px;color:var(--blue)">⏱ '+durStr+'</td>'
       +'<td><span class="badge '+(v.on?'ba2':'bx')+'">'+(v.on?'مفعّلة':'معطّلة')+'</span></td>'
       +'<td></td>';
     var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';
