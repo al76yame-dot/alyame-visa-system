@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OK to Board - تأكيد صحة السفر | اليامي</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", "Tahoma", Arial, sans-serif;
+    margin: 0; padding: 0; background: #f0f2f5; color: #222;
+  }
+  .app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 8px 0 16px; text-align: center; }
+  .panel {
+    background: #fff; border-radius: 10px; padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 16px;
+  }
+  .grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  label { display: block; font-size: 13px; margin-bottom: 4px; color: #444; }
+  input, select {
+    width: 100%; padding: 9px 10px; border: 1px solid #cfd4da;
+    border-radius: 6px; font-size: 14px; background: #fff;
+  }
+  input:focus, select:focus { outline: 2px solid #1a4d8f33; border-color: #1a4d8f; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  button {
+    padding: 10px 18px; border: 0; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+  }
+  .btn-primary { background: #1a4d8f; color: #fff; }
+  .btn-secondary { background: #6c757d; color: #fff; }
+  .btn-print { background: #198754; color: #fff; }
+  button:hover { opacity: .9; }
+
+  /* ===== الوثيقة ===== */
+  .document-wrap { display: flex; justify-content: center; }
+  .document {
+    width: 210mm; min-height: 297mm; padding: 14mm;
+    background: #fff; border: 2px solid #1a4d8f; position: relative;
+    font-size: 12px; color: #111;
+  }
+  .doc-date { position: absolute; top: 10mm; left: 14mm; font-size: 11px; }
+  .doc-title { text-align: center; margin-top: 6mm; }
+  .doc-title h2 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+  .doc-title h3 { margin: 4px 0 0; font-size: 18px; font-weight: 500; }
+  .hr { border-top: 1px solid #999; margin: 8mm auto; width: 60%; }
+  .section-title { text-align: center; font-weight: 700; font-size: 14px; margin: 6mm 0 3mm; }
+  .underline { width: 60%; height: 1px; background: #999; margin: 0 auto 4mm; }
+
+  table.doc-table { width: 100%; border-collapse: collapse; }
+  table.doc-table td {
+    border: 1px solid #b9c2cc; padding: 6px 8px; vertical-align: middle;
+    font-size: 12px;
+  }
+  .label-cell { background: #e7eef7; font-weight: 600; width: 35%; }
+  .qr-cell { text-align: center; vertical-align: middle; width: 30%; }
+  .qr-cell img, .qr-cell canvas { width: 90px; height: 90px; }
+
+  .notes {
+    margin-top: 8mm; border: 2px solid #d33; border-radius: 4px;
+    padding: 6mm; color: #c62828;
+  }
+  .notes h4 { margin: 0 0 4mm; font-size: 14px; color: #c62828; }
+  .notes p { margin: 2mm 0; font-size: 11.5px; line-height: 1.5; }
+  .watermark {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; pointer-events: none; opacity: .06;
+    font-size: 90px; font-weight: 800; color: #1a4d8f; transform: rotate(-20deg);
+  }
+
+  /* الطباعة */
+  @media print {
+    body { background: #fff; }
+    .panel, h1, .no-print { display: none !important; }
+    .document { border: 2px solid #1a4d8f; box-shadow: none; margin: 0; }
+    @page { size: A4; margin: 0; }
+  }
+
+  /* الهاتف */
+  @media (max-width: 768px) {
+    .document { width: 100%; min-height: auto; padding: 6mm; font-size: 11px; }
+    .doc-title h2 { font-size: 18px; }
+    .doc-title h3 { font-size: 15px; }
+    table.doc-table td { padding: 4px 6px; font-size: 11px; }
+    .qr-cell img, .qr-cell canvas { width: 70px; height: 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1 class="no-print">نظام إصدار وطباعة OK to Board</h1>
+
+  <div class="panel no-print">
+    <div class="grid">
+      <div>
+        <label>اسم المسافر (عربي)</label>
+        <input id="name_ar" placeholder="مثال: وسام الهمالى منصور محمد" />
+      </div>
+      <div>
+        <label>Passenger Name (English)</label>
+        <input id="name_en" placeholder="WISAM ALHAMALY..." />
+      </div>
+      <div>
+        <label>رقم جواز السفر</label>
+        <input id="passport" placeholder="AC827160" />
+      </div>
+      <div>
+        <label>تاريخ الميلاد</label>
+        <input id="birth" type="date" />
+      </div>
+      <div>
+        <label>الجنسية</label>
+        <input id="nationality" value="ليبيا | Libya" />
+      </div>
+      <div>
+        <label>شركة الطيران</label>
+        <input id="airline" placeholder="EgyptAir | مصر للطيران" />
+      </div>
+      <div>
+        <label>رقم الرحلة</label>
+        <input id="flight" placeholder="MS 830" />
+      </div>
+      <div>
+        <label>تاريخ الوصول</label>
+        <input id="arrival" type="date" />
+      </div>
+      <div>
+        <label>تاريخ الإصدار</label>
+        <input id="issue" type="date" />
+      </div>
+      <div>
+        <label>صالح حتى</label>
+        <input id="valid" type="date" />
+      </div>
+      <div>
+        <label>رقم التحقق</label>
+        <input id="vno" placeholder="EGV-202607206" />
+      </div>
+      <div>
+        <label>نوع التحقق</label>
+        <select id="vtype">
+          <option>Pre-Travel Clearance</option>
+          <option>Visa Verification</option>
+          <option>Boarding Approval</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" onclick="generate()">توليد الوثيقة</button>
+      <button class="btn-print" onclick="window.print()">طباعة / حفظ PDF</button>
+      <button class="btn-secondary" onclick="resetForm()">مسح</button>
+    </div>
+  </div>
+
+  <div class="document-wrap">
+    <div class="document" id="doc">
+      <div class="doc-date" id="d_date"></div>
+      <div class="watermark">EGYPT VISA</div>
+
+      <div class="doc-title">
+        <h2>OK TO BOARD VERIFICATION</h2>
+        <h3>تأكيد صحة السفر</h3>
+      </div>
+      <div class="hr"></div>
+
+      <div class="section-title">VERIFICATION DETAILS | تفاصيل التحقق</div>
+      <div class="underline"></div>
+
+      <table class="doc-table">
+        <tr>
+          <td class="label-cell">Verification Number | رقم التحقق</td>
+          <td class="qr-cell" rowspan="2"><canvas id="qr"></canvas></td>
+          <td class="label-cell">Date of Issue | تاريخ الإصدار</td>
+        </tr>
+        <tr>
+          <td id="d_vno"></td>
+          <td id="d_issue"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">Verification Type | نوع التحقق</td>
+          <td id="d_vtype" style="text-align:center"></td>
+          <td id="d_valid"></td>
+        </tr>
+        <tr>
+          <td class="label-cell"></td>
+          <td></td>
+          <td class="label-cell">Valid Until | صالح حتى</td>
+        </tr>
+      </table>
+
+      <div class="section-title" style="text-align:right">PASSENGER INFORMATION | معلومات المسافر</div>
+      <div style="height:1px;background:#999;margin-bottom:3mm"></div>
+
+      <table class="doc-table">
+        <tr>
+          <td class="label-cell">Passenger Name | اسم المسافر</td>
+          <td class="label-cell">Passport Number | رقم جواز السفر</td>
+        </tr>
+        <tr>
+          <td id="d_name"></td>
+          <td id="d_passport"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">Nationality | الجنسية</td>
+          <td class="label-cell">Birth Date | تاريخ الميلاد</td>
+        </tr>
+        <tr>
+          <td id="d_nat"></td>
+          <td id="d_birth"></td>
+        </tr>
+      </table>
+
+      <div class="section-title" style="text-align:right">FLIGHT DETAILS | معلومات الرحلة</div>
+      <div style="height:1px;background:#999;margin-bottom:3mm"></div>
+
+      <table class="doc-table">
+        <tr>
+          <td class="label-cell">Airline | شركة الطيران</td>
+          <td class="label-cell">Flight No. | رقم الرحلة</td>
+          <td class="label-cell">Arrival Date | تاريخ الوصول</td>
+        </tr>
+        <tr>
+          <td id="d_airline"></td>
+          <td id="d_flight"></td>
+          <td id="d_arrival"></td>
+        </tr>
+      </table>
+
+      <div class="notes">
+        <h4>IMPORTANT NOTES | إشعارات هامة</h4>
+        <p>- This document confirms that the passenger has been pre-cleared for travel to Egypt as of the date of issue.</p>
+        <p style="text-align:right">هذا المستند يؤكد أن المسافر تمت الموافقة المسبقة على سفره إلى مصر اعتباراً من تاريخ الإصدار</p>
+        <p>- Passenger must present valid passport with minimum 6 months validity at the time of travel.</p>
+        <p style="text-align:right">يجب على المسافر تقديم جواز سفر ساري مع صلاحية لا تقل عن 6 أشهر في وقت السفر</p>
+        <p>- This verification is subject to change based on instructions from the security authorities.</p>
+        <p style="text-align:right">هذا التحقق يخضع للتغيير بناءً على تعليمات الجهات الأمنية</p>
+        <p>- The final decision regarding boarding and entry rests with the boarding officer and the security authorities at port of entry.</p>
+        <p style="text-align:right">القرار النهائي للصعود والدخول يقع على عاتق ضابط الجوازات و الجهات الأمنية في منفذ الدخول</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  function fmtDateUS(iso) {
+    if (!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${parseInt(m)}/${parseInt(d)}/${y}`;
+  }
+  function genVerificationNo() {
+    const y = new Date().getFullYear();
+    const r = Math.floor(1000000 + Math.random()*9000000);
+    return `EGV-${y}${r.toString().slice(0,7)}`;
+  }
+  function addMonths(iso, months) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().slice(0,10);
+  }
+  function todayISO() { return new Date().toISOString().slice(0,10); }
+
+  function initDefaults() {
+    if (!$('issue').value) $('issue').value = todayISO();
+    if (!$('valid').value) $('valid').value = addMonths($('issue').value, 3);
+    if (!$('vno').value) $('vno').value = genVerificationNo();
+  }
+
+  function generate() {
+    initDefaults();
+
+    const data = {
+      name: $('name_ar').value || $('name_en').value,
+      name_en: $('name_en').value,
+      passport: $('passport').value,
+      birth: $('birth').value,
+      nationality: $('nationality').value,
+      airline: $('airline').value,
+      flight: $('flight').value,
+      arrival: $('arrival').value,
+      issue: $('issue').value,
+      valid: $('valid').value,
+      vno: $('vno').value,
+      vtype: $('vtype').value
+    };
+
+    $('d_date').textContent = new Date().toLocaleString('en-US', {
+      weekday:'long', year:'numeric', month:'long', day:'numeric',
+      hour:'numeric', minute:'2-digit'
+    });
+    $('d_vno').textContent = data.vno;
+    $('d_issue').textContent = fmtDate(data.issue);
+    $('d_valid').textContent = fmtDate(data.valid);
+    $('d_vtype').textContent = data.vtype;
+    $('d_name').textContent = data.name;
+    $('d_passport').textContent = data.passport;
+    $('d_nat').textContent = data.nationality;
+    $('d_birth').textContent = fmtDateUS(data.birth);
+    $('d_airline').textContent = data.airline;
+    $('d_flight').textContent = data.flight;
+    $('d_arrival').textContent = fmtDateUS(data.arrival);
+
+    const qrPayload = JSON.stringify({
+      vno: data.vno,
+      name: data.name_en || data.name,
+      passport: data.passport,
+      birth: data.birth,
+      nationality: data.nationality,
+      flight: data.flight,
+      arrival: data.arrival,
+      issue: data.issue,
+      valid: data.valid
+    });
+    QRCode.toCanvas($('qr'), qrPayload, { width: 180, margin: 1 }, err => {
+      if (err) console.error(err);
+    });
+
+    try {
+      localStorage.setItem('okToBoard:last', JSON.stringify(data));
+    } catch(e){}
+  }
+
+  function resetForm() {
+    document.querySelectorAll('input').forEach(i => i.value = '');
+    $('nationality').value = 'ليبيا | Libya';
+    $('vtype').selectedIndex = 0;
+    initDefaults();
+  }
+
+  // تحميل آخر إدخال
+  try {
+    const saved = JSON.parse(localStorage.getItem('okToBoard:last') || '{}');
+    if (saved.name) {
+      $('name_ar').value = saved.name || '';
+      $('name_en').value = saved.name_en || '';
+      $('passport').value = saved.passport || '';
+      $('birth').value = saved.birth || '';
+      $('nationality').value = saved.nationality || 'ليبيا | Libya';
+      $('airline').value = saved.airline || '';
+      $('flight').value = saved.flight || '';
+      $('arrival').value = saved.arrival || '';
+    }
+  } catch(e){}
+
+  initDefaults();
+  generate();
+
+  // إعادة توليد رقم التحقق عند الضغط مرتين عليه
+  $('vno').addEventListener('dblclick', () => { $('vno').value = genVerificationNo(); });
+</script>
+</body>
+</html>
