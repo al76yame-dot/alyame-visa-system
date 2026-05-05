@@ -3057,7 +3057,9 @@ function printVisa(r){
     try{localStorage.setItem('alyami_reqs',JSON.stringify(reqs));}catch(e){}
     if(typeof sbSaveReq==='function'){try{sbSaveReq(r);}catch(e){}}
   }
-  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(r.docNo);
+  // QR contains: Name + DOB + Doc Number for verification
+  var qrPayload='الاسم: '+(r.name||r.name_en||'-')+'\nName: '+(r.name_en||r.name||'-')+'\nتاريخ الميلاد / DOB: '+(r.dob||'-')+'\nرقم التحقق / Ref: '+r.docNo;
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(qrPayload);
 
   // Date formatting helpers
   function fmtEn(dt){try{return new Date(dt).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return '-';}}
@@ -3086,44 +3088,57 @@ function printVisa(r){
 <meta charset="UTF-8">\
 <title>OK TO BOARD VERIFICATION - '+r.docNo+'</title>\
 <style>\
-  @page{size:A4;margin:14mm}\
+  @page{size:A4;margin:0}\
   *{box-sizing:border-box;margin:0;padding:0}\
-  body{font-family:Arial,sans-serif;background:white;color:#1A1A1A;font-size:13px;line-height:1.5}\
-  .page{width:100%;max-width:210mm;margin:0 auto;border:2.5px solid '+navy+';padding:18px 22px;position:relative;min-height:275mm}\
-  .topdate{position:absolute;top:18px;right:22px;font-size:11px;font-weight:700;color:#222}\
-  .h-title{text-align:center;margin:18px 0 8px;font-size:22px;font-weight:700;color:#222;letter-spacing:1px}\
-  .h-sub{text-align:center;font-size:15px;color:#444;margin-bottom:14px}\
-  .h-line{border-top:2px solid #222;width:80%;margin:8px auto 18px}\
-  .sec-title{text-align:center;font-size:15px;font-weight:700;color:#222;margin:12px 0 4px;letter-spacing:0.5px}\
-  .sec-line{border-top:1.5px solid #222;width:55%;margin:0 auto 14px}\
-  .sec-label{font-size:13px;font-weight:700;color:#222;margin:18px 0 4px;border-bottom:1.5px solid #222;padding-bottom:4px;width:fit-content}\
+  body{font-family:"Helvetica Neue","Segoe UI",Arial,sans-serif;background:#f3f4f6;color:#1A1A1A;font-size:13px;line-height:1.5}\
+  .page{width:210mm;min-height:297mm;margin:14px auto;background:white;padding:0;position:relative;box-shadow:0 6px 30px rgba(0,0,0,0.08);overflow:hidden}\
+  /* Decorative gold/navy header band */\
+  .hdr-band{height:7px;background:linear-gradient(90deg,'+navy+' 0%,#C49A3C 50%,'+navy+' 100%)}\
+  .inner{padding:22px 28px 28px;position:relative}\
+  .topdate{position:absolute;top:20px;right:28px;font-size:10.5px;font-weight:600;color:#555;letter-spacing:0.3px}\
+  .h-title{text-align:center;margin:6px 0 4px;font-size:24px;font-weight:800;color:'+navy+';letter-spacing:2.5px}\
+  .h-sub{text-align:center;font-size:15px;color:#555;font-weight:600;margin-bottom:8px;direction:rtl;letter-spacing:1px}\
+  .h-line{border-top:1.5px solid #C49A3C;width:70%;margin:10px auto 0}\
+  .h-deco{text-align:center;color:#C49A3C;font-size:10px;letter-spacing:8px;margin-top:6px}\
+  .sec-title{text-align:center;font-size:14px;font-weight:700;color:'+navy+';margin:18px 0 3px;letter-spacing:1.2px}\
+  .sec-line{border-top:1.2px solid #C49A3C;width:45%;margin:0 auto 14px}\
+  .sec-label{font-size:13px;font-weight:700;color:'+navy+';margin:18px 0 6px;border-right:3px solid #C49A3C;padding:2px 10px 2px 0;background:linear-gradient(90deg,'+lightBlue+' 0%,transparent 100%);letter-spacing:0.5px}\
   /* Three-column verification layout */\
-  .v-grid{display:grid;grid-template-columns:1fr 200px 1fr;gap:8px;margin-bottom:14px;align-items:stretch}\
-  .v-cell{border:1.5px solid '+navy+'}\
-  .v-cell .h{background:'+lightBlue+';padding:7px 10px;font-size:11px;font-weight:700;color:#222;border-bottom:1.5px solid '+navy+'}\
-  .v-cell .b{padding:10px;font-size:13px;font-weight:600;text-align:center;min-height:42px;display:flex;align-items:center;justify-content:center}\
-  .v-qr{display:flex;align-items:center;justify-content:center;border:1.5px solid '+navy+';padding:6px}\
-  .v-qr img{width:170px;height:170px;display:block}\
+  .v-grid{display:grid;grid-template-columns:1fr 210px 1fr;gap:10px;margin-bottom:16px;align-items:stretch}\
+  .v-cell{border:1px solid #c5d3e8;border-radius:6px;overflow:hidden;background:white;box-shadow:0 1px 3px rgba(13,27,62,0.04)}\
+  .v-cell .h{background:'+lightBlue+';padding:8px 12px;font-size:10.5px;font-weight:700;color:'+navy+';border-bottom:1px solid #c5d3e8;letter-spacing:0.3px}\
+  .v-cell .b{padding:11px;font-size:13px;font-weight:700;text-align:center;min-height:44px;display:flex;align-items:center;justify-content:center;color:#1A1A1A}\
+  .v-qr{display:flex;align-items:center;justify-content:center;border:1px solid #c5d3e8;border-radius:6px;padding:8px;background:white;flex-direction:column}\
+  .v-qr img{width:175px;height:175px;display:block}\
+  .v-qr .qcap{font-size:8.5px;color:#888;margin-top:5px;font-style:italic;letter-spacing:0.3px}\
   /* Generic data table */\
-  .dtbl{width:100%;border-collapse:collapse;margin-bottom:14px}\
-  .dtbl th{background:'+lightBlue+';color:#222;font-size:12px;font-weight:700;padding:7px 10px;border:1.5px solid '+navy+';text-align:center}\
-  .dtbl td{border:1.5px solid '+navy+';padding:9px 10px;font-size:13px;font-weight:600;text-align:center;vertical-align:middle}\
+  .dtbl{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:14px;border:1px solid #c5d3e8;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(13,27,62,0.04)}\
+  .dtbl th{background:'+lightBlue+';color:'+navy+';font-size:11.5px;font-weight:700;padding:9px 10px;text-align:center;letter-spacing:0.3px;border-bottom:1px solid #c5d3e8}\
+  .dtbl th+th,.dtbl th+th{border-right:1px solid #c5d3e8}\
+  .dtbl td{padding:11px 10px;font-size:13px;font-weight:600;text-align:center;vertical-align:middle;color:#1A1A1A;border-top:1px solid #e5eaf2}\
+  .dtbl td+td{border-right:1px solid #e5eaf2}\
+  .dtbl tr:first-child td{border-top:none}\
   /* Important notes */\
-  .notes-box{border:2px solid '+redNote+';padding:14px;margin-top:18px;color:'+redNote+';font-size:12px}\
-  .notes-box .nt{font-weight:700;font-size:14px;margin-bottom:10px;border-bottom:1.5px solid '+redNote+';padding-bottom:5px;display:inline-block}\
-  .nrow{margin-bottom:10px}\
+  .notes-box{border:1.5px solid #d4a5a5;border-right:5px solid '+redNote+';border-radius:6px;padding:14px 16px;margin-top:18px;color:#3a3a3a;font-size:11.5px;background:linear-gradient(90deg,#fdf3f3 0%,white 70%)}\
+  .notes-box .nt{font-weight:700;font-size:13px;margin-bottom:10px;color:'+redNote+';border-bottom:1px solid #e8c5c5;padding-bottom:6px;letter-spacing:0.5px}\
+  .nrow{margin-bottom:9px}\
   .n-en{display:block;line-height:1.5}\
-  .n-ar{display:block;text-align:right;direction:rtl;margin-top:3px;line-height:1.7}\
-  /* Stamp */\
-  .stamp{position:absolute;bottom:30px;right:30px;border:2px dashed '+greenStamp+';padding:14px 24px;text-align:center;color:'+greenStamp+'}\
-  .stamp .s1{font-size:13px;font-weight:700;letter-spacing:1px}\
-  .stamp .s2{font-size:13px;font-weight:700;margin-top:4px;direction:rtl}\
+  .n-ar{display:block;text-align:right;direction:rtl;margin-top:2px;line-height:1.7;color:#444}\
+  /* Footer strip */\
+  .footer-strip{margin-top:22px;border-top:2px solid '+navy+';padding:12px 4px 4px;display:flex;justify-content:space-between;align-items:center}\
+  .fs-left{display:flex;align-items:center;gap:12px}\
+  .fs-logo{width:54px;height:54px;object-fit:contain}\
+  .fs-name .fs-ar{font-size:14px;font-weight:700;color:'+navy+'}\
+  .fs-name .fs-en{font-size:10.5px;color:#888;font-weight:600;letter-spacing:0.5px;margin-top:1px}\
+  .fs-right{text-align:left}\
+  .fs-ref{font-size:11px;font-weight:700;color:'+navy+';font-family:Consolas,monospace;letter-spacing:0.5px}\
+  .fs-issued{font-size:10px;color:#777;margin-top:3px}\
   /* Watermark */\
-  .wm{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);opacity:0.07;pointer-events:none;z-index:0;text-align:center}\
-  .wm-en{font-size:64px;font-weight:900;color:'+navy+';letter-spacing:6px;line-height:1}\
-  .wm-ar{font-size:42px;font-weight:700;color:'+navy+';margin-top:8px;line-height:1}\
-  .wm-logo{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);opacity:0.05;pointer-events:none;z-index:0}\
-  .wm-logo img{width:340px;height:auto}\
+  .wm{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);opacity:0.05;pointer-events:none;z-index:0;text-align:center}\
+  .wm-en{font-size:72px;font-weight:900;color:'+navy+';letter-spacing:8px;line-height:1}\
+  .wm-ar{font-size:46px;font-weight:700;color:'+navy+';margin-top:10px;line-height:1}\
+  .wm-logo{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);opacity:0.04;pointer-events:none;z-index:0}\
+  .wm-logo img{width:360px;height:auto}\
   .content{position:relative;z-index:1}\
   /* Editable hover */\
   [contenteditable="true"]:hover{background:#fffbe6;outline:1px dashed #C49A3C}\
@@ -3138,14 +3153,17 @@ function printVisa(r){
 </head>\
 <body>\
 <div class="page">\
+  <div class="hdr-band"></div>\
   '+(logoSrc?'<div class="wm-logo"><img src="'+logoSrc+'" onerror="this.parentNode.style.display=\'none\'"></div>':'')+'\
   <div class="wm"><div class="wm-en">EGYPT VISA</div><div class="wm-ar">إيجيبت فيزا</div></div>\
   \
+  <div class="inner">\
   <div class="content">\
     <div class="topdate">'+nowFull+'</div>\
     <h1 class="h-title">OK TO BOARD VERIFICATION</h1>\
     <div class="h-sub" dir="rtl">تأكيد صحة السفر</div>\
     <div class="h-line"></div>\
+    <div class="h-deco">◆ ◆ ◆</div>\
     \
     <div class="sec-title">VERIFICATION DETAILS | <span dir="rtl">تفاصيل التحقق</span></div>\
     <div class="sec-line"></div>\
@@ -3161,7 +3179,7 @@ function printVisa(r){
           <div class="b" contenteditable="true">Pre-Travel Clearance</div>\
         </div>\
       </div>\
-      <div class="v-qr"><img src="'+qrUrl+'" alt="QR" onerror="this.style.display=\'none\'"></div>\
+      <div class="v-qr"><img src="'+qrUrl+'" alt="QR" onerror="this.style.display=\'none\'"><div class="qcap">Scan for verification</div></div>\
       <div>\
         <div class="v-cell" style="margin-bottom:8px">\
           <div class="h">Date of Issue | <span dir="rtl">تاريخ الإصدار</span></div>\
@@ -3228,10 +3246,20 @@ function printVisa(r){
       </div>\
     </div>\
     \
-    <div class="stamp">\
-      <div class="s1">VERIFIED &amp; APPROVED</div>\
-      <div class="s2">تم التحقق والموافقة</div>\
+    <div class="footer-strip">\
+      <div class="fs-left">\
+        '+(logoSrc?'<img src="'+logoSrc+'" class="fs-logo" onerror="this.style.display=\'none\'">':'')+'\
+        <div class="fs-name">\
+          <div class="fs-ar">اليامي للسفر والسياحة</div>\
+          <div class="fs-en">ALYAME TRAVEL &amp; TOURISM</div>\
+        </div>\
+      </div>\
+      <div class="fs-right">\
+        <div class="fs-ref">REF: '+r.docNo+'</div>\
+        <div class="fs-issued">Issued: '+issueDate+' &nbsp;•&nbsp; Valid until: '+validUntil+'</div>\
+      </div>\
     </div>\
+  </div>\
   </div>\
 </div>\
 \
