@@ -3038,7 +3038,7 @@ function printSingle(id){
   if(r)printVisa(r);
 }
 
-// PRINT VISA CERTIFICATE - Full A4 with QR and logo
+// PRINT VISA CERTIFICATE - OK TO BOARD VERIFICATION (bilingual, A4)
 function printVisa(r){
   if(!r)return;
   var vmap={};visas.forEach(function(v){vmap[v.id]=v;});
@@ -3048,193 +3048,197 @@ function printVisa(r){
   var logoEl=document.querySelector('.sb-head img')||document.querySelector('.auth-logo img');
   var logoSrc=logoEl?logoEl.src:'';
 
-  // Generate unique document number on first print (persists on request)
+  // Generate unique verification number EGV-YYYYMMNNNN
   if(!r.docNo){
     var d=new Date();
-    var ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-    var rand=Math.floor(100000+Math.random()*900000);
-    r.docNo='ALY-'+ymd+'-'+rand;
+    var ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0');
+    var rand=Math.floor(10000+Math.random()*90000);
+    r.docNo='EGV-'+ym+rand;
     try{localStorage.setItem('alyami_reqs',JSON.stringify(reqs));}catch(e){}
     if(typeof sbSaveReq==='function'){try{sbSaveReq(r);}catch(e){}}
   }
-  // QR contains document number only (specific to this printed document)
   var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent(r.docNo);
 
-  var printDate=new Date().toLocaleDateString('ar-SA');
-  var approvedDate=r.approvedDate||printDate;
-  // Expiry date = 90 days from approval
-  var expDate='';
-  try{var ad=r.approvedDate?new Date(r.approvedDate):new Date();ad.setDate(ad.getDate()+90);expDate=ad.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');}catch(e){expDate='-';}
-  var appDateFmt='';
-  try{var dd=r.approvedDate?new Date(r.approvedDate):new Date();appDateFmt=dd.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');}catch(e){appDateFmt=approvedDate;}
-  var dobFmt=r.dob||'-';
+  // Date formatting helpers
+  function fmtEn(dt){try{return new Date(dt).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return '-';}}
+  var nowD=new Date();
+  var nowFull=nowD.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+' '+nowD.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var issueDate=r.approvedDate?fmtEn(r.approvedDate):fmtEn(nowD);
+  var validUntil='';
+  try{var ad=r.approvedDate?new Date(r.approvedDate):new Date();ad.setDate(ad.getDate()+90);validUntil=fmtEn(ad);}catch(e){validUntil='-';}
+  var dobFmt=r.dob?fmtEn(r.dob):'-';
+  var travelFmt=r.travel_date?fmtEn(r.travel_date):'-';
 
-  // Destination text
-  var destAr=r.type==='egypt'?'جمهورية مصر العربية':r.type==='hajj'||r.type==='umra'?'المملكة العربية السعودية':v.n||r.type;
-  var destEn=r.type==='egypt'?'Arab Republic of Egypt':r.type==='hajj'||r.type==='umra'?'Kingdom of Saudi Arabia':r.type||'';
+  // Nationality
+  var natAr=r.nationality||'ليبيا';
+  var natEn=natAr==='ليبيا'?'Libya':natAr==='مصر'?'Egypt':natAr;
 
-  // Color theme - Al Yami brand
-  var mainBlue='#0D1B3E';
-  var accentGold='#C49A3C';
+  // Color theme
+  var navy='#0D1B3E';
   var lightBlue='#D4E8F7';
-  var headerBlue='#1A2F5A';
+  var redNote='#C62828';
+  var greenStamp='#2E7D32';
 
   var win=window.open('','_blank');
   win.document.write('<!DOCTYPE html>\
-<html dir="rtl" lang="ar">\
+<html lang="en">\
 <head>\
 <meta charset="UTF-8">\
-<title>وثيقة التأشيرة - '+r.id+'</title>\
+<title>OK TO BOARD VERIFICATION - '+r.docNo+'</title>\
 <style>\
-  @page{size:A4;margin:12mm 15mm}\
+  @page{size:A4;margin:14mm}\
   *{box-sizing:border-box;margin:0;padding:0}\
-  body{font-family:Arial,sans-serif;direction:rtl;background:white;color:#1A1A1A;font-size:14px;line-height:1.6}\
-  .page{width:100%;max-width:210mm;margin:0 auto;padding:0;position:relative;min-height:280mm}\
-  \
-  /* SECTION HEADER BAR */\
-  .sec-bar{background:'+lightBlue+';border:2px solid '+mainBlue+';text-align:center;padding:10px 0;font-size:18px;font-weight:700;color:'+mainBlue+';margin-bottom:0}\
-  \
-  /* DATA TABLE */\
-  .dtbl{width:100%;border-collapse:collapse;margin-bottom:0}\
-  .dtbl td{border:1.5px solid '+mainBlue+';padding:10px 14px;font-size:14px;vertical-align:middle}\
-  .dtbl .lbl{font-weight:700;color:'+mainBlue+';width:22%;text-align:right;white-space:nowrap;background:#f8fafc}\
-  .dtbl .val{font-weight:700;font-size:15px;text-align:center}\
-  \
-  /* NOTES SECTION */\
-  .notes{margin-top:24px;padding:0 10px}\
-  .notes h3{font-size:16px;font-weight:700;color:'+mainBlue+';margin-bottom:10px}\
-  .notes p,.notes li{font-size:13px;line-height:2;color:#333}\
-  .notes ol{padding-right:20px;margin:0}\
-  .note-star{font-size:12px;color:#555;margin-top:14px;line-height:1.8;border-top:1px solid #ddd;padding-top:10px}\
-  .notes-en{margin-top:18px;direction:ltr;text-align:left}\
-  .notes-en h4{font-size:14px;font-weight:700;color:'+mainBlue+';margin-bottom:6px}\
-  .notes-en p,.notes-en li{font-size:12px;line-height:1.9;color:#444}\
-  .notes-en ol{padding-left:20px;margin:0}\
-  \
-  /* BOTTOM SECTION */\
-  .bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:30px;padding:0 10px}\
-  .bottom-logo{text-align:center}\
-  .bottom-logo img{width:140px;height:auto;opacity:0.9}\
-  .bottom-logo .co-name{font-size:18px;font-weight:700;color:'+mainBlue+';margin-top:6px}\
-  .bottom-logo .co-name-en{font-size:13px;color:#666;font-weight:600}\
-  .bottom-qr{text-align:center}\
-  .bottom-qr img{width:160px;height:160px}\
-  \
-  /* WATERMARK */\
-  .watermark{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);opacity:0.04;pointer-events:none;z-index:0}\
-  .watermark img{width:350px;height:auto}\
-  .wm-text{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-25deg);font-size:60px;font-weight:700;color:rgba(13,27,62,0.04);pointer-events:none;z-index:0;white-space:nowrap}\
-  \
-  [contenteditable="true"]:hover{background:#fffbe6;outline:1px dashed '+accentGold+'}\
-  [contenteditable="true"]:focus{background:#fff8d1;outline:2px solid '+accentGold+'}\
+  body{font-family:Arial,sans-serif;background:white;color:#1A1A1A;font-size:13px;line-height:1.5}\
+  .page{width:100%;max-width:210mm;margin:0 auto;border:2.5px solid '+navy+';padding:18px 22px;position:relative;min-height:275mm}\
+  .topdate{position:absolute;top:18px;right:22px;font-size:11px;font-weight:700;color:#222}\
+  .h-title{text-align:center;margin:18px 0 8px;font-size:22px;font-weight:700;color:#222;letter-spacing:1px}\
+  .h-sub{text-align:center;font-size:15px;color:#444;margin-bottom:14px}\
+  .h-line{border-top:2px solid #222;width:80%;margin:8px auto 18px}\
+  .sec-title{text-align:center;font-size:15px;font-weight:700;color:#222;margin:12px 0 4px;letter-spacing:0.5px}\
+  .sec-line{border-top:1.5px solid #222;width:55%;margin:0 auto 14px}\
+  .sec-label{font-size:13px;font-weight:700;color:#222;margin:18px 0 4px;border-bottom:1.5px solid #222;padding-bottom:4px;width:fit-content}\
+  /* Three-column verification layout */\
+  .v-grid{display:grid;grid-template-columns:1fr 200px 1fr;gap:8px;margin-bottom:14px;align-items:stretch}\
+  .v-cell{border:1.5px solid '+navy+'}\
+  .v-cell .h{background:'+lightBlue+';padding:7px 10px;font-size:11px;font-weight:700;color:#222;border-bottom:1.5px solid '+navy+'}\
+  .v-cell .b{padding:10px;font-size:13px;font-weight:600;text-align:center;min-height:42px;display:flex;align-items:center;justify-content:center}\
+  .v-qr{display:flex;align-items:center;justify-content:center;border:1.5px solid '+navy+';padding:6px}\
+  .v-qr img{width:170px;height:170px;display:block}\
+  /* Generic data table */\
+  .dtbl{width:100%;border-collapse:collapse;margin-bottom:14px}\
+  .dtbl th{background:'+lightBlue+';color:#222;font-size:12px;font-weight:700;padding:7px 10px;border:1.5px solid '+navy+';text-align:center}\
+  .dtbl td{border:1.5px solid '+navy+';padding:9px 10px;font-size:13px;font-weight:600;text-align:center;vertical-align:middle}\
+  /* Important notes */\
+  .notes-box{border:2px solid '+redNote+';padding:14px;margin-top:18px;color:'+redNote+';font-size:12px}\
+  .notes-box .nt{font-weight:700;font-size:14px;margin-bottom:10px;border-bottom:1.5px solid '+redNote+';padding-bottom:5px;display:inline-block}\
+  .nrow{margin-bottom:10px}\
+  .n-en{display:block;line-height:1.5}\
+  .n-ar{display:block;text-align:right;direction:rtl;margin-top:3px;line-height:1.7}\
+  /* Stamp */\
+  .stamp{position:absolute;bottom:30px;right:30px;border:2px dashed '+greenStamp+';padding:14px 24px;text-align:center;color:'+greenStamp+'}\
+  .stamp .s1{font-size:13px;font-weight:700;letter-spacing:1px}\
+  .stamp .s2{font-size:13px;font-weight:700;margin-top:4px;direction:rtl}\
+  /* Watermark */\
+  .wm{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);opacity:0.07;pointer-events:none;z-index:0;text-align:center}\
+  .wm-en{font-size:64px;font-weight:900;color:'+navy+';letter-spacing:6px;line-height:1}\
+  .wm-ar{font-size:42px;font-weight:700;color:'+navy+';margin-top:8px;line-height:1}\
+  .wm-logo{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);opacity:0.05;pointer-events:none;z-index:0}\
+  .wm-logo img{width:340px;height:auto}\
+  .content{position:relative;z-index:1}\
+  /* Editable hover */\
+  [contenteditable="true"]:hover{background:#fffbe6;outline:1px dashed #C49A3C}\
+  [contenteditable="true"]:focus{background:#fff8d1;outline:2px solid #C49A3C}\
   @media print{\
     .no-print{display:none!important}\
     body{print-color-adjust:exact;-webkit-print-color-adjust:exact}\
-    .page{min-height:auto}\
+    .page{min-height:auto;border-color:'+navy+'}\
     [contenteditable="true"]:hover,[contenteditable="true"]:focus{background:transparent!important;outline:none!important}\
   }\
 </style>\
 </head>\
 <body>\
-<div class="wm-text">اليامي للسفر والسياحة</div>\
-'+(logoSrc?'<div class="watermark"><img src="'+logoSrc+'" onerror="this.parentNode.style.display=\'none\'"></div>':'')+'\
-\
 <div class="page">\
-  <!-- بيانات الموافقة -->\
-  <div class="sec-bar">بيانات الموافقة</div>\
-  <table class="dtbl">\
-    <tr>\
-      <td class="lbl">رقم الموافقة :</td>\
-      <td class="val" contenteditable="true">'+r.id+'</td>\
-      <td class="lbl">تاريخ الموافقة :</td>\
-      <td class="val" contenteditable="true">'+appDateFmt+'</td>\
-    </tr>\
-  </table>\
+  '+(logoSrc?'<div class="wm-logo"><img src="'+logoSrc+'" onerror="this.parentNode.style.display=\'none\'"></div>':'')+'\
+  <div class="wm"><div class="wm-en">EGYPT VISA</div><div class="wm-ar">إيجيبت فيزا</div></div>\
   \
-  <!-- بيانات العميل -->\
-  <div class="sec-bar" style="margin-top:0">بيانات العميل</div>\
-  <table class="dtbl">\
-    <tr>\
-      <td class="lbl">الاسم :</td>\
-      <td class="val" contenteditable="true" style="font-size:16px">'+(r.name||'-')+'</td>\
-      <td class="lbl">رقم الجواز :</td>\
-      <td class="val" contenteditable="true" style="font-family:monospace;letter-spacing:2px">'+(r.passport||'-')+'</td>\
-    </tr>\
-    <tr>\
-      <td class="lbl">تاريخ الميلاد :</td>\
-      <td class="val" contenteditable="true">'+dobFmt+'</td>\
-      <td class="lbl">تاريخ انتهاء الموافقة:</td>\
-      <td class="val" contenteditable="true" style="color:#B22222">'+expDate+'</td>\
-    </tr>\
-    <tr>\
-      <td class="lbl">الاسم (إنجليزي) :</td>\
-      <td class="val" contenteditable="true" dir="ltr">'+(r.name_en||'-')+'</td>\
-      <td class="lbl">نوع التأشيرة :</td>\
-      <td class="val" contenteditable="true">'+(v.n||r.type)+'</td>\
-    </tr>\
-    <tr>\
-      <td class="lbl">خط الطيران :</td>\
-      <td class="val" contenteditable="true">'+(r.airline||'-')+'</td>\
-      <td class="lbl">الرحلة :</td>\
-      <td class="val" contenteditable="true">'+((r.route_from&&r.route_to)?(r.route_from+' ← '+r.route_to):'-')+'</td>\
-    </tr>\
-    <tr>\
-      <td class="lbl">تاريخ السفر :</td>\
-      <td class="val" contenteditable="true">'+(r.travel_date||'-')+'</td>\
-      <td class="lbl">الوجهة :</td>\
-      <td class="val" contenteditable="true">'+destAr+'</td>\
-    </tr>\
-  </table>\
-  \
-  <!-- ملاحظات هامه -->\
-  <div class="notes" contenteditable="true">\
-    <h3>ملاحظات هامه :</h3>\
-    <p style="font-weight:700;margin:4px 0">السادة / القائمين على العمل بالمواني الجوية الليبية</p>\
-    <ol>\
-      <li>نفيدكم بأن المعني سلف الذكر بالكشف لديه تصريح (موافقة أمنية) دخول جمهورية مصر العربية وتكون خاضعة لسلطات أمن المطار عند الوصول.</li>\
-      <li>صلاحية الموافقة الأمنية (العادية - المستعجلة - البرقية) بيوم السفر المدرج بالكشف.</li>\
-      <li>صلاحية الموافقة الأمنية 90 يوم من تاريخ صدورها للموافقات الرقمية.</li>\
-      <li>الموافقة غير قابلة للتجديد بعد إنتهاء مدة صلاحيتها قبل السفر.</li>\
-    </ol>\
-    <div class="note-star" style="margin-top:6px">\
-      ★ تتمنى لكم شركة اليامي رحلة سعيدة على متن الخطوط الجوية وإقامة ممتعة بجمهورية مصر العربية — ( دمتم في رعاية الله وحفظه )\
+  <div class="content">\
+    <div class="topdate">'+nowFull+'</div>\
+    <h1 class="h-title">OK TO BOARD VERIFICATION</h1>\
+    <div class="h-sub" dir="rtl">تأكيد صحة السفر</div>\
+    <div class="h-line"></div>\
+    \
+    <div class="sec-title">VERIFICATION DETAILS | <span dir="rtl">تفاصيل التحقق</span></div>\
+    <div class="sec-line"></div>\
+    \
+    <div class="v-grid">\
+      <div>\
+        <div class="v-cell" style="margin-bottom:8px">\
+          <div class="h">Verification Number | <span dir="rtl">رقم التحقق</span></div>\
+          <div class="b" contenteditable="true" style="font-family:monospace;letter-spacing:1px;color:'+navy+'">'+r.docNo+'</div>\
+        </div>\
+        <div class="v-cell">\
+          <div class="h">Verification Type | <span dir="rtl">نوع التحقق</span></div>\
+          <div class="b" contenteditable="true">Pre-Travel Clearance</div>\
+        </div>\
+      </div>\
+      <div class="v-qr"><img src="'+qrUrl+'" alt="QR" onerror="this.style.display=\'none\'"></div>\
+      <div>\
+        <div class="v-cell" style="margin-bottom:8px">\
+          <div class="h">Date of Issue | <span dir="rtl">تاريخ الإصدار</span></div>\
+          <div class="b" contenteditable="true">'+issueDate+'</div>\
+        </div>\
+        <div class="v-cell">\
+          <div class="h">Valid Until | <span dir="rtl">صالح حتى</span></div>\
+          <div class="b" contenteditable="true">'+validUntil+'</div>\
+        </div>\
+      </div>\
+    </div>\
+    \
+    <div class="sec-label">PASSENGER INFORMATION | <span dir="rtl">معلومات المسافر</span></div>\
+    <table class="dtbl">\
+      <tr>\
+        <th>Passenger Name | <span dir="rtl">اسم المسافر</span></th>\
+        <th>Passport Number | <span dir="rtl">رقم جواز السفر</span></th>\
+      </tr>\
+      <tr>\
+        <td contenteditable="true">'+(r.name||r.name_en||'-')+'</td>\
+        <td contenteditable="true" style="font-family:monospace;letter-spacing:1px">'+(r.passport||'-')+'</td>\
+      </tr>\
+      <tr>\
+        <th>Nationality | <span dir="rtl">الجنسية</span></th>\
+        <th>Birth Date | <span dir="rtl">تاريخ الميلاد</span></th>\
+      </tr>\
+      <tr>\
+        <td contenteditable="true">'+natEn+' | <span dir="rtl">'+natAr+'</span></td>\
+        <td contenteditable="true">'+dobFmt+'</td>\
+      </tr>\
+    </table>\
+    \
+    <div class="sec-label">FLIGHT DETAILS | <span dir="rtl">معلومات الرحلة</span></div>\
+    <table class="dtbl">\
+      <tr>\
+        <th>Airline | <span dir="rtl">شركة الطيران</span></th>\
+        <th>Flight No. | <span dir="rtl">رقم الرحلة</span></th>\
+        <th>Arrival Date | <span dir="rtl">تاريخ الوصول</span></th>\
+      </tr>\
+      <tr>\
+        <td contenteditable="true">'+(r.airline||'EgyptAir')+'</td>\
+        <td contenteditable="true" style="font-family:monospace">'+(r.flightNo||'-')+'</td>\
+        <td contenteditable="true">'+travelFmt+'</td>\
+      </tr>\
+    </table>\
+    \
+    <div class="notes-box" contenteditable="true">\
+      <div class="nt">IMPORTANT NOTES | <span dir="rtl">إشعارات هامة</span></div>\
+      <div class="nrow">\
+        <span class="n-en">- This document confirms that the passenger has been pre-cleared for travel to Egypt as of the date of issue.</span>\
+        <span class="n-ar">هذا المستند يؤكد أن المسافر تمت الموافقة المسبقة على سفره إلى مصر اعتباراً من تاريخ الإصدار</span>\
+      </div>\
+      <div class="nrow">\
+        <span class="n-en">- Passenger must present valid passport with minimum 6 months validity at the time of travel.</span>\
+        <span class="n-ar">يجب على المسافر تقديم جواز سفر ساري مع صلاحية لا تقل عن 6 أشهر في وقت السفر</span>\
+      </div>\
+      <div class="nrow">\
+        <span class="n-en">- This verification is subject to change based on instructions from the security authorities.</span>\
+        <span class="n-ar">هذا التحقق يخضع للتغيير بناءً على تعليمات الجهات الأمنية</span>\
+      </div>\
+      <div class="nrow">\
+        <span class="n-en">- The final decision regarding boarding and entry rests with the boarding officer and the security authorities at port of entry.</span>\
+        <span class="n-ar">القرار النهائي للصعود والدخول يقع على عاتق ضابط الجوازات و الجهات الأمنية في منفذ الدخول</span>\
+      </div>\
+    </div>\
+    \
+    <div class="stamp">\
+      <div class="s1">VERIFIED &amp; APPROVED</div>\
+      <div class="s2">تم التحقق والموافقة</div>\
     </div>\
   </div>\
-  \
-  <div class="notes-en" contenteditable="true">\
-    <h4>Important Notes:</h4>\
-    <p style="font-weight:700;margin:4px 0">To: Officials at Libyan Air Ports</p>\
-    <ol>\
-      <li>This is to inform you that the above-mentioned person listed in the manifest holds an entry permit (security approval) to the Arab Republic of Egypt, subject to airport security authorities upon arrival.</li>\
-      <li>The validity of the security approval (Regular - Urgent - Telegraphic) is limited to the travel date listed in the manifest.</li>\
-      <li>Digital security approvals are valid for 90 days from the date of issuance.</li>\
-      <li>The approval is non-renewable after its validity expires before travel.</li>\
-    </ol>\
-    <div class="note-star" style="margin-top:6px">\
-      ★ Alyame Travel wishes you a pleasant flight and an enjoyable stay in the Arab Republic of Egypt — ( May God protect and keep you )\
-    </div>\
-  </div>\
-  \
-  <!-- BOTTOM: Logo + QR -->\
-  <div class="bottom">\
-    <div class="bottom-logo">\
-      '+(logoSrc?'<img src="'+logoSrc+'" onerror="this.style.display=\'none\'">':'<div style="width:140px;height:100px;background:'+mainBlue+';border-radius:12px;display:flex;align-items:center;justify-content:center;color:'+accentGold+';font-size:20px;font-weight:700">اليامي</div>')+'\
-      <div class="co-name">اليامي للسفر والسياحة</div>\
-      <div class="co-name-en">ALYAME TRAVEL & TOURISM</div>\
-    </div>\
-    <div class="bottom-qr" style="text-align:center">\
-      <img src="'+qrUrl+'" alt="QR Code" onerror="this.style.display=\'none\'">\
-      <div style="font-size:10px;color:'+mainBlue+';font-weight:700;margin-top:4px;font-family:monospace;letter-spacing:0.5px">'+r.docNo+'</div>\
-      <div style="font-size:9px;color:#666;margin-top:1px">رقم الوثيقة / Doc No.</div>\
-    </div>\
-  </div>\
-  \
 </div>\
 \
 <div class="no-print" style="text-align:center;padding:16px;background:#f0f0f0;margin-top:10px">\
-  <div style="margin-bottom:10px;font-size:13px;color:#555">💡 انقر على أي حقل لتعديله قبل الطباعة</div>\
-  <button onclick="window.print()" style="padding:10px 28px;background:'+mainBlue+';color:white;border:none;border-radius:8px;cursor:pointer;font-family:Arial,sans-serif;font-size:14px;font-weight:700;margin-left:10px">🖨️ طباعة</button>\
-  <button onclick="window.close()" style="padding:10px 20px;background:#6B6B6B;color:white;border:none;border-radius:8px;cursor:pointer;font-family:Arial,sans-serif;font-size:14px">إغلاق</button>\
+  <div style="margin-bottom:10px;font-size:13px;color:#555">💡 Click any field to edit before printing | انقر على أي حقل لتعديله قبل الطباعة</div>\
+  <button onclick="window.print()" style="padding:10px 28px;background:'+navy+';color:white;border:none;border-radius:8px;cursor:pointer;font-family:Arial,sans-serif;font-size:14px;font-weight:700;margin-left:10px">🖨️ Print / طباعة</button>\
+  <button onclick="window.close()" style="padding:10px 20px;background:#6B6B6B;color:white;border:none;border-radius:8px;cursor:pointer;font-family:Arial,sans-serif;font-size:14px">Close / إغلاق</button>\
 </div>\
 \
 </body></html>');
