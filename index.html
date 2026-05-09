@@ -894,11 +894,6 @@ input.sr{padding:6px 9px;border:1px solid var(--border);border-radius:7px;font-f
       <div class="fg full"><label>الجهة المنفذة</label><input type="text" id="pr-entity" list="pr-entity-list" placeholder="مثال: مكتب اليامي / وزارة الداخلية / السفارة..."><datalist id="pr-entity-list"><option value="مكتب اليامي"><option value="وزارة الداخلية المصرية"><option value="السفارة المصرية"><option value="القنصلية"></datalist></div>
       <div class="fg full"><label>نوع التأشيرة (إدخال يدوي أو اختيار)</label><input type="text" id="pr-visa" list="pr-visa-list" placeholder="اكتب نوع التأشيرة"><datalist id="pr-visa-list"></datalist></div>
       <div class="fg full"><label>منفذ الدخول</label><input type="text" id="pr-port" list="pr-port-list" placeholder="مثال: مطار القاهرة الدولي"><datalist id="pr-port-list"><option value="مطار القاهرة الدولي"><option value="مطار برج العرب"><option value="مطار شرم الشيخ"><option value="مطار الغردقة"><option value="مطار الأقصر"><option value="مطار أسوان"><option value="مطار جدة"><option value="مطار المدينة المنورة"><option value="منفذ رأس جدير"></datalist></div>
-      <div class="fg"><label>نوع السفر</label>
-        <select id="pr-type">
-          <option>فردي</option><option>عائلي</option><option>مجموعة</option>
-        </select>
-      </div>
       <div class="fg"><label>مدة الإنجاز</label><input type="text" id="pr-duration" placeholder="7-14 يوم"></div>
       <div class="fg"><label>السعر ($)</label><input type="number" id="pr-price" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
       <div class="fg"><label>السعر (د.ل) - اختياري</label><input type="number" id="pr-price-lyd" placeholder="0" min="0" style="font-size:16px;font-weight:700;text-align:center"></div>
@@ -3610,7 +3605,6 @@ function addPriceRow(){
   document.getElementById('pr-entity').value='';
   document.getElementById('pr-visa').value='';
   document.getElementById('pr-port').value='';
-  document.getElementById('pr-type').value='فردي';
   document.getElementById('pr-duration').value='';
   document.getElementById('pr-price').value='';
   document.getElementById('pr-price-lyd').value='';
@@ -3632,7 +3626,6 @@ function editPriceRow(id){
   document.getElementById('pr-entity').value=p.entity||'';
   document.getElementById('pr-visa').value=p.visaName||'';
   document.getElementById('pr-port').value=p.port||'';
-  document.getElementById('pr-type').value=p.type||'فردي';
   document.getElementById('pr-duration').value=p.duration||'';
   document.getElementById('pr-price').value=p.price||'';
   document.getElementById('pr-price-lyd').value=p.priceLyd||'';
@@ -3650,7 +3643,6 @@ function savePriceRow(){
   var vname=document.getElementById('pr-visa').value.trim();
   var port=document.getElementById('pr-port').value.trim();
   var airline=document.getElementById('pr-airline').value.trim();
-  var type=document.getElementById('pr-type').value;
   var duration=document.getElementById('pr-duration').value.trim();
   var price=parseFloat(document.getElementById('pr-price').value)||0;
   var priceLyd=parseFloat(document.getElementById('pr-price-lyd').value)||0;
@@ -3668,9 +3660,9 @@ function savePriceRow(){
   var visaId=matched?matched.id:vname;
   if(editPriceId){
     var p=priceList.find(function(x){return x.id===editPriceId;});
-    if(p){p.nat=nat;p.entity=entity;p.visaId=visaId;p.visaName=vname;p.port=port;p.airline=airline;p.type=type;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;p.custom=customVals;}
+    if(p){p.nat=nat;p.entity=entity;p.visaId=visaId;p.visaName=vname;p.port=port;p.airline=airline;p.duration=duration;p.price=price;p.priceLyd=priceLyd;p.priceEgp=priceEgp;p.validity=validity;p.notes=notes;p.custom=customVals;}
   } else {
-    priceList.push({id:Date.now(),nat:nat,entity:entity,visaId:visaId,visaName:vname,port:port,airline:airline,type:type,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes,custom:customVals});
+    priceList.push({id:Date.now(),nat:nat,entity:entity,visaId:visaId,visaName:vname,port:port,airline:airline,duration:duration,price:price,priceLyd:priceLyd,priceEgp:priceEgp,validity:validity,notes:notes,custom:customVals});
   }
   try{localStorage.setItem('alyami_prices',JSON.stringify(priceList));}catch(e){}
   closeOv('ov-price');renderPrices();
@@ -3737,7 +3729,7 @@ function renderPrices(){
     });
     row.innerHTML='<td style="font-size:18px;font-weight:700;color:var(--navy)">'+p.nat+'</td>'
       +'<td style="font-size:14px">'+(p.entity||'-')+'</td>'
-      +'<td style="font-weight:700;font-size:15px">'+p.visaName+'<div style="font-size:12px;color:var(--text2);font-weight:500">'+p.type+'</div>'+validityHtml+'</td>'
+      +'<td style="font-weight:700;font-size:15px">'+p.visaName+validityHtml+'</td>'
       +'<td style="font-size:14px">'+(p.port||'-')+'</td>'
       +'<td style="color:var(--blue);font-size:14px">⏱ '+(p.duration||'-')+'</td>'
       +'<td><div style="font-weight:700;color:var(--gold-d);font-size:17px">$'+p.price+'</div>'+lydHtml+egpHtml+'</td>'
