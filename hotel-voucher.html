@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>قسيمة حجز فندقي - اليامي للسفر والسياحة</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://wcknrzuedgkcyygeqmqw.supabase.co https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://lh3.googleusercontent.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src * data: blob:; connect-src 'self' https://wcknrzuedgkcyygeqmqw.supabase.co; font-src https://fonts.gstatic.com data:;">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-surface": "#0b1c30",
+        "surface-container-low": "#eff4ff",
+        "surface-container": "#e5eeff",
+        "surface-container-highest": "#d3e4fe",
+        "outline-variant": "#c6c6cd",
+        "on-surface-variant": "#45464d",
+        "primary": "#0f172a",
+        "on-primary": "#ffffff",
+        "background": "#f8f9ff",
+        "surface": "#f8f9ff",
+        "on-background": "#0b1c30",
+        "brand-gold": "#C5A059"
+      },
+      borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" },
+      spacing: { "section-gap": "48px", "container-margin": "24px" },
+      fontFamily: {
+        "headline-lg-mobile": ["Noto Serif"],
+        "body-sm": ["IBM Plex Sans Arabic"],
+        "body-lg": ["IBM Plex Sans Arabic"],
+        "label-md": ["IBM Plex Sans Arabic"],
+        "title-md": ["IBM Plex Sans Arabic"]
+      },
+      fontSize: {
+        "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+        "title-md": ["20px", { lineHeight: "28px", fontWeight: "600" }]
+      }
+    }
+  }
+};
+</script>
+<style>
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.voucher-card {
+  background-image: radial-gradient(circle at 0 50%, transparent 12px, white 13px),
+                    radial-gradient(circle at 100% 50%, transparent 12px, white 13px);
+  background-position: right top, left top;
+  background-size: 100% 100%;
+}
+.ticket-stub-border { position: relative; }
+.ticket-stub-border::after {
+  content: ''; position: absolute; bottom: 140px; left: 0; right: 0;
+  border-bottom: 2px dashed #e2e8f0; margin: 0 24px;
+}
+[lang="en"] { font-family: 'Noto Serif', serif; }
+.skeleton { background: linear-gradient(90deg,#e5eeff 25%,#f0f4ff 50%,#e5eeff 75%); background-size:200% 100%; animation: sk 1.2s infinite; color: transparent; border-radius: 4px; }
+@keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+@media print {
+  header, .no-print { display: none !important; }
+  body { padding: 0 !important; margin: 0 !important; background: white !important; }
+  main { margin-top: 0 !important; }
+}
+</style>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col items-center pb-10">
+
+<header class="no-print bg-surface border-b border-outline-variant fixed top-0 w-full h-24 flex flex-row-reverse justify-between items-center px-container-margin z-50">
+  <div class="flex items-center gap-4">
+    <img alt="Alyame Travel Logo" class="h-20 w-20 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRUVTv-W9t5UrXqPJuOWacUv4dbKDGEyoVcmRgR4HhWWjMTMmPtvLyLJOMSOkKf7gJ2UjNI5LIjE5Bk6Klbt2V1AMB9ujCj0LBtPu7rdLW4EO-Bv3bTUHuob7uwK_qOrucvZuLeZ2atz_1AY7dr9_RlKnispZmQKvVA1RyAEoYKqzj4jX_tQJgcRSg2GaxUnNpLEVXB78Jiqirzpbo4ld4fs9QsDEII_uHEEn__bHDyoHnNr-iXZcRnvh08lQObDQTdRQ0SGDs3GoU"/>
+  </div>
+  <button onclick="window.print()" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-low transition-colors text-on-surface" title="طباعة">
+    <span class="material-symbols-outlined">print</span>
+  </button>
+</header>
+
+<main class="mt-28 w-full max-w-md px-4 flex flex-col gap-6">
+
+  <div id="error-box" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center text-sm"></div>
+
+  <div class="flex flex-col items-center text-center gap-1 mb-2">
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">قسيمة حجز فندقي / <span class="text-[22px]">Hotel Voucher</span></h1>
+    <p class="font-label-md text-label-md text-on-surface-variant">مرجع القسيمة / Voucher Reference: <span id="ref-num">#---</span></p>
+  </div>
+
+  <div id="voucher" class="bg-white rounded-xl shadow-lg border border-outline-variant overflow-hidden voucher-card ticket-stub-border relative">
+
+    <div class="absolute left-6 top-6">
+      <span id="status-badge" class="bg-primary text-brand-gold font-label-md text-label-md px-3 py-1 rounded-sm border border-brand-gold/30">
+        مؤكد / Confirmed
+      </span>
+    </div>
+
+    <div class="p-6 pt-12 flex flex-col gap-6">
+      <div class="flex items-start gap-4">
+        <div class="bg-primary p-3 rounded-xl border border-brand-gold/20 shadow-sm">
+          <span class="material-symbols-outlined text-brand-gold" style="font-variation-settings: 'FILL' 1;">hotel</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface-variant">اسم الفندق / Hotel Name</span>
+          <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">
+            <span id="hotel-ar">—</span> / <span id="hotel-en" class="text-[20px]">—</span>
+          </h2>
+          <div class="flex items-center gap-1 mt-1 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[18px]">location_on</span>
+            <p class="font-body-sm text-body-sm"><span id="loc-ar">—</span> / <span id="loc-en">—</span></p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-outline-variant/30"/>
+
+      <div class="grid grid-cols-2 gap-y-6 gap-x-4">
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">person</span>
+            <span class="font-label-md text-label-md">اسم العميل / Guest Name</span>
+          </div>
+          <p id="guest-name" class="font-title-md text-title-md text-on-surface">—</p>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">bed</span>
+            <span class="font-label-md text-label-md">نوع الغرفة / Room Type</span>
+          </div>
+          <p id="room-type" class="font-title-md text-[16px] text-on-surface">—</p>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">login</span>
+            <span class="font-label-md text-label-md">تاريخ الدخول / Check-in</span>
+          </div>
+          <p id="check-in" class="font-title-md text-title-md text-on-surface tabular-nums">—</p>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">logout</span>
+            <span class="font-label-md text-label-md">تاريخ الخروج / Check-out</span>
+          </div>
+          <p id="check-out" class="font-title-md text-title-md text-on-surface tabular-nums">—</p>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">nightlight</span>
+            <span class="font-label-md text-label-md">عدد الليالي / Nights</span>
+          </div>
+          <p id="nights" class="font-title-md text-title-md text-on-surface">—</p>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">restaurant</span>
+            <span class="font-label-md text-label-md">الوجبات / Meals</span>
+          </div>
+          <p id="meals" class="font-title-md text-title-md text-on-surface">—</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-container p-4 rounded-lg flex items-center justify-between border-r-4 border-brand-gold">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface-variant">الموظف المختص / Issued By</span>
+          <p id="issued-by" class="font-body-lg text-body-lg text-on-surface">—</p>
+        </div>
+        <span class="material-symbols-outlined text-primary">verified_user</span>
+      </div>
+    </div>
+
+    <div class="p-6 flex flex-col items-center gap-4 bg-surface-container-low/50">
+      <div class="bg-white p-2 border border-outline-variant rounded-xl shadow-sm relative">
+        <div class="absolute inset-0 border-2 border-brand-gold/10 rounded-xl pointer-events-none"></div>
+        <canvas id="qr-canvas" class="w-24 h-24"></canvas>
+      </div>
+      <p class="font-label-md text-label-md text-on-surface-variant text-center">يرجى إبراز الرمز عند الوصول<br/>Please present this code upon arrival</p>
+    </div>
+  </div>
+
+  <div class="no-print flex flex-col gap-3">
+    <button id="btn-pdf" class="w-full bg-primary text-on-primary h-14 rounded-xl font-title-md text-title-md flex items-center justify-center gap-3 active:scale-95 duration-150 transition-all shadow-md border border-brand-gold/30">
+      <span class="material-symbols-outlined text-brand-gold">download</span>
+      تحميل PDF / Download PDF
+    </button>
+    <button id="btn-share" class="w-full border-2 border-primary text-primary h-14 rounded-xl font-title-md text-title-md flex items-center justify-center gap-3 hover:bg-surface-container-highest transition-colors active:scale-95 duration-150">
+      <span class="material-symbols-outlined">share</span>
+      مشاركة / Share
+    </button>
+  </div>
+</main>
+
+<footer class="no-print w-full py-8 px-container-margin flex flex-row-reverse justify-between items-center mt-section-gap bg-primary text-white border-t border-brand-gold/20">
+  <div class="flex flex-col items-end gap-1">
+    <span class="font-bold text-brand-gold">Alyame Travel</span>
+    <span class="font-label-md text-label-md opacity-80">© 2026 All Rights Reserved.</span>
+  </div>
+  <div class="flex flex-row-reverse gap-4">
+    <a class="font-label-md text-label-md text-white/80 hover:text-brand-gold transition-colors" href="#">Support / الدعم</a>
+    <a class="font-label-md text-label-md text-white/80 hover:text-brand-gold transition-colors" href="#">Help / المساعدة</a>
+  </div>
+</footer>
+
+<script>
+const SB = 'https://wcknrzuedgkcyygeqmqw.supabase.co';
+const SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
+
+function esc(s){if(s==null)return '';return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function fmtDate(d){
+  if(!d) return '—';
+  try {
+    const dt = new Date(d);
+    const ar = dt.toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'});
+    const en = dt.toLocaleDateString('en-US',{day:'numeric',month:'short'});
+    return ar + ' / ' + en;
+  } catch(e){ return d; }
+}
+
+function calcNights(ci, co){
+  if(!ci||!co) return null;
+  const ms = new Date(co) - new Date(ci);
+  return Math.max(1, Math.round(ms/86400000));
+}
+
+const DEMO = {
+  voucher_ref: 'MR-2024-8842',
+  status: 'confirmed',
+  hotel_name_ar: 'فندق ريجنسي بالاس',
+  hotel_name_en: 'Regency Palace Hotel',
+  location_ar: 'طريق الملك فهد، الرياض',
+  location_en: 'King Fahd Rd, Riyadh',
+  guest_name: 'محمد أحمد علي',
+  room_type_ar: 'جناح ملكي بإطلالة بحرية',
+  room_type_en: 'Royal Suite Sea View',
+  check_in: '2026-05-15',
+  check_out: '2026-05-20',
+  meals_ar: 'إقامة شاملة',
+  meals_en: 'All Inclusive',
+  issued_by: 'أحمد محمود - Reservations Dept'
+};
+
+async function fetchVoucher(ref){
+  const url = `${SB}/rest/v1/hotel_vouchers?voucher_ref=eq.${encodeURIComponent(ref)}&select=*&limit=1`;
+  const r = await fetch(url, { headers: { apikey: SK, Authorization: 'Bearer ' + SK } });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const rows = await r.json();
+  return rows[0] || null;
+}
+
+function render(v){
+  document.getElementById('ref-num').textContent = '#' + (v.voucher_ref || '---');
+  document.getElementById('hotel-ar').textContent = v.hotel_name_ar || '—';
+  document.getElementById('hotel-en').textContent = v.hotel_name_en || '';
+  document.getElementById('loc-ar').textContent = v.location_ar || '—';
+  document.getElementById('loc-en').textContent = v.location_en || '';
+  document.getElementById('guest-name').textContent = v.guest_name || '—';
+  document.getElementById('room-type').textContent = (v.room_type_ar || '—') + (v.room_type_en ? ' / ' + v.room_type_en : '');
+  document.getElementById('check-in').textContent = fmtDate(v.check_in);
+  document.getElementById('check-out').textContent = fmtDate(v.check_out);
+  const n = calcNights(v.check_in, v.check_out);
+  document.getElementById('nights').textContent = n ? `${n} ليالي / ${n} Nights` : '—';
+  document.getElementById('meals').textContent = (v.meals_ar || '—') + (v.meals_en ? ' / ' + v.meals_en : '');
+  document.getElementById('issued-by').textContent = v.issued_by || '—';
+
+  const status = (v.status || 'confirmed').toLowerCase();
+  const badge = document.getElementById('status-badge');
+  const map = {
+    confirmed: { ar: 'مؤكد', en: 'Confirmed', cls: 'bg-primary text-brand-gold border-brand-gold/30' },
+    pending:   { ar: 'قيد المراجعة', en: 'Pending', cls: 'bg-amber-100 text-amber-800 border-amber-300' },
+    cancelled: { ar: 'ملغي', en: 'Cancelled', cls: 'bg-red-100 text-red-800 border-red-300' }
+  };
+  const s = map[status] || map.confirmed;
+  badge.textContent = `${s.ar} / ${s.en}`;
+  badge.className = `font-label-md text-label-md px-3 py-1 rounded-sm border ${s.cls}`;
+
+  // QR code
+  const qrData = JSON.stringify({
+    ref: v.voucher_ref,
+    guest: v.guest_name,
+    hotel: v.hotel_name_en || v.hotel_name_ar,
+    in: v.check_in,
+    out: v.check_out
+  });
+  QRCode.toCanvas(document.getElementById('qr-canvas'), qrData, {
+    width: 192, margin: 1,
+    color: { dark: '#0f172a', light: '#ffffff' }
+  });
+}
+
+function showError(msg){
+  const el = document.getElementById('error-box');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+async function init(){
+  const params = new URLSearchParams(location.search);
+  const ref = params.get('ref');
+
+  if(!ref){
+    render(DEMO);
+    return;
+  }
+
+  try {
+    const v = await fetchVoucher(ref);
+    if(!v){
+      showError('لم يتم العثور على القسيمة / Voucher not found: ' + ref);
+      render({ ...DEMO, voucher_ref: ref });
+      return;
+    }
+    render(v);
+  } catch(e){
+    showError('تعذّر تحميل البيانات / Failed to load: ' + e.message);
+    render({ ...DEMO, voucher_ref: ref });
+  }
+}
+
+document.getElementById('btn-pdf').addEventListener('click', () => {
+  const el = document.getElementById('voucher');
+  const ref = (document.getElementById('ref-num').textContent || 'voucher').replace('#','');
+  html2pdf().set({
+    margin: 10,
+    filename: `Alyame-Voucher-${ref}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(el).save();
+});
+
+document.getElementById('btn-share').addEventListener('click', async () => {
+  const ref = (document.getElementById('ref-num').textContent || '').replace('#','');
+  const shareData = {
+    title: 'قسيمة حجز فندقي - اليامي',
+    text: `قسيمة الحجز ${ref}`,
+    url: location.href
+  };
+  try {
+    if(navigator.share) await navigator.share(shareData);
+    else {
+      await navigator.clipboard.writeText(location.href);
+      alert('تم نسخ الرابط / Link copied');
+    }
+  } catch(e){ /* user cancelled */ }
+});
+
+init();
+</script>
+</body>
+</html>
