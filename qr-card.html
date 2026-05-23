@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>باركود اليامي للسفر والسياحة</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e4f0 100%);
+    margin: 0;
+    padding: 30px;
+    text-align: center;
+    min-height: 100vh;
+  }
+  .card {
+    background: #fff;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(26,77,122,0.15);
+    border: 2px solid #d4af37;
+  }
+  .logo-top { max-width: 180px; margin: 0 auto 10px; display:block; }
+  h1 { color: #1a4d7a; margin: 0 0 6px; font-size: 22px; }
+  .tagline { color: #d4af37; font-size: 14px; margin-bottom: 20px; font-weight:bold;}
+  .subtitle { color: #666; margin-bottom: 20px; font-size: 13px; }
+  .qr-wrap {
+    position: relative;
+    display: inline-block;
+    padding: 16px;
+    background:#fff;
+    border:3px solid #1a4d7a;
+    border-radius:14px;
+  }
+  #qrcanvas { display:block; }
+  .qr-logo {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 80px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    object-fit: contain;
+  }
+  .info { text-align: right; margin-top: 24px; font-size: 13px; color: #444; line-height: 1.9; }
+  .info b { color: #1a4d7a; }
+  .actions { margin-top: 22px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  button {
+    background: #1a4d7a; color:#fff; border:0; padding: 11px 24px;
+    border-radius: 8px; font-size: 14px; cursor:pointer; font-family:inherit; font-weight:bold;
+  }
+  button:hover { background: #15406a; }
+  button.gold { background:#d4af37; }
+  button.gold:hover { background:#b8962f; }
+  @media print {
+    body { background:#fff; padding:0; }
+    .card { box-shadow:none; border:none; }
+    .actions { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <img src="logo.png" class="logo-top" alt="اليامي للسفر" onerror="this.style.display='none'">
+  <h1>اليامي للسفر والسياحة</h1>
+  <div class="tagline">بوابتك إلى العالم</div>
+  <div class="subtitle">امسح الباركود لحفظ جميع أرقامنا وروابطنا</div>
+
+  <div class="qr-wrap">
+    <canvas id="qrcanvas"></canvas>
+    <img src="logo.png" class="qr-logo" alt="" onerror="this.style.display='none'">
+  </div>
+
+  <div class="info">
+    <b>📞 الهواتف:</b><br>
+    +218 91 325 7652<br>
+    +218 91 300 7799<br>
+    +218 94 300 7766<br>
+    +218 94 300 7755<br>
+    +218 91 300 7759<br>
+    +20 101 785 7655<br><br>
+    <b>🌐 السوشل ميديا:</b> Instagram · Facebook<br>
+    <b>📍 المواقع:</b> فرعين على Google Maps
+  </div>
+
+  <div class="actions">
+    <button onclick="window.print()">🖨️ طباعة</button>
+    <button class="gold" onclick="downloadPNG()">⬇️ تحميل PNG</button>
+  </div>
+</div>
+
+<script>
+const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:Alyame Travel - اليامي للسفر
+ORG:Alyame Travel & Tourism
+TEL;TYPE=CELL,VOICE:+218913257652
+TEL;TYPE=CELL,VOICE:+218913007799
+TEL;TYPE=CELL,VOICE:+218943007766
+TEL;TYPE=CELL,VOICE:+218943007755
+TEL;TYPE=CELL,VOICE:+218913007759
+TEL;TYPE=CELL,VOICE:+201017857655
+URL;TYPE=Instagram:https://www.instagram.com/alyame_travel
+URL;TYPE=Facebook:https://www.facebook.com/share/1ATbu7CqFT/
+URL;TYPE=Location1:https://maps.app.goo.gl/McWKSZpva24bqA4N8
+URL;TYPE=Location2:https://maps.app.goo.gl/SjoWHbfGT8XZ47tS6
+END:VCARD`;
+
+const canvas = document.getElementById('qrcanvas');
+QRCode.toCanvas(canvas, vcard, {
+  width: 400,
+  margin: 2,
+  errorCorrectionLevel: 'H',
+  color: { dark: '#1a4d7a', light: '#ffffff' }
+}, err => { if (err) console.error(err); });
+
+function downloadPNG() {
+  const exportCanvas = document.createElement('canvas');
+  const size = 800;
+  exportCanvas.width = size;
+  exportCanvas.height = size;
+  const ctx = exportCanvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, size, size);
+  ctx.drawImage(canvas, 0, 0, size, size);
+
+  const logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.onload = () => {
+    const logoSize = size * 0.20;
+    const x = (size - logoSize) / 2;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x - 8, x - 8, logoSize + 16, logoSize + 16);
+    ctx.drawImage(logo, x, x, logoSize, logoSize);
+    triggerDownload(exportCanvas);
+  };
+  logo.onerror = () => triggerDownload(exportCanvas);
+  logo.src = 'logo.png';
+}
+
+function triggerDownload(c) {
+  const link = document.createElement('a');
+  link.download = 'alyame-travel-qr.png';
+  link.href = c.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>

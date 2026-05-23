@@ -2,8 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>OK to Board - تأكيد صحة السفر | اليامي</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#1a4d8f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="OK to Board" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='28' fill='%231a4d8f'/><text x='96' y='90' font-size='42' font-weight='800' text-anchor='middle' fill='white' font-family='Arial'>OK</text><text x='96' y='140' font-size='30' font-weight='600' text-anchor='middle' fill='white' font-family='Arial'>BOARD</text></svg>" />
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
   * { box-sizing: border-box; }
@@ -154,6 +160,7 @@
       <button class="btn-primary" onclick="generate()">توليد الوثيقة</button>
       <button class="btn-print" onclick="window.print()">طباعة / حفظ PDF</button>
       <button class="btn-secondary" onclick="resetForm()">مسح</button>
+      <button id="btnInstall" class="btn-primary" style="display:none;background:#198754" onclick="installApp()">📲 تثبيت كتطبيق</button>
     </div>
   </div>
 
@@ -359,6 +366,34 @@
 
   // إعادة توليد رقم التحقق عند الضغط مرتين عليه
   $('vno').addEventListener('dblclick', () => { $('vno').value = genVerificationNo(); });
+
+  // ===== PWA: تسجيل Service Worker وزر التثبيت =====
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW failed:', err));
+    });
+  }
+
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById('btnInstall');
+    if (btn) btn.style.display = 'inline-block';
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    const btn = document.getElementById('btnInstall');
+    if (btn) btn.style.display = 'none';
+  });
+  function installApp() {
+    if (!deferredPrompt) {
+      alert('لتثبيت التطبيق على iPhone: افتح في Safari ثم اضغط "مشاركة" → "إضافة إلى الشاشة الرئيسية".\n\nعلى Android/الكمبيوتر: استخدم قائمة المتصفح → "تثبيت التطبيق".');
+      return;
+    }
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(() => { deferredPrompt = null; });
+  }
 </script>
 </body>
 </html>

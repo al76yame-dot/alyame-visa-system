@@ -1,0 +1,27 @@
+{
+  "name": "OK to Board - اليامي",
+  "short_name": "OK to Board",
+  "description": "نظام إصدار وثائق تأكيد صحة السفر مع رمز QR",
+  "start_url": "./ok-to-board.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1a4d8f",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='28' fill='%231a4d8f'/><text x='96' y='86' font-size='38' font-weight='800' text-anchor='middle' fill='white' font-family='Arial'>OK</text><text x='96' y='130' font-size='28' font-weight='600' text-anchor='middle' fill='white' font-family='Arial'>BOARD</text><text x='96' y='162' font-size='16' text-anchor='middle' fill='%23cfe0f5' font-family='Arial'>اليامي</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='72' fill='%231a4d8f'/><text x='256' y='230' font-size='100' font-weight='800' text-anchor='middle' fill='white' font-family='Arial'>OK</text><text x='256' y='340' font-size='72' font-weight='600' text-anchor='middle' fill='white' font-family='Arial'>BOARD</text><text x='256' y='430' font-size='44' text-anchor='middle' fill='%23cfe0f5' font-family='Arial'>اليامي</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
