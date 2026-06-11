@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>e-Visa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:#f0f2f5;color:#222;padding:16px}
+.wrap{max-width:1100px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:14px;background:#fff;padding:14px 18px;border-radius:10px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.brand img{width:54px;height:54px;object-fit:contain}
+.brand .t b{font-size:16px;color:var(--c,#1a4d8f);display:block}
+.brand .t span{font-size:11px;color:#666}
+.panel{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px}
+.panel h2{font-size:15px;color:#0D1B3E;margin-bottom:12px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600}
+input,select{width:100%;padding:8px 10px;border:1px solid #cfd4da;border-radius:6px;font-family:'Cairo',sans-serif;font-size:13px}
+input:focus,select:focus{outline:2px solid #1a4d8f33;border-color:var(--c,#1a4d8f)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button{padding:10px 18px;border:0;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700}
+.btn-p{background:var(--c,#1a4d8f);color:#fff}
+.btn-s{background:#198754;color:#fff}
+.msg{padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px;display:none}
+.msg.ok{background:#d4edda;color:#155724;display:block}
+.msg.err{background:#f8d7da;color:#721c24;display:block}
+.doc-wrap{display:flex;justify-content:center;margin-top:14px}
+.doc{width:210mm;min-height:297mm;padding:16mm;background:#fff;border:2px solid var(--c,#1a4d8f);color:#111;font-size:12px;position:relative}
+.doc-hd{display:flex;align-items:center;justify-content:space-between;border-bottom:3px double var(--c,#1a4d8f);padding-bottom:10mm;margin-bottom:8mm}
+.doc-hd .l{display:flex;align-items:center;gap:14px}
+.doc-hd img{width:80px;height:80px;object-fit:contain}
+.doc-hd .info b{font-size:18px;color:var(--c,#1a4d8f);display:block}
+.doc-hd .info span{font-size:11px;color:#666;display:block;margin-top:2px}
+.doc-hd .r{text-align:left;font-size:11px;color:#555}
+.doc-hd .r b{font-size:14px;color:var(--c,#1a4d8f);display:block;margin-bottom:4px}
+.doc-title{text-align:center;margin:6mm 0}
+.doc-title h2{font-size:22px;color:var(--c,#1a4d8f);letter-spacing:2px}
+.doc-title h3{font-size:14px;color:#666;font-weight:500;margin-top:3px}
+.sec{margin:6mm 0}
+.sec .st{font-size:12px;font-weight:700;color:var(--c,#1a4d8f);border-bottom:1px solid #ccc;padding-bottom:3px;margin-bottom:5mm}
+.sec table{width:100%;border-collapse:collapse;font-size:12px}
+.sec td{padding:4mm 3mm;border-bottom:1px solid #eee;vertical-align:top}
+.sec td:first-child{color:#666;width:35%;font-weight:600}
+.sec td:last-child{color:#111;font-weight:600}
+.qr-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:10mm;padding-top:6mm;border-top:2px solid var(--c,#1a4d8f)}
+.qr-row .qr{text-align:center}
+.qr-row .qr canvas{display:block}
+.qr-row .qr span{font-size:9px;color:#666;display:block;margin-top:3px}
+.qr-row .sig{text-align:center;font-size:11px;color:#555}
+.qr-row .sig b{color:var(--c,#1a4d8f);font-size:13px;display:block;margin-bottom:3px}
+.foot{text-align:center;font-size:9px;color:#999;margin-top:8mm;border-top:1px solid #eee;padding-top:4mm}
+@media print{body{background:#fff;padding:0}.brand,.panel,.actions{display:none!important}.doc-wrap{margin:0}.doc{border:none;box-shadow:none}}
+.banner{background:#fff3cd;color:#856404;padding:12px;border-radius:6px;margin-bottom:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="status"></div>
+
+  <div id="app" style="display:none">
+    <div class="brand">
+      <img id="cLogo" alt="">
+      <div class="t"><b id="cName">—</b><span id="cName2">e-Visa System</span></div>
+    </div>
+
+    <div class="panel" id="loginPanel" style="display:none">
+      <h2>تسجيل الدخول</h2>
+      <div id="lMsg" class="msg"></div>
+      <div class="grid">
+        <div><label>البريد</label><input id="lEmail" type="email"></div>
+        <div><label>كلمة المرور</label><input id="lPass" type="password"></div>
+      </div>
+      <div class="actions"><button class="btn-p" onclick="login()">دخول</button></div>
+    </div>
+
+    <div id="formPanel" style="display:none">
+      <div class="panel">
+        <h2>بيانات الراكب</h2>
+        <div class="grid">
+          <div><label>الاسم بالعربي</label><input id="nameAr"></div>
+          <div><label>الاسم بالإنجليزي *</label><input id="nameEn" placeholder="JOHN SMITH"></div>
+          <div><label>رقم الجواز *</label><input id="passport"></div>
+          <div><label>الجنسية</label><input id="nat"></div>
+          <div><label>تاريخ الميلاد</label><input id="dob" type="date"></div>
+          <div><label>الجنس</label><select id="gender"><option value="">—</option><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option></select></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>بيانات الرحلة</h2>
+        <div class="grid">
+          <div><label>الوجهة *</label><input id="dest" placeholder="تركيا"></div>
+          <div><label>تاريخ الرحلة</label><input id="fdate" type="date"></div>
+          <div><label>رقم الرحلة</label><input id="fno" placeholder="TK1234"></div>
+          <div><label>مدينة المغادرة</label><input id="dep" placeholder="الرياض"></div>
+          <div><label>مدينة الوصول</label><input id="arr" placeholder="إسطنبول"></div>
+          <div><label>نوع التأشيرة</label><select id="vtype"><option value="tourist">سياحية</option><option value="business">عمل</option><option value="transit">عبور</option><option value="student">دراسة</option></select></div>
+          <div><label>تاريخ انتهاء التأشيرة</label><input id="vexp" type="date"></div>
+        </div>
+        <div id="genMsg" class="msg" style="margin-top:10px"></div>
+        <div class="actions">
+          <button class="btn-p" onclick="generate()">توليد التأشيرة</button>
+          <button class="btn-s" onclick="window.print()" id="printBtn" style="display:none">طباعة / حفظ PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-wrap" id="docWrap" style="display:none">
+      <div class="doc" id="doc">
+        <div class="doc-hd">
+          <div class="l">
+            <img id="dLogo">
+            <div class="info"><b id="dName">—</b><span id="dName2"></span></div>
+          </div>
+          <div class="r">
+            <b>e-Visa</b>
+            <div>رقم التأشيرة: <b id="dVno">—</b></div>
+            <div>تاريخ الإصدار: <b id="dIssue">—</b></div>
+          </div>
+        </div>
+        <div class="doc-title"><h2>ELECTRONIC VISA</h2><h3>تأشيرة إلكترونية</h3></div>
+        <div class="sec">
+          <div class="st">بيانات الراكب · PASSENGER INFORMATION</div>
+          <table>
+            <tr><td>الاسم بالإنجليزي / Name</td><td id="dNameEn"></td></tr>
+            <tr><td>الاسم بالعربي</td><td id="dNameAr"></td></tr>
+            <tr><td>رقم الجواز / Passport No.</td><td id="dPassport"></td></tr>
+            <tr><td>الجنسية / Nationality</td><td id="dNat"></td></tr>
+            <tr><td>تاريخ الميلاد / Date of Birth</td><td id="dDob"></td></tr>
+            <tr><td>الجنس / Gender</td><td id="dGender"></td></tr>
+          </table>
+        </div>
+        <div class="sec">
+          <div class="st">بيانات الرحلة · TRAVEL DETAILS</div>
+          <table>
+            <tr><td>الوجهة / Destination</td><td id="dDest"></td></tr>
+            <tr><td>تاريخ الرحلة / Flight Date</td><td id="dFdate"></td></tr>
+            <tr><td>رقم الرحلة / Flight No.</td><td id="dFno"></td></tr>
+            <tr><td>من / From</td><td id="dDep"></td></tr>
+            <tr><td>إلى / To</td><td id="dArr"></td></tr>
+            <tr><td>نوع التأشيرة / Visa Type</td><td id="dVtype"></td></tr>
+            <tr><td>صالحة حتى / Valid Until</td><td id="dVexp"></td></tr>
+          </table>
+        </div>
+        <div class="qr-row">
+          <div class="qr"><canvas id="qr"></canvas><span>امسح للتحقق · Scan to verify</span></div>
+          <div class="sig"><b id="dSigName">—</b>الجهة المُصدِرة<br><span style="font-size:9px;color:#999">Issuing Authority</span></div>
+        </div>
+        <div class="foot">هذه الوثيقة إلكترونية وصادرة عبر نظام e-Visa. يمكن التحقق منها بمسح رمز QR.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
+const sb=supabase.createClient(SB,SK);
+
+let company=null;
+
+function showStatus(html){document.getElementById('status').innerHTML='<div class="banner">'+html+'</div>'}
+function msg(id,type,t){var m=document.getElementById(id);m.className='msg '+type;m.textContent=t;setTimeout(()=>{m.style.display='none'},5000)}
+
+async function init(){
+  const params=new URLSearchParams(location.search);
+  const slug=params.get('co');
+  if(!slug){showStatus('⚠ هذا الرابط غير صالح. يجب تحديد الشركة في الرابط: <code>?co=company-slug</code>');return}
+
+  const{data,error}=await sb.from('companies').select('*').eq('slug',slug).eq('active',true).maybeSingle();
+  if(error||!data){showStatus('⚠ الشركة "'+slug+'" غير موجودة أو معطّلة');return}
+
+  company=data;
+  document.documentElement.style.setProperty('--c',data.primary_color||'#1a4d8f');
+  document.title=data.name_ar+' - e-Visa';
+  document.getElementById('cLogo').src=data.logo_url||'';
+  document.getElementById('dLogo').src=data.logo_url||'';
+  document.getElementById('cName').textContent=data.name_ar;
+  document.getElementById('cName2').textContent=data.name_en||'e-Visa System';
+  document.getElementById('dName').textContent=data.name_ar;
+  document.getElementById('dName2').textContent=data.name_en||'';
+  document.getElementById('dSigName').textContent=data.name_ar;
+  document.getElementById('app').style.display='block';
+
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){document.getElementById('formPanel').style.display='block'}
+  else{document.getElementById('loginPanel').style.display='block'}
+}
+init();
+
+async function login(){
+  const{error}=await sb.auth.signInWithPassword({
+    email:document.getElementById('lEmail').value.trim(),
+    password:document.getElementById('lPass').value
+  });
+  if(error)return msg('lMsg','err',error.message);
+  document.getElementById('loginPanel').style.display='none';
+  document.getElementById('formPanel').style.display='block';
+}
+
+function fmt(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-GB')}catch(e){return d}}
+
+async function generate(){
+  const nameEn=document.getElementById('nameEn').value.trim();
+  const passport=document.getElementById('passport').value.trim();
+  const dest=document.getElementById('dest').value.trim();
+  if(!nameEn||!passport||!dest)return msg('genMsg','err','الاسم الإنجليزي، الجواز، والوجهة مطلوبة');
+
+  const visaNo='V'+Date.now().toString().slice(-9);
+  const payload={
+    company_id:company.id,
+    visa_no:visaNo,
+    passenger_name_ar:document.getElementById('nameAr').value.trim()||null,
+    passenger_name_en:nameEn,
+    passport_no:passport,
+    nationality:document.getElementById('nat').value.trim()||null,
+    date_of_birth:document.getElementById('dob').value||null,
+    gender:document.getElementById('gender').value||null,
+    destination:dest,
+    flight_no:document.getElementById('fno').value.trim()||null,
+    flight_date:document.getElementById('fdate').value||null,
+    departure_city:document.getElementById('dep').value.trim()||null,
+    arrival_city:document.getElementById('arr').value.trim()||null,
+    visa_type:document.getElementById('vtype').value,
+    expiry_date:document.getElementById('vexp').value||null
+  };
+  const{data,error}=await sb.from('evisas').insert(payload).select().single();
+  if(error)return msg('genMsg','err',error.message);
+
+  document.getElementById('dVno').textContent=data.visa_no;
+  document.getElementById('dIssue').textContent=fmt(data.issue_date);
+  document.getElementById('dNameEn').textContent=data.passenger_name_en;
+  document.getElementById('dNameAr').textContent=data.passenger_name_ar||'—';
+  document.getElementById('dPassport').textContent=data.passport_no;
+  document.getElementById('dNat').textContent=data.nationality||'—';
+  document.getElementById('dDob').textContent=fmt(data.date_of_birth);
+  document.getElementById('dGender').textContent=data.gender||'—';
+  document.getElementById('dDest').textContent=data.destination;
+  document.getElementById('dFdate').textContent=fmt(data.flight_date);
+  document.getElementById('dFno').textContent=data.flight_no||'—';
+  document.getElementById('dDep').textContent=data.departure_city||'—';
+  document.getElementById('dArr').textContent=data.arrival_city||'—';
+  const vTypes={tourist:'سياحية',business:'عمل',transit:'عبور',student:'دراسة'};
+  document.getElementById('dVtype').textContent=vTypes[data.visa_type]||data.visa_type;
+  document.getElementById('dVexp').textContent=fmt(data.expiry_date);
+
+  const verifyUrl=location.origin+location.pathname.replace('evisa.html','verify.html')+'?t='+data.qr_token;
+  QRCode.toCanvas(document.getElementById('qr'),verifyUrl,{width:110,margin:1});
+
+  document.getElementById('docWrap').style.display='flex';
+  document.getElementById('printBtn').style.display='inline-block';
+  msg('genMsg','ok','تم توليد التأشيرة بنجاح. رقم: '+data.visa_no);
+  document.getElementById('docWrap').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

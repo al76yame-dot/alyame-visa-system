@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة الشركات - اليامي e-Visa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:#f0f2f5;color:#222;padding:20px}
+.wrap{max-width:1100px;margin:0 auto}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.hd h1{font-size:22px;color:#0D1B3E}
+.hd a{color:#0D1B3E;text-decoration:none;font-size:13px}
+.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+.card h2{font-size:16px;color:#0D1B3E;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.fg label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600}
+.fg input,.fg textarea{width:100%;padding:9px 10px;border:1px solid #cfd4da;border-radius:6px;font-family:'Cairo',sans-serif;font-size:13px}
+.fg input:focus{outline:2px solid #1a4d8f33;border-color:#1a4d8f}
+.btn{padding:10px 20px;border:0;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700}
+.btn-p{background:#1a4d8f;color:#fff}
+.btn-d{background:#dc3545;color:#fff;padding:6px 12px;font-size:11px}
+.btn-c{background:#198754;color:#fff;padding:6px 12px;font-size:11px;text-decoration:none;display:inline-block}
+.row{display:flex;gap:10px;align-items:center;padding:14px;border:1px solid #e5e0d5;border-radius:8px;margin-bottom:10px;background:#fafafa}
+.row img{width:60px;height:60px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid #ddd}
+.row .info{flex:1}
+.row .info b{font-size:14px;color:#0D1B3E}
+.row .info .meta{font-size:11px;color:#666;margin-top:2px}
+.row .acts{display:flex;gap:6px;flex-direction:column}
+.msg{padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px;display:none}
+.msg.ok{background:#d4edda;color:#155724;display:block}
+.msg.err{background:#f8d7da;color:#721c24;display:block}
+.color-box{width:30px;height:30px;border-radius:6px;border:1px solid #ddd}
+input[type=color]{padding:0;height:38px;cursor:pointer}
+.link-row{background:#e8f4ff;border:1px solid #1a4d8f33;padding:8px;border-radius:6px;font-size:11px;font-family:monospace;direction:ltr;text-align:left;cursor:pointer;margin-top:4px;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>إدارة الشركات - e-Visa</h1>
+    <a href="index.html">← العودة للنظام</a>
+  </div>
+
+  <div id="login" class="card">
+    <h2>تسجيل الدخول</h2>
+    <div id="loginMsg" class="msg"></div>
+    <div class="fg" style="margin-bottom:10px"><label>البريد</label><input id="email" type="email"></div>
+    <div class="fg" style="margin-bottom:10px"><label>كلمة المرور</label><input id="password" type="password"></div>
+    <button class="btn btn-p" onclick="login()">دخول</button>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="card">
+      <h2>إضافة شركة جديدة</h2>
+      <div id="addMsg" class="msg"></div>
+      <div class="grid">
+        <div class="fg"><label>الاسم العربي *</label><input id="nameAr" placeholder="شركة الأمل للسياحة"></div>
+        <div class="fg"><label>الاسم الإنجليزي</label><input id="nameEn" placeholder="Al Amal Tourism"></div>
+        <div class="fg"><label>المعرّف (slug) *</label><input id="slug" placeholder="al-amal" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')"></div>
+        <div class="fg"><label>الجوال</label><input id="phone" placeholder="+9665..."></div>
+        <div class="fg"><label>البريد</label><input id="email2" type="email"></div>
+        <div class="fg"><label>اللون الأساسي</label><input id="color" type="color" value="#1a4d8f"></div>
+        <div class="fg"><label>الشعار (PNG/JPG)</label><input id="logo" type="file" accept="image/*"></div>
+      </div>
+      <button class="btn btn-p" style="margin-top:14px" onclick="addCompany()">إضافة الشركة</button>
+    </div>
+
+    <div class="card">
+      <h2>الشركات المسجّلة (<span id="count">0</span>)</h2>
+      <div id="list">جارٍ التحميل...</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
+const sb=supabase.createClient(SB,SK);
+
+function msg(id,type,text){var m=document.getElementById(id);m.className='msg '+type;m.textContent=text;setTimeout(()=>{m.style.display='none'},4000)}
+
+async function checkSession(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';loadCompanies()}
+}
+checkSession();
+
+async function login(){
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  const{error}=await sb.auth.signInWithPassword({email,password});
+  if(error)return msg('loginMsg','err',error.message);
+  checkSession();
+}
+
+async function addCompany(){
+  const nameAr=document.getElementById('nameAr').value.trim();
+  const slug=document.getElementById('slug').value.trim();
+  if(!nameAr||!slug)return msg('addMsg','err','الاسم العربي والمعرّف مطلوبان');
+
+  let logoUrl=null;
+  const file=document.getElementById('logo').files[0];
+  if(file){
+    const path=slug+'-'+Date.now()+'-'+file.name.replace(/[^a-z0-9.]/gi,'_');
+    const{error:upErr}=await sb.storage.from('company-logos').upload(path,file);
+    if(upErr)return msg('addMsg','err','فشل رفع الشعار: '+upErr.message);
+    logoUrl=sb.storage.from('company-logos').getPublicUrl(path).data.publicUrl;
+  }
+
+  const{error}=await sb.from('companies').insert({
+    slug,
+    name_ar:nameAr,
+    name_en:document.getElementById('nameEn').value.trim()||null,
+    logo_url:logoUrl,
+    primary_color:document.getElementById('color').value,
+    contact_phone:document.getElementById('phone').value.trim()||null,
+    contact_email:document.getElementById('email2').value.trim()||null
+  });
+  if(error)return msg('addMsg','err',error.message);
+  msg('addMsg','ok','تمت إضافة الشركة بنجاح');
+  ['nameAr','nameEn','slug','phone','email2','logo'].forEach(id=>document.getElementById(id).value='');
+  loadCompanies();
+}
+
+async function loadCompanies(){
+  const{data,error}=await sb.from('companies').select('*').order('created_at',{ascending:false});
+  if(error)return document.getElementById('list').innerHTML='<div class="msg err" style="display:block">'+error.message+'</div>';
+  document.getElementById('count').textContent=data.length;
+  if(!data.length)return document.getElementById('list').innerHTML='<p style="color:#666;font-size:13px">لا توجد شركات بعد</p>';
+  const base=location.origin+location.pathname.replace('companies-admin.html','');
+  document.getElementById('list').innerHTML=data.map(c=>{
+    const link=base+'evisa.html?co='+c.slug;
+    return `<div class="row">
+      <img src="${c.logo_url||'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 60 60\\'><rect width=\\'60\\' height=\\'60\\' fill=\\'%23eee\\'/><text x=\\'30\\' y=\\'35\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%23999\\'>NO LOGO</text></svg>'}">
+      <div class="info">
+        <b>${c.name_ar}</b> ${c.name_en?`<span style="color:#666">· ${c.name_en}</span>`:''}
+        <div class="meta">slug: <code>${c.slug}</code> ${c.contact_phone?'· '+c.contact_phone:''} ${c.active?'':' · <span style="color:#dc3545">معطّلة</span>'}</div>
+        <div class="link-row" onclick="navigator.clipboard.writeText('${link}');this.style.background='#d4edda';setTimeout(()=>this.style.background='#e8f4ff',800)">${link} <span style="color:#1a4d8f">📋 نسخ</span></div>
+      </div>
+      <div class="acts">
+        <a class="btn-c" href="${link}" target="_blank">فتح ↗</a>
+        <button class="btn-d" onclick="delCompany('${c.id}','${c.name_ar.replace(/'/g,"\\'")}')">حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function delCompany(id,name){
+  if(!confirm('حذف الشركة "'+name+'" نهائياً؟'))return;
+  const{error}=await sb.from('companies').delete().eq('id',id);
+  if(error)return alert(error.message);
+  loadCompanies();
+}
+</script>
+</body>
+</html>
