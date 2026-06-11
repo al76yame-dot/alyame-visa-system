@@ -132,16 +132,21 @@ async function loadCompanies(){
   if(!data.length)return document.getElementById('list').innerHTML='<p style="color:#666;font-size:13px">لا توجد شركات بعد</p>';
   const base=location.origin+location.pathname.replace('companies-admin.html','');
   document.getElementById('list').innerHTML=data.map(c=>{
-    const link=base+'evisa.html?co='+c.slug;
+    const evisaLink=base+'evisa.html?co='+c.slug;
+    const okbLink=base+'okboard.html?co='+c.slug;
     return `<div class="row">
       <img src="${c.logo_url||'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 60 60\\'><rect width=\\'60\\' height=\\'60\\' fill=\\'%23eee\\'/><text x=\\'30\\' y=\\'35\\' font-size=\\'10\\' text-anchor=\\'middle\\' fill=\\'%23999\\'>NO LOGO</text></svg>'}">
       <div class="info">
         <b>${c.name_ar}</b> ${c.name_en?`<span style="color:#666">· ${c.name_en}</span>`:''}
         <div class="meta">slug: <code>${c.slug}</code> ${c.contact_phone?'· '+c.contact_phone:''} ${c.active?'':' · <span style="color:#dc3545">معطّلة</span>'}</div>
-        <div class="link-row" onclick="navigator.clipboard.writeText('${link}');this.style.background='#d4edda';setTimeout(()=>this.style.background='#e8f4ff',800)">${link} <span style="color:#1a4d8f">📋 نسخ</span></div>
+        <div style="font-size:10px;color:#1a4d8f;margin-top:6px;font-weight:700">e-Visa:</div>
+        <div class="link-row" onclick="navigator.clipboard.writeText('${evisaLink}');this.style.background='#d4edda';setTimeout(()=>this.style.background='#e8f4ff',800)">${evisaLink} <span style="color:#1a4d8f">📋</span></div>
+        <div style="font-size:10px;color:#1a4d8f;margin-top:6px;font-weight:700">OK to Board:</div>
+        <div class="link-row" onclick="navigator.clipboard.writeText('${okbLink}');this.style.background='#d4edda';setTimeout(()=>this.style.background='#e8f4ff',800)">${okbLink} <span style="color:#1a4d8f">📋</span></div>
       </div>
       <div class="acts">
-        <a class="btn-c" href="${link}" target="_blank">فتح ↗</a>
+        <a class="btn-c" href="${evisaLink}" target="_blank">e-Visa ↗</a>
+        <a class="btn-c" href="${okbLink}" target="_blank" style="background:#1a4d8f">OK Board ↗</a>
         <button class="btn-d" onclick="delCompany('${c.id}','${c.name_ar.replace(/'/g,"\\'")}')">حذف</button>
       </div>
     </div>`;

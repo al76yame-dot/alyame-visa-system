@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>التحقق من OK to Board · Verify</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:linear-gradient(135deg,#0D1B3E 0%,#1a4d8f 100%);min-height:100vh;color:#222;padding:20px;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:14px;padding:28px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.brand{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid #eee;margin-bottom:18px}
+.brand img{width:50px;height:50px;object-fit:contain}
+.brand b{display:block;font-size:14px;color:#0D1B3E}
+.brand span{font-size:11px;color:#666}
+.status{text-align:center;padding:18px;border-radius:10px;margin-bottom:18px}
+.status.ok{background:#d4edda;color:#155724;border:2px solid #28a745}
+.status.bad{background:#f8d7da;color:#721c24;border:2px solid #dc3545}
+.status .ico{font-size:46px;display:block;margin-bottom:6px}
+.status b{font-size:18px;display:block}
+.status span{font-size:12px;display:block;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{padding:9px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+td:first-child{color:#666;width:42%;font-weight:600;font-size:12px}
+td:last-child{color:#111;font-weight:600}
+.sec-t{font-size:12px;font-weight:700;color:#1a4d8f;margin-top:14px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ddd}
+.foot{text-align:center;font-size:10px;color:#999;margin-top:16px;padding-top:12px;border-top:1px solid #eee}
+.loading{text-align:center;padding:30px;color:#666;font-size:13px}
+</style>
+</head>
+<body>
+<div class="card"><div id="content" class="loading">جارٍ التحقق...</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
+const sb=supabase.createClient(SB,SK);
+
+function fmt(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-GB')}catch(e){return d}}
+function bad(msg){document.getElementById('content').innerHTML='<div class="status bad"><span class="ico">✗</span><b>غير صالحة</b><span>'+msg+'</span></div>'}
+
+async function verify(){
+  const t=new URLSearchParams(location.search).get('t');
+  if(!t)return bad('رمز التحقق مفقود');
+
+  const{data:v,error}=await sb.from('boarding_passes').select('*').eq('qr_token',t).maybeSingle();
+  if(error||!v)return bad('الوثيقة غير موجودة أو الرابط مزوّر');
+
+  const{data:c}=await sb.from('companies').select('*').eq('id',v.company_id).maybeSingle();
+  const expired=v.valid_until&&new Date(v.valid_until)<new Date();
+  const inactive=v.status!=='active';
+  const valid=!expired&&!inactive;
+
+  document.getElementById('content').innerHTML=`
+    ${c?`<div class="brand"><img src="${c.logo_url||''}"><div><b>${c.name_ar}</b><span>${c.name_en||'OK to Board System'}</span></div></div>`:''}
+    <div class="status ${valid?'ok':'bad'}">
+      <span class="ico">${valid?'✓':'✗'}</span>
+      <b>${valid?'وثيقة صالحة':(expired?'منتهية الصلاحية':'ملغاة')}</b>
+      <span>${valid?'Verified · صادرة عن جهة موثوقة':'هذه الوثيقة لم تعد سارية'}</span>
+    </div>
+    <div class="sec-t">معلومات التحقق</div>
+    <table>
+      <tr><td>رقم التحقق</td><td>${v.verification_no}</td></tr>
+      <tr><td>النوع</td><td>${v.verification_type}</td></tr>
+      <tr><td>تاريخ الإصدار</td><td>${fmt(v.issue_date)}</td></tr>
+      <tr><td>صالح حتى</td><td>${fmt(v.valid_until)}</td></tr>
+    </table>
+    <div class="sec-t">المسافر</div>
+    <table>
+      <tr><td>الاسم</td><td>${v.passenger_name_en}</td></tr>
+      ${v.passenger_name_ar?`<tr><td>بالعربي</td><td>${v.passenger_name_ar}</td></tr>`:''}
+      <tr><td>رقم الجواز</td><td>${v.passport_no}</td></tr>
+      ${v.nationality?`<tr><td>الجنسية</td><td>${v.nationality}</td></tr>`:''}
+    </table>
+    <div class="sec-t">الرحلة</div>
+    <table>
+      ${v.airline?`<tr><td>شركة الطيران</td><td>${v.airline}</td></tr>`:''}
+      ${v.flight_no?`<tr><td>رقم الرحلة</td><td>${v.flight_no}</td></tr>`:''}
+      <tr><td>تاريخ الوصول</td><td>${fmt(v.arrival_date)}</td></tr>
+      <tr><td>الوجهة</td><td>${v.destination_country||'—'}</td></tr>
+    </table>
+    <div class="foot">تم التحقق إلكترونياً<br>${new Date().toLocaleString('ar-SA')}</div>`;
+}
+verify();
+</script>
+</body>
+</html>

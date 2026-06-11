@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OK to Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo','Segoe UI',sans-serif;background:#f0f2f5;color:#222;padding:16px}
+.wrap{max-width:1100px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:14px;background:#fff;padding:14px 18px;border-radius:10px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.brand img{width:54px;height:54px;object-fit:contain}
+.brand .t b{font-size:16px;color:var(--c,#1a4d8f);display:block}
+.brand .t span{font-size:11px;color:#666}
+.panel{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px}
+.panel h2{font-size:15px;color:#0D1B3E;margin-bottom:12px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+label{display:block;font-size:12px;color:#555;margin-bottom:4px;font-weight:600}
+input,select{width:100%;padding:8px 10px;border:1px solid #cfd4da;border-radius:6px;font-family:'Cairo',sans-serif;font-size:13px}
+input:focus,select:focus{outline:2px solid #1a4d8f33;border-color:var(--c,#1a4d8f)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button{padding:10px 18px;border:0;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700}
+.btn-p{background:var(--c,#1a4d8f);color:#fff}
+.btn-s{background:#198754;color:#fff}
+.msg{padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px;display:none}
+.msg.ok{background:#d4edda;color:#155724;display:block}
+.msg.err{background:#f8d7da;color:#721c24;display:block}
+.banner{background:#fff3cd;color:#856404;padding:12px;border-radius:6px;margin-bottom:14px;text-align:center}
+
+.doc-wrap{display:flex;justify-content:center;margin-top:14px}
+.document{width:210mm;min-height:297mm;padding:14mm;background:#fff;border:2px solid var(--c,#1a4d8f);position:relative;font-size:12px;color:#111}
+.doc-hd{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--c,#1a4d8f);padding-bottom:8mm;margin-bottom:6mm}
+.doc-hd .l{display:flex;align-items:center;gap:12px}
+.doc-hd img{width:70px;height:70px;object-fit:contain}
+.doc-hd .info b{font-size:16px;color:var(--c,#1a4d8f);display:block}
+.doc-hd .info span{font-size:10px;color:#666;display:block;margin-top:2px}
+.doc-hd .r{text-align:left;font-size:10px;color:#555}
+.doc-date{position:absolute;top:8mm;left:14mm;font-size:10px;color:#666}
+.watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.05;font-size:90px;font-weight:800;color:var(--c,#1a4d8f);transform:rotate(-20deg)}
+.doc-title{text-align:center;margin-top:4mm}
+.doc-title h2{margin:0;font-size:22px;letter-spacing:1px;color:var(--c,#1a4d8f)}
+.doc-title h3{margin:4px 0 0;font-size:16px;font-weight:500;color:#333}
+.hr{border-top:1px solid #999;margin:6mm auto;width:60%}
+.section-title{text-align:center;font-weight:700;font-size:13px;margin:5mm 0 2mm;color:var(--c,#1a4d8f)}
+.underline{width:55%;height:1px;background:#999;margin:0 auto 3mm}
+table.doc-table{width:100%;border-collapse:collapse;font-family:'Cairo','Segoe UI',sans-serif}
+table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middle;font-size:12px}
+.label-cell{background:#e7eef7;font-weight:600;width:35%}
+.qr-cell{text-align:center;vertical-align:middle;width:30%}
+.qr-cell canvas{width:90px;height:90px}
+.notes{margin-top:6mm;border:2px solid #d33;border-radius:4px;padding:5mm;color:#c62828}
+.notes h4{margin:0 0 3mm;font-size:13px;color:#c62828}
+.notes p{margin:1.5mm 0;font-size:11px;line-height:1.5}
+@media print{body{background:#fff;padding:0}.brand,.panel,.actions{display:none!important}.doc-wrap{margin:0}.document{border:2px solid var(--c,#1a4d8f);box-shadow:none}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="status"></div>
+
+  <div id="app" style="display:none">
+    <div class="brand">
+      <img id="cLogo" alt="">
+      <div class="t"><b id="cName">—</b><span id="cName2">OK to Board System</span></div>
+    </div>
+
+    <div class="panel" id="loginPanel" style="display:none">
+      <h2>تسجيل الدخول</h2>
+      <div id="lMsg" class="msg"></div>
+      <div class="grid">
+        <div><label>البريد</label><input id="lEmail" type="email"></div>
+        <div><label>كلمة المرور</label><input id="lPass" type="password"></div>
+      </div>
+      <div class="actions"><button class="btn-p" onclick="login()">دخول</button></div>
+    </div>
+
+    <div id="formPanel" style="display:none">
+      <div class="panel">
+        <h2>بيانات المسافر</h2>
+        <div class="grid">
+          <div><label>اسم المسافر (عربي)</label><input id="name_ar" placeholder="وسام الهمالي منصور محمد"></div>
+          <div><label>Passenger Name (English) *</label><input id="name_en" placeholder="WISAM ALHAMALY..."></div>
+          <div><label>رقم جواز السفر *</label><input id="passport" placeholder="AC827160"></div>
+          <div><label>تاريخ الميلاد</label><input id="birth" type="date"></div>
+          <div><label>الجنسية</label><input id="nationality" value="ليبيا | Libya"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>بيانات الرحلة</h2>
+        <div class="grid">
+          <div><label>شركة الطيران</label><input id="airline" placeholder="EgyptAir | مصر للطيران"></div>
+          <div><label>رقم الرحلة</label><input id="flight" placeholder="MS 830"></div>
+          <div><label>تاريخ الوصول</label><input id="arrival" type="date"></div>
+          <div><label>الوجهة</label><input id="dest" value="Egypt | مصر"></div>
+          <div><label>تاريخ الإصدار</label><input id="issue" type="date"></div>
+          <div><label>صالح حتى</label><input id="valid" type="date"></div>
+          <div><label>نوع التحقق</label>
+            <select id="vtype">
+              <option>Pre-Travel Clearance</option>
+              <option>Visa Verification</option>
+              <option>Boarding Approval</option>
+            </select>
+          </div>
+        </div>
+        <div id="genMsg" class="msg" style="margin-top:10px"></div>
+        <div class="actions">
+          <button class="btn-p" onclick="generate()">توليد الوثيقة</button>
+          <button class="btn-s" onclick="window.print()" id="printBtn" style="display:none">طباعة / حفظ PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-wrap" id="docWrap" style="display:none">
+      <div class="document">
+        <div class="doc-date" id="d_date"></div>
+        <div class="watermark" id="d_wm">EGYPT</div>
+
+        <div class="doc-hd">
+          <div class="l">
+            <img id="dLogo">
+            <div class="info"><b id="dName">—</b><span id="dName2"></span></div>
+          </div>
+          <div class="r">
+            <b style="color:var(--c,#1a4d8f);font-size:13px;display:block">Verification ID</b>
+            <span id="d_vno_top">—</span>
+          </div>
+        </div>
+
+        <div class="doc-title">
+          <h2>OK TO BOARD VERIFICATION</h2>
+          <h3>تأكيد صحة السفر</h3>
+        </div>
+        <div class="hr"></div>
+
+        <div class="section-title">VERIFICATION DETAILS | تفاصيل التحقق</div>
+        <div class="underline"></div>
+        <table class="doc-table">
+          <tr>
+            <td class="label-cell">Verification Number<br>رقم التحقق</td>
+            <td class="qr-cell" rowspan="2"><canvas id="qr"></canvas></td>
+            <td class="label-cell">Date of Issue<br>تاريخ الإصدار</td>
+          </tr>
+          <tr>
+            <td id="d_vno"></td>
+            <td id="d_issue"></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Verification Type<br>نوع التحقق</td>
+            <td id="d_vtype" style="text-align:center"></td>
+            <td id="d_valid"></td>
+          </tr>
+          <tr>
+            <td class="label-cell"></td>
+            <td></td>
+            <td class="label-cell">Valid Until<br>صالح حتى</td>
+          </tr>
+        </table>
+
+        <div class="section-title">PASSENGER INFORMATION | معلومات المسافر</div>
+        <div class="underline"></div>
+        <table class="doc-table">
+          <tr>
+            <td class="label-cell">Passenger Name | اسم المسافر</td>
+            <td class="label-cell">Passport No. | رقم الجواز</td>
+          </tr>
+          <tr><td id="d_name"></td><td id="d_passport"></td></tr>
+          <tr>
+            <td class="label-cell">Nationality | الجنسية</td>
+            <td class="label-cell">Birth Date | تاريخ الميلاد</td>
+          </tr>
+          <tr><td id="d_nat"></td><td id="d_birth"></td></tr>
+        </table>
+
+        <div class="section-title">FLIGHT DETAILS | معلومات الرحلة</div>
+        <div class="underline"></div>
+        <table class="doc-table">
+          <tr>
+            <td class="label-cell">Airline | شركة الطيران</td>
+            <td class="label-cell">Flight No. | رقم الرحلة</td>
+            <td class="label-cell">Arrival Date | تاريخ الوصول</td>
+          </tr>
+          <tr><td id="d_airline"></td><td id="d_flight"></td><td id="d_arrival"></td></tr>
+        </table>
+
+        <div class="notes">
+          <h4>IMPORTANT NOTES | إشعارات هامة</h4>
+          <p>- This document confirms that the passenger has been pre-cleared for travel as of the date of issue.</p>
+          <p style="text-align:right">هذا المستند يؤكد أن المسافر تمت الموافقة المسبقة على سفره اعتباراً من تاريخ الإصدار</p>
+          <p>- Passenger must present valid passport with minimum 6 months validity at the time of travel.</p>
+          <p style="text-align:right">يجب على المسافر تقديم جواز سفر ساري مع صلاحية لا تقل عن 6 أشهر</p>
+          <p>- The final decision regarding boarding and entry rests with the security authorities at port of entry.</p>
+          <p style="text-align:right">القرار النهائي للصعود والدخول يقع على الجهات الأمنية في منفذ الدخول</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
+const sb=supabase.createClient(SB,SK);
+let company=null;
+
+function showStatus(html){document.getElementById('status').innerHTML='<div class="banner">'+html+'</div>'}
+function msg(id,type,t){var m=document.getElementById(id);m.className='msg '+type;m.textContent=t;setTimeout(()=>{m.style.display='none'},5000)}
+function fmt(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-GB')}catch(e){return d}}
+
+async function init(){
+  const slug=new URLSearchParams(location.search).get('co');
+  if(!slug)return showStatus('⚠ يجب تحديد الشركة: <code>?co=company-slug</code>');
+
+  const{data,error}=await sb.from('companies').select('*').eq('slug',slug).eq('active',true).maybeSingle();
+  if(error||!data)return showStatus('⚠ الشركة "'+slug+'" غير موجودة أو معطّلة');
+
+  company=data;
+  document.documentElement.style.setProperty('--c',data.primary_color||'#1a4d8f');
+  document.title=data.name_ar+' - OK to Board';
+  document.getElementById('cLogo').src=data.logo_url||'';
+  document.getElementById('dLogo').src=data.logo_url||'';
+  document.getElementById('cName').textContent=data.name_ar;
+  document.getElementById('cName2').textContent=data.name_en||'OK to Board System';
+  document.getElementById('dName').textContent=data.name_ar;
+  document.getElementById('dName2').textContent=data.name_en||'';
+  document.getElementById('app').style.display='block';
+
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('issue').value=today;
+
+  const{data:{session}}=await sb.auth.getSession();
+  if(session)document.getElementById('formPanel').style.display='block';
+  else document.getElementById('loginPanel').style.display='block';
+}
+init();
+
+async function login(){
+  const{error}=await sb.auth.signInWithPassword({
+    email:document.getElementById('lEmail').value.trim(),
+    password:document.getElementById('lPass').value
+  });
+  if(error)return msg('lMsg','err',error.message);
+  document.getElementById('loginPanel').style.display='none';
+  document.getElementById('formPanel').style.display='block';
+}
+
+async function generate(){
+  const nameEn=document.getElementById('name_en').value.trim();
+  const passport=document.getElementById('passport').value.trim();
+  if(!nameEn||!passport)return msg('genMsg','err','الاسم الإنجليزي ورقم الجواز مطلوبان');
+
+  const vno='OKB-'+Date.now().toString().slice(-9);
+  const payload={
+    company_id:company.id,
+    verification_no:vno,
+    passenger_name_ar:document.getElementById('name_ar').value.trim()||null,
+    passenger_name_en:nameEn,
+    passport_no:passport,
+    nationality:document.getElementById('nationality').value.trim()||null,
+    date_of_birth:document.getElementById('birth').value||null,
+    airline:document.getElementById('airline').value.trim()||null,
+    flight_no:document.getElementById('flight').value.trim()||null,
+    arrival_date:document.getElementById('arrival').value||null,
+    destination_country:document.getElementById('dest').value.trim()||null,
+    verification_type:document.getElementById('vtype').value,
+    issue_date:document.getElementById('issue').value||new Date().toISOString().split('T')[0],
+    valid_until:document.getElementById('valid').value||null
+  };
+  const{data,error}=await sb.from('boarding_passes').insert(payload).select().single();
+  if(error)return msg('genMsg','err',error.message);
+
+  document.getElementById('d_date').textContent='Issued: '+fmt(data.issue_date);
+  document.getElementById('d_vno').textContent=data.verification_no;
+  document.getElementById('d_vno_top').textContent=data.verification_no;
+  document.getElementById('d_issue').textContent=fmt(data.issue_date);
+  document.getElementById('d_vtype').textContent=data.verification_type;
+  document.getElementById('d_valid').textContent=fmt(data.valid_until);
+  document.getElementById('d_name').textContent=(data.passenger_name_ar?data.passenger_name_ar+' / ':'')+data.passenger_name_en;
+  document.getElementById('d_passport').textContent=data.passport_no;
+  document.getElementById('d_nat').textContent=data.nationality||'—';
+  document.getElementById('d_birth').textContent=fmt(data.date_of_birth);
+  document.getElementById('d_airline').textContent=data.airline||'—';
+  document.getElementById('d_flight').textContent=data.flight_no||'—';
+  document.getElementById('d_arrival').textContent=fmt(data.arrival_date);
+  document.getElementById('d_wm').textContent=(data.destination_country||'').split('|')[0].trim().toUpperCase();
+
+  const verifyUrl=location.origin+location.pathname.replace('okboard.html','verify-board.html')+'?t='+data.qr_token;
+  QRCode.toCanvas(document.getElementById('qr'),verifyUrl,{width:110,margin:1});
+
+  document.getElementById('docWrap').style.display='flex';
+  document.getElementById('printBtn').style.display='inline-block';
+  msg('genMsg','ok','تم توليد الوثيقة. رقم: '+data.verification_no);
+  document.getElementById('docWrap').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
