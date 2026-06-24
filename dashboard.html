@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة التحكم الرئيسية - اليامي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:#f0f2f5;color:#222;padding:20px;min-height:100vh}
+.wrap{max-width:1300px;margin:0 auto}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;background:linear-gradient(135deg,#0D1B3E,#1a4d8f);color:#fff;padding:18px 22px;border-radius:12px}
+.hd h1{font-size:20px;font-weight:800}
+.hd .out{background:rgba(255,255,255,.15);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;border:0;font-family:inherit;font-size:12px}
+.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:#fff;border-radius:10px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-right:4px solid var(--ic,#1a4d8f)}
+.stat .label{font-size:12px;color:#666;margin-bottom:6px}
+.stat .val{font-size:28px;font-weight:800;color:#0D1B3E}
+.stat .sub{font-size:11px;color:#999;margin-top:4px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{background:#fff;border:1px solid #ddd;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#666}
+.tab.on{background:#1a4d8f;color:#fff;border-color:#1a4d8f}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8f7f3;text-align:right;padding:10px 12px;font-size:12px;color:#555;border-bottom:2px solid #ddd;font-weight:700}
+td{padding:10px 12px;border-bottom:1px solid #eee;vertical-align:top}
+tr:hover{background:#fafafa}
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.pill.ok{background:#d4edda;color:#155724}
+.pill.off{background:#f8d7da;color:#721c24}
+.pill.blue{background:#cfe2ff;color:#084298}
+.pill.gold{background:#fff3cd;color:#856404}
+.btn{padding:6px 12px;border:0;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;margin:0 2px}
+.btn-p{background:#1a4d8f;color:#fff}
+.btn-d{background:#dc3545;color:#fff}
+.btn-w{background:#198754;color:#fff}
+.btn-g{background:#6c757d;color:#fff}
+.filter{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter input,.filter select{padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-family:inherit;font-size:12px;min-width:160px}
+.filter label{font-size:12px;color:#666;font-weight:600}
+.msg{padding:12px;border-radius:6px;font-size:13px;margin-bottom:10px;font-weight:600;display:none}
+.msg.ok{background:#d4edda;color:#155724;display:block}
+.msg.err{background:#f8d7da;color:#721c24;display:block}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-card{background:#fff;border-radius:14px;padding:36px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.login-card h2{color:#0D1B3E;margin-bottom:20px;font-size:20px;text-align:center}
+.login-card .lock{text-align:center;font-size:48px;margin-bottom:10px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:12px;color:#555;font-weight:600;margin-bottom:6px}
+.fg input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px}
+.fg input:focus{outline:0;border-color:#1a4d8f}
+.btn-full{width:100%;padding:12px;background:#1a4d8f;color:#fff;border:0;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.empty{text-align:center;padding:40px;color:#999;font-size:13px}
+.bar{height:6px;background:#eee;border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;background:#1a4d8f}
+.export{padding:8px 16px;background:#198754;color:#fff;border:0;border-radius:6px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;margin-right:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <div class="lock">🔒</div>
+    <h2>لوحة التحكم الرئيسية</h2>
+    <div id="lMsg" class="msg"></div>
+    <div class="fg"><label>كلمة المرور</label><input id="adminPass" type="password" autofocus></div>
+    <button class="btn-full" id="loginBtn">دخول</button>
+  </div>
+</div>
+
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:12px;padding:24px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:2px solid #eee;padding-bottom:10px">
+      <h2 id="editTitle" style="color:#0D1B3E;font-size:18px">تعديل الوثيقة</h2>
+      <button onclick="closeEdit()" style="background:#dc3545;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer">إغلاق</button>
+    </div>
+    <div id="editMsg" class="msg"></div>
+    <div id="editFields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeEdit()" class="btn btn-g" style="padding:10px 20px">إلغاء</button>
+      <button onclick="saveEdit()" class="btn btn-p" style="padding:10px 20px;font-size:13px">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
+<div id="appScreen" style="display:none">
+  <div class="hd">
+    <h1>لوحة تحكم اليامي — مدير النظام</h1>
+    <button class="out" onclick="logout()">خروج</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat" style="--ic:#1a4d8f"><div class="label">عدد الشركات</div><div class="val" id="s_companies">—</div><div class="sub" id="s_companies_active">— نشطة</div></div>
+    <div class="stat" style="--ic:#198754"><div class="label">وثائق OK to Board</div><div class="val" id="s_okboard">—</div><div class="sub">إجمالي الوثائق الصادرة</div></div>
+    <div class="stat" style="--ic:#dc3545"><div class="label">تأشيرات e-Visa</div><div class="val" id="s_evisas">—</div><div class="sub">إجمالي التأشيرات</div></div>
+    <div class="stat" style="--ic:#ffc107"><div class="label">وثائق اليوم</div><div class="val" id="s_today">—</div><div class="sub" id="s_today_sub">في آخر 24 ساعة</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="companies" onclick="switchTab('companies')">الشركات</button>
+    <button class="tab" data-tab="boardings" onclick="switchTab('boardings')">وثائق OK to Board</button>
+    <button class="tab" data-tab="visas" onclick="switchTab('visas')">تأشيرات e-Visa</button>
+    <button class="tab" data-tab="ranking" onclick="switchTab('ranking')">ترتيب الشركات</button>
+  </div>
+
+  <div id="tabCompanies" class="card">
+    <div class="filter">
+      <input id="fCompany" placeholder="بحث باسم الشركة أو slug..." oninput="renderCompanies()">
+      <a href="companies-admin.html" class="btn btn-p" style="text-decoration:none">+ إضافة شركة</a>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>الشركة</th><th>slug</th><th>رقم الدخول</th><th>كلمة المرور</th><th>OK Board</th><th>e-Visa</th><th>الإجمالي</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+      <tbody id="tbCompanies"></tbody>
+    </table>
+  </div>
+
+  <div id="tabBoardings" class="card" style="display:none">
+    <div class="filter">
+      <input id="fBoardSearch" placeholder="بحث بالاسم أو الجواز..." oninput="renderBoardings()">
+      <select id="fBoardCompany" onchange="renderBoardings()"><option value="">كل الشركات</option></select>
+      <select id="fBoardType" onchange="renderBoardings()">
+        <option value="">كل الأنواع</option>
+        <option value="تشريفات">تشريفات</option>
+        <option value="موافقة أمنية">موافقة أمنية</option>
+        <option value="الرقمية">الرقمية</option>
+      </select>
+      <button class="export" onclick="exportCSV('boardings')">تصدير CSV</button>
+    </div>
+    <table>
+      <thead><tr><th>رقم التحقق</th><th>الشركة</th><th>المسافر</th><th>الجواز</th><th>الرحلة</th><th>النوع</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+      <tbody id="tbBoardings"></tbody>
+    </table>
+  </div>
+
+  <div id="tabVisas" class="card" style="display:none">
+    <div class="filter">
+      <input id="fVisaSearch" placeholder="بحث بالاسم أو الجواز..." oninput="renderVisas()">
+      <select id="fVisaCompany" onchange="renderVisas()"><option value="">كل الشركات</option></select>
+      <button class="export" onclick="exportCSV('visas')">تصدير CSV</button>
+    </div>
+    <table>
+      <thead><tr><th>رقم التأشيرة</th><th>الشركة</th><th>المسافر</th><th>الجواز</th><th>الوجهة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+      <tbody id="tbVisas"></tbody>
+    </table>
+  </div>
+
+  <div id="tabRanking" class="card" style="display:none">
+    <h3 style="margin-bottom:14px;color:#0D1B3E">ترتيب الشركات حسب عدد الوثائق</h3>
+    <div id="rankList"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
+const H={apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'};
+const ADMIN_PASS='Ghith76@@';
+
+let companies=[],boardings=[],visas=[];
+
+function msg(id,type,text){const m=document.getElementById(id);m.className='msg '+type;m.textContent=text;m.style.display='block';if(type==='ok')setTimeout(()=>m.style.display='none',3000)}
+
+document.getElementById('loginBtn').addEventListener('click',doLogin);
+document.getElementById('adminPass').addEventListener('keypress',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogin(){
+  const p=document.getElementById('adminPass').value;
+  if(p!==ADMIN_PASS)return msg('lMsg','err','كلمة المرور غير صحيحة');
+  sessionStorage.setItem('alyami_admin','1');
+  showApp();
+}
+function logout(){sessionStorage.removeItem('alyami_admin');location.reload()}
+
+if(sessionStorage.getItem('alyami_admin')==='1')showApp();
+
+function showApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  loadAll();
+}
+
+async function loadAll(){
+  const [c,b,v]=await Promise.all([
+    fetch(SB+'/rest/v1/companies?select=*&order=created_at.desc',{headers:H}).then(r=>r.json()),
+    fetch(SB+'/rest/v1/boarding_passes?select=*&order=created_at.desc',{headers:H}).then(r=>r.json()),
+    fetch(SB+'/rest/v1/evisas?select=*&order=created_at.desc',{headers:H}).then(r=>r.json())
+  ]);
+  companies=c;boardings=b;visas=v;
+  fillStats();fillFilters();renderCompanies();renderBoardings();renderVisas();renderRanking();
+}
+
+function fillStats(){
+  document.getElementById('s_companies').textContent=companies.length;
+  document.getElementById('s_companies_active').textContent=companies.filter(c=>c.active).length+' نشطة';
+  document.getElementById('s_okboard').textContent=boardings.length;
+  document.getElementById('s_evisas').textContent=visas.length;
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayCount=[...boardings,...visas].filter(x=>new Date(x.created_at)>=today).length;
+  document.getElementById('s_today').textContent=todayCount;
+}
+
+function fillFilters(){
+  const opts=companies.map(c=>`<option value="${c.id}">${c.name_ar}</option>`).join('');
+  document.getElementById('fBoardCompany').innerHTML='<option value="">كل الشركات</option>'+opts;
+  document.getElementById('fVisaCompany').innerHTML='<option value="">كل الشركات</option>'+opts;
+}
+
+function companyName(id){const c=companies.find(x=>x.id===id);return c?c.name_ar:'—'}
+function fmt(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-GB')+' '+new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}catch(e){return d}}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  ['Companies','Boardings','Visas','Ranking'].forEach(x=>{document.getElementById('tab'+x).style.display='none'});
+  document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).style.display='block';
+}
+
+function renderCompanies(){
+  const q=document.getElementById('fCompany').value.toLowerCase();
+  const filtered=companies.filter(c=>!q||c.name_ar.toLowerCase().includes(q)||c.slug.toLowerCase().includes(q));
+  const rows=filtered.map((c,i)=>{
+    const bp=boardings.filter(b=>b.company_id===c.id).length;
+    const ev=visas.filter(v=>v.company_id===c.id).length;
+    return {c,i,bp,ev,total:bp+ev};
+  });
+  document.getElementById('tbCompanies').innerHTML=rows.map(({c,i,bp,ev,total})=>`<tr>
+      <td>${i+1}</td>
+      <td><b>${c.name_ar}</b><div style="font-size:11px;color:#666">${c.name_en||''}</div></td>
+      <td><code>${c.slug}</code></td>
+      <td>${c.auth_phone||'—'}</td>
+      <td><code style="color:#dc3545">${c.passcode||'—'}</code></td>
+      <td style="text-align:center"><span class="pill blue">${bp}</span></td>
+      <td style="text-align:center"><span class="pill gold">${ev}</span></td>
+      <td style="text-align:center;font-weight:800;color:#1a4d8f;font-size:15px">${total}</td>
+      <td><span class="pill ${c.active?'ok':'off'}">${c.active?'نشطة':'معطّلة'}</span></td>
+      <td>
+        <a href="okboard.html?co=${c.slug}" target="_blank" class="btn btn-p" style="text-decoration:none">فتح</a>
+        <a href="my-docs.html?co=${c.slug}" target="_blank" class="btn btn-g" style="text-decoration:none">وثائقها</a>
+        <button class="btn" style="background:#fd7e14;color:#fff" onclick="editCompany('${c.id}')">تعديل</button>
+        <button class="btn btn-w" onclick="toggleCompany('${c.id}',${!c.active})">${c.active?'تعطيل':'تفعيل'}</button>
+        <button class="btn btn-d" onclick="delCompany('${c.id}','${c.name_ar.replace(/'/g,"&#39;")}')">حذف</button>
+      </td>
+    </tr>`).join('')||'<tr><td colspan="10" class="empty">لا توجد شركات</td></tr>';
+}
+
+function renderBoardings(){
+  const q=document.getElementById('fBoardSearch').value.toLowerCase();
+  const co=document.getElementById('fBoardCompany').value;
+  const tp=document.getElementById('fBoardType').value;
+  const filtered=boardings.filter(b=>
+    (!q||(b.passenger_name_en||'').toLowerCase().includes(q)||(b.passport_no||'').toLowerCase().includes(q))&&
+    (!co||b.company_id===co)&&
+    (!tp||b.approval_type===tp)
+  );
+  document.getElementById('tbBoardings').innerHTML=filtered.slice(0,200).map(b=>`<tr>
+    <td><code>${b.verification_no}</code></td>
+    <td>${companyName(b.company_id)}</td>
+    <td>${b.passenger_name_en}<div style="font-size:11px;color:#888">${b.passenger_name_ar||''}</div></td>
+    <td><code>${b.passport_no}</code></td>
+    <td>${b.airline||'—'} ${b.flight_no?'· '+b.flight_no:''}</td>
+    <td><span class="pill blue">${b.approval_type||b.verification_type||'—'}</span></td>
+    <td>${fmt(b.created_at)}</td>
+    <td>
+      <a href="verify-board.html?t=${b.qr_token}" target="_blank" class="btn btn-p" style="text-decoration:none">عرض</a>
+      <button class="btn btn-w" onclick="editDoc('boarding_passes','${b.id}')">تعديل</button>
+      <button class="btn btn-d" onclick="delDoc('boarding_passes','${b.id}','وثيقة')">حذف</button>
+    </td>
+  </tr>`).join('')||'<tr><td colspan="8" class="empty">لا توجد وثائق</td></tr>';
+}
+
+function renderVisas(){
+  const q=document.getElementById('fVisaSearch').value.toLowerCase();
+  const co=document.getElementById('fVisaCompany').value;
+  const filtered=visas.filter(v=>
+    (!q||(v.passenger_name_en||'').toLowerCase().includes(q)||(v.passport_no||'').toLowerCase().includes(q))&&
+    (!co||v.company_id===co)
+  );
+  document.getElementById('tbVisas').innerHTML=filtered.slice(0,200).map(v=>`<tr>
+    <td><code>${v.visa_no}</code></td>
+    <td>${companyName(v.company_id)}</td>
+    <td>${v.passenger_name_en}</td>
+    <td><code>${v.passport_no}</code></td>
+    <td>${v.destination||'—'}</td>
+    <td>${fmt(v.created_at)}</td>
+    <td>
+      <a href="verify.html?t=${v.qr_token}" target="_blank" class="btn btn-p" style="text-decoration:none">عرض</a>
+      <button class="btn btn-w" onclick="editDoc('evisas','${v.id}')">تعديل</button>
+      <button class="btn btn-d" onclick="delDoc('evisas','${v.id}','تأشيرة')">حذف</button>
+    </td>
+  </tr>`).join('')||'<tr><td colspan="7" class="empty">لا توجد تأشيرات</td></tr>';
+}
+
+function renderRanking(){
+  const counts=companies.map(c=>({
+    name:c.name_ar,
+    slug:c.slug,
+    bp:boardings.filter(b=>b.company_id===c.id).length,
+    ev:visas.filter(v=>v.company_id===c.id).length
+  })).map(x=>({...x,total:x.bp+x.ev})).sort((a,b)=>b.total-a.total);
+  const max=Math.max(1,...counts.map(c=>c.total));
+  document.getElementById('rankList').innerHTML=counts.map((c,i)=>`
+    <div style="margin-bottom:12px;padding:12px;background:#fafafa;border-radius:8px;border-right:3px solid #1a4d8f">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>${i+1}. ${c.name_ar||c.name}</b> <span style="color:#999;font-size:11px">(${c.slug})</span></div>
+        <div style="font-weight:700;color:#1a4d8f">${c.total} وثيقة</div>
+      </div>
+      <div style="font-size:11px;color:#666;margin-top:4px">OK to Board: ${c.bp} · e-Visa: ${c.ev}</div>
+      <div class="bar"><div class="bar-fill" style="width:${(c.total/max)*100}%"></div></div>
+    </div>
+  `).join('');
+}
+
+async function toggleCompany(id,newState){
+  const r=await fetch(SB+'/rest/v1/companies?id=eq.'+id,{method:'PATCH',headers:H,body:JSON.stringify({active:newState})});
+  if(!r.ok)return alert('فشل التحديث');
+  loadAll();
+}
+
+async function delCompany(id,name){
+  if(!confirm('حذف الشركة "'+name+'" وكل وثائقها؟ لا يمكن التراجع.'))return;
+  const r=await fetch(SB+'/rest/v1/companies?id=eq.'+id,{method:'DELETE',headers:H});
+  if(!r.ok)return alert('فشل الحذف');
+  loadAll();
+}
+
+async function delDoc(table,id,label){
+  if(!confirm('حذف '+label+'؟'))return;
+  const r=await fetch(SB+'/rest/v1/'+table+'?id=eq.'+id,{method:'DELETE',headers:H});
+  if(!r.ok)return alert('فشل');
+  loadAll();
+}
+
+let editCtx=null;
+const COMPANY_FIELDS=[
+  {k:'name_ar',l:'الاسم العربي *'},
+  {k:'name_en',l:'الاسم الإنجليزي'},
+  {k:'slug',l:'المعرّف (slug)'},
+  {k:'auth_phone',l:'رقم الدخول للشركة *'},
+  {k:'passcode',l:'كلمة المرور'},
+  {k:'contact_phone',l:'جوال التواصل'},
+  {k:'contact_email',l:'البريد'},
+  {k:'primary_color',l:'اللون الأساسي',t:'color'},
+  {k:'logo_url',l:'رابط الشعار'},
+  {k:'active',l:'مفعّلة',t:'select',o:['true','false']}
+];
+
+function editCompany(id){
+  const c=companies.find(x=>x.id===id);
+  if(!c)return alert('الشركة غير موجودة');
+  editCtx={table:'companies',id,row:c};
+  document.getElementById('editTitle').textContent='تعديل الشركة — '+c.name_ar;
+  document.getElementById('editFields').innerHTML=COMPANY_FIELDS.map(f=>{
+    const val=c[f.k]==null?'':c[f.k];
+    if(f.t==='select')return `<div class="fg"><label>${f.l}</label><select id="e_${f.k}">${f.o.map(o=>`<option value="${o}" ${String(val)===o?'selected':''}>${o==='true'?'نعم':o==='false'?'لا':o}</option>`).join('')}</select></div>`;
+    if(f.t==='color')return `<div class="fg"><label>${f.l}</label><input id="e_${f.k}" type="color" value="${val||'#1a4d8f'}" style="height:42px"></div>`;
+    return `<div class="fg"><label>${f.l}</label><input id="e_${f.k}" value="${val}"></div>`;
+  }).join('')+
+    '<div class="fg" style="grid-column:1/-1"><label>رفع شعار جديد (اختياري)</label><input id="e_logo_file" type="file" accept="image/*"></div>';
+  document.getElementById('editModal').style.display='flex';
+}
+
+const FIELDS={
+  boarding_passes:[
+    {k:'passenger_name_en',l:'الاسم بالإنجليزي *'},
+    {k:'passenger_name_ar',l:'الاسم بالعربي'},
+    {k:'passport_no',l:'رقم الجواز *'},
+    {k:'nationality',l:'الجنسية'},
+    {k:'date_of_birth',l:'تاريخ الميلاد',t:'date'},
+    {k:'airline',l:'شركة الطيران'},
+    {k:'flight_no',l:'رقم الرحلة'},
+    {k:'arrival_date',l:'تاريخ الوصول',t:'date'},
+    {k:'destination_country',l:'الوجهة'},
+    {k:'approval_type',l:'نوع الموافقة',t:'select',o:['تشريفات','موافقة أمنية','الرقمية']},
+    {k:'digital_no',l:'رقم الرقمية'},
+    {k:'visa_number',l:'رقم التأشيرة الرقمية'},
+    {k:'issue_date',l:'تاريخ الإصدار',t:'date'},
+    {k:'valid_until',l:'صالح حتى',t:'date'},
+    {k:'verification_no',l:'رقم التحقق'},
+    {k:'status',l:'الحالة',t:'select',o:['active','cancelled','expired']}
+  ],
+  evisas:[
+    {k:'passenger_name_en',l:'الاسم بالإنجليزي *'},
+    {k:'passenger_name_ar',l:'الاسم بالعربي'},
+    {k:'passport_no',l:'رقم الجواز *'},
+    {k:'nationality',l:'الجنسية'},
+    {k:'date_of_birth',l:'تاريخ الميلاد',t:'date'},
+    {k:'gender',l:'الجنس',t:'select',o:['','ذكر','أنثى']},
+    {k:'destination',l:'الوجهة *'},
+    {k:'flight_no',l:'رقم الرحلة'},
+    {k:'flight_date',l:'تاريخ الرحلة',t:'date'},
+    {k:'departure_city',l:'مدينة المغادرة'},
+    {k:'arrival_city',l:'مدينة الوصول'},
+    {k:'visa_type',l:'نوع التأشيرة',t:'select',o:['tourist','business','transit','student']},
+    {k:'expiry_date',l:'تاريخ الانتهاء',t:'date'},
+    {k:'visa_no',l:'رقم التأشيرة'},
+    {k:'status',l:'الحالة',t:'select',o:['active','cancelled','expired']}
+  ]
+};
+
+function editDoc(table,id){
+  const list=table==='boarding_passes'?boardings:visas;
+  const row=list.find(x=>x.id===id);
+  if(!row)return alert('الوثيقة غير موجودة');
+  editCtx={table,id,row};
+  document.getElementById('editTitle').textContent='تعديل '+(table==='boarding_passes'?'وثيقة OK to Board':'تأشيرة e-Visa')+' — '+(row.passenger_name_en||'');
+  const fields=FIELDS[table];
+  document.getElementById('editFields').innerHTML=fields.map(f=>{
+    const val=row[f.k]||'';
+    if(f.t==='select')return `<div class="fg"><label>${f.l}</label><select id="e_${f.k}">${f.o.map(o=>`<option value="${o}" ${o===val?'selected':''}>${o||'—'}</option>`).join('')}</select></div>`;
+    return `<div class="fg"><label>${f.l}</label><input id="e_${f.k}" type="${f.t||'text'}" value="${val||''}"></div>`;
+  }).join('');
+  document.getElementById('editModal').style.display='flex';
+}
+
+function closeEdit(){document.getElementById('editModal').style.display='none';editCtx=null}
+
+async function saveEdit(){
+  if(!editCtx)return;
+  const isCompany=editCtx.table==='companies';
+  const fields=isCompany?COMPANY_FIELDS:FIELDS[editCtx.table];
+  const payload={};
+  for(const f of fields){
+    const el=document.getElementById('e_'+f.k);
+    let v=el.value.trim();
+    if(f.k==='active')v=(v==='true');
+    payload[f.k]=v===''?null:v;
+  }
+  if(isCompany){
+    const fileEl=document.getElementById('e_logo_file');
+    if(fileEl&&fileEl.files&&fileEl.files[0]){
+      const file=fileEl.files[0];
+      const path=(payload.slug||editCtx.id)+'-'+Date.now()+'-'+file.name.replace(/[^a-z0-9.]/gi,'_');
+      const up=await fetch(SB+'/storage/v1/object/company-logos/'+path,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK},body:file});
+      if(!up.ok){const t=await up.text();const m=document.getElementById('editMsg');m.className='msg err';m.textContent='فشل رفع الشعار: '+t;m.style.display='block';return}
+      payload.logo_url=SB+'/storage/v1/object/public/company-logos/'+path;
+    }
+  }
+  const r=await fetch(SB+'/rest/v1/'+editCtx.table+'?id=eq.'+editCtx.id,{method:'PATCH',headers:H,body:JSON.stringify(payload)});
+  if(!r.ok){const t=await r.text();const m=document.getElementById('editMsg');m.className='msg err';m.textContent='فشل: '+t;m.style.display='block';return}
+  closeEdit();
+  loadAll();
+}
+
+function exportCSV(type){
+  const data=type==='boardings'?boardings:visas;
+  if(!data.length)return alert('لا توجد بيانات');
+  const rows=data.map(x=>({
+    'الشركة':companyName(x.company_id),
+    'الرقم':x.verification_no||x.visa_no,
+    'الاسم':x.passenger_name_en,
+    'الاسم بالعربي':x.passenger_name_ar||'',
+    'الجواز':x.passport_no,
+    'الجنسية':x.nationality||'',
+    'الميلاد':x.date_of_birth||'',
+    'الوجهة':x.destination||x.destination_country||'',
+    'الطيران':x.airline||'',
+    'الرحلة':x.flight_no||'',
+    'تاريخ السفر':x.arrival_date||x.flight_date||'',
+    'النوع':x.approval_type||x.verification_type||'',
+    'تاريخ الإصدار':fmt(x.created_at)
+  }));
+  const headers=Object.keys(rows[0]);
+  const csv='﻿'+headers.join(',')+'\n'+rows.map(r=>headers.map(h=>`"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='alyami-'+type+'-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

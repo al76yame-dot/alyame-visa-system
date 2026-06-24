@@ -30,30 +30,43 @@ button{padding:10px 18px;border:0;border-radius:6px;cursor:pointer;font-family:'
 .banner{background:#fff3cd;color:#856404;padding:12px;border-radius:6px;margin-bottom:14px;text-align:center}
 
 .doc-wrap{display:flex;justify-content:center;margin-top:14px}
-.document{width:210mm;min-height:297mm;padding:14mm;background:#fff;border:2px solid var(--c,#1a4d8f);position:relative;font-size:12px;color:#111}
-.doc-hd{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--c,#1a4d8f);padding-bottom:8mm;margin-bottom:6mm}
-.doc-hd .l{display:flex;align-items:center;gap:12px}
-.doc-hd img{width:70px;height:70px;object-fit:contain}
+.document{width:210mm;height:297mm;padding:9mm 10mm;background:#fff;border:2px solid var(--c,#1a4d8f);position:relative;font-size:10.5px;color:#111;overflow:hidden;display:flex;flex-direction:column}
+.doc-hd{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--c,#1a4d8f);padding-bottom:3mm;margin-bottom:3mm}
+.doc-hd .l{display:flex;align-items:center;gap:8px}
+.doc-hd img{width:45px;height:45px;object-fit:contain}
 .doc-hd .info b{font-size:16px;color:var(--c,#1a4d8f);display:block}
 .doc-hd .info span{font-size:10px;color:#666;display:block;margin-top:2px}
 .doc-hd .r{text-align:left;font-size:10px;color:#555}
 .doc-date{position:absolute;top:8mm;left:14mm;font-size:10px;color:#666}
-.watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.05;font-size:90px;font-weight:800;color:var(--c,#1a4d8f);transform:rotate(-20deg)}
-.doc-title{text-align:center;margin-top:4mm}
-.doc-title h2{margin:0;font-size:22px;letter-spacing:1px;color:var(--c,#1a4d8f)}
-.doc-title h3{margin:4px 0 0;font-size:16px;font-weight:500;color:#333}
-.hr{border-top:1px solid #999;margin:6mm auto;width:60%}
-.section-title{text-align:center;font-weight:700;font-size:13px;margin:5mm 0 2mm;color:var(--c,#1a4d8f)}
-.underline{width:55%;height:1px;background:#999;margin:0 auto 3mm}
+.watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.08;z-index:0}
+.watermark img{max-width:55%;max-height:55%;object-fit:contain}
+.doc-hd,.doc-title,.section-title,.underline,table.doc-table,.notes{position:relative;z-index:1}
+.doc-title{text-align:center;margin:1mm 0 2mm}
+.doc-title h1{margin:0;font-size:22px;letter-spacing:2px;color:var(--c,#1a4d8f);font-weight:800}
+.doc-title h2{margin:2px 0 0;font-size:16px;letter-spacing:1px;color:var(--c,#1a4d8f);font-weight:700}
+.doc-title h3{margin:3px 0 0;font-size:12px;font-weight:500;color:#444}
+.doc-foot{margin-top:auto;padding-top:2mm;border-top:1.5px solid var(--c,#1a4d8f);position:relative;z-index:2}
+.doc-foot .co-name{text-align:center;display:flex;align-items:center;justify-content:center;gap:10px}
+.doc-foot .co-name img{height:38px;object-fit:contain}
+.doc-foot .co-name .t{text-align:center}
+.doc-foot .co-name b{font-size:12px;color:var(--c,#1a4d8f);letter-spacing:1px;display:block}
+.doc-foot .co-name span{font-size:10px;color:#666}
+.doc-foot .rights{text-align:center;font-size:8px;color:#666;margin-top:1.5mm;border-top:1px dashed #ccc;padding-top:1mm}
+.doc-foot .rights b{color:var(--c,#1a4d8f)}
+.doc-foot .serial{display:flex;justify-content:space-between;font-size:7.5px;color:#666;margin-top:1mm;font-family:monospace}
+.doc-foot .warn{background:#fff8e1;border:1px solid #ffc107;border-radius:3px;padding:2px 8px;font-size:7.5px;color:#856404;margin-top:1.5mm;text-align:center;line-height:1.4}
+.hr{border-top:1px solid #999;margin:2mm auto;width:60%}
+.section-title{text-align:center;font-weight:700;font-size:11px;margin:2mm 0 1mm;color:var(--c,#1a4d8f)}
+.underline{width:55%;height:1px;background:#999;margin:0 auto 1mm}
 table.doc-table{width:100%;border-collapse:collapse;font-family:'Cairo','Segoe UI',sans-serif}
-table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middle;font-size:12px}
+table.doc-table td{border:1px solid #b9c2cc;padding:3px 6px;vertical-align:middle;font-size:10px}
 .label-cell{background:#e7eef7;font-weight:600;width:35%}
 .qr-cell{text-align:center;vertical-align:middle;width:30%}
-.qr-cell canvas{width:90px;height:90px}
-.notes{margin-top:6mm;border:2px solid #d33;border-radius:4px;padding:5mm;color:#c62828}
-.notes h4{margin:0 0 3mm;font-size:13px;color:#c62828}
-.notes p{margin:1.5mm 0;font-size:11px;line-height:1.5}
-@media print{body{background:#fff;padding:0}.brand,.panel,.actions{display:none!important}.doc-wrap{margin:0}.document{border:2px solid var(--c,#1a4d8f);box-shadow:none}@page{size:A4;margin:0}}
+.qr-cell canvas,.qr-cell img{width:70px;height:70px}
+.notes{margin-top:2mm;border:1.5px solid #d33;border-radius:3px;padding:2mm 3mm;color:#c62828}
+.notes h4{margin:0 0 1mm;font-size:10px;color:#c62828}
+.notes p{margin:0.5mm 0;font-size:9px;line-height:1.4}
+@media print{html,body{background:#fff;padding:0;margin:0;width:210mm;height:297mm}.brand,.panel,.actions,#status{display:none!important}.doc-wrap{margin:0;padding:0;display:block}.document{border:none;box-shadow:none;width:210mm;height:297mm;margin:0;page-break-inside:avoid;page-break-after:avoid}@page{size:A4 portrait;margin:0}}
 </style>
 </head>
 <body>
@@ -64,13 +77,18 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
     <div class="brand">
       <img id="cLogo" alt="">
       <div class="t"><b id="cName">—</b><span id="cName2">OK to Board System</span></div>
+      <div id="coStats" style="margin-right:auto;display:none;gap:8px">
+        <div style="background:#e8f4ff;padding:8px 12px;border-radius:8px;text-align:center;min-width:80px"><div style="font-size:18px;font-weight:800;color:#1a4d8f" id="coTotal">0</div><div style="font-size:10px;color:#666">إجمالي</div></div>
+        <div style="background:#fff3cd;padding:8px 12px;border-radius:8px;text-align:center;min-width:80px"><div style="font-size:18px;font-weight:800;color:#856404" id="coMonth">0</div><div style="font-size:10px;color:#666">هذا الشهر</div></div>
+        <div style="background:#d4edda;padding:8px 12px;border-radius:8px;text-align:center;min-width:80px"><div style="font-size:18px;font-weight:800;color:#155724" id="coToday">0</div><div style="font-size:10px;color:#666">اليوم</div></div>
+      </div>
     </div>
 
     <div class="panel" id="loginPanel" style="display:none">
       <h2>تسجيل الدخول</h2>
       <div id="lMsg" class="msg"></div>
       <div class="grid">
-        <div><label>البريد</label><input id="lEmail" type="email"></div>
+        <div><label>رقم الدخول</label><input id="lEmail" placeholder="+218..."></div>
         <div><label>كلمة المرور</label><input id="lPass" type="password"></div>
       </div>
       <div class="actions"><button class="btn-p" onclick="login()">دخول</button></div>
@@ -96,18 +114,23 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
           <div><label>الوجهة</label><input id="dest" value="Egypt | مصر"></div>
           <div><label>تاريخ الإصدار</label><input id="issue" type="date"></div>
           <div><label>صالح حتى</label><input id="valid" type="date"></div>
-          <div><label>نوع التحقق</label>
-            <select id="vtype">
-              <option>Pre-Travel Clearance</option>
-              <option>Visa Verification</option>
-              <option>Boarding Approval</option>
+          <div><label>نوع الموافقة</label>
+            <select id="approvalType" onchange="toggleDigital()">
+              <option value="تشريفات">تشريفات</option>
+              <option value="موافقة أمنية">موافقة أمنية</option>
+              <option value="الرقمية">الرقمية</option>
             </select>
           </div>
+          <div id="digitalWrap" style="display:none"><label>رقم الرقمية *</label><input id="digitalNo" placeholder="رقم الرقمية"></div>
+          <div><label>رقم التأشيرة الرقمية</label><input id="visaNumber" placeholder="رقم التأشيرة"></div>
+          <input id="vtype" type="hidden" value="Pre-Travel Clearance">
         </div>
         <div id="genMsg" class="msg" style="margin-top:10px"></div>
         <div class="actions">
           <button class="btn-p" onclick="generate()">توليد الوثيقة</button>
           <button class="btn-s" onclick="window.print()" id="printBtn" style="display:none">طباعة / حفظ PDF</button>
+          <button class="btn-s" style="background:#25D366;display:none" onclick="sendWhatsApp()" id="waBtn">إرسال WhatsApp</button>
+          <a href="my-docs.html" id="myDocsBtn" style="background:#6c757d;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block">وثائقي السابقة</a>
         </div>
       </div>
     </div>
@@ -115,7 +138,7 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
     <div class="doc-wrap" id="docWrap" style="display:none">
       <div class="document">
         <div class="doc-date" id="d_date"></div>
-        <div class="watermark" id="d_wm">EGYPT</div>
+        <div class="watermark"><img id="d_wm_img"></div>
 
         <div class="doc-hd">
           <div class="l">
@@ -129,7 +152,8 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
         </div>
 
         <div class="doc-title">
-          <h2>OK TO BOARD VERIFICATION</h2>
+          <h1>E-VISA TO EGYPT</h1>
+          <h2>OK TO BOARD</h2>
           <h3>تأكيد صحة السفر</h3>
         </div>
         <div class="hr"></div>
@@ -147,7 +171,7 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
             <td id="d_issue"></td>
           </tr>
           <tr>
-            <td class="label-cell">Verification Type<br>نوع التحقق</td>
+            <td class="label-cell">نوع الموافقة<br>Approval Type</td>
             <td id="d_vtype" style="text-align:center"></td>
             <td id="d_valid"></td>
           </tr>
@@ -155,6 +179,14 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
             <td class="label-cell"></td>
             <td></td>
             <td class="label-cell">Valid Until<br>صالح حتى</td>
+          </tr>
+          <tr id="d_digital_row" style="display:none">
+            <td class="label-cell">رقم الرقمية<br>Digital Reference</td>
+            <td colspan="2" id="d_digital_no" style="text-align:center;font-weight:700;color:var(--c,#1a4d8f)"></td>
+          </tr>
+          <tr id="d_visa_row" style="display:none">
+            <td class="label-cell">رقم التأشيرة الرقمية<br>Visa Number</td>
+            <td colspan="2" id="d_visa_no" style="text-align:center;font-weight:700;color:var(--c,#1a4d8f)"></td>
           </tr>
         </table>
 
@@ -186,35 +218,78 @@ table.doc-table td{border:1px solid #b9c2cc;padding:6px 8px;vertical-align:middl
 
         <div class="notes">
           <h4>IMPORTANT NOTES | إشعارات هامة</h4>
-          <p>- This document confirms that the passenger has been pre-cleared for travel as of the date of issue.</p>
-          <p style="text-align:right">هذا المستند يؤكد أن المسافر تمت الموافقة المسبقة على سفره اعتباراً من تاريخ الإصدار</p>
+          <p>- This document confirms that the passenger has been pre-cleared for travel to Egypt as of the date of issue.</p>
+          <p style="text-align:right">هذا المستند يؤكد أن المسافر تمت الموافقة المسبقة على سفره إلى مصر اعتباراً من تاريخ الإصدار</p>
           <p>- Passenger must present valid passport with minimum 6 months validity at the time of travel.</p>
-          <p style="text-align:right">يجب على المسافر تقديم جواز سفر ساري مع صلاحية لا تقل عن 6 أشهر</p>
-          <p>- The final decision regarding boarding and entry rests with the security authorities at port of entry.</p>
-          <p style="text-align:right">القرار النهائي للصعود والدخول يقع على الجهات الأمنية في منفذ الدخول</p>
+          <p style="text-align:right">يجب على المسافر تقديم جواز سفر ساري مع صلاحية لا تقل عن 6 أشهر في وقت السفر</p>
+          <p>- This verification is subject to change based on instructions from the security authorities.</p>
+          <p style="text-align:right">هذا التحقق يخضع للتغيير بناءً على تعليمات الجهات الأمنية</p>
+          <p>- The final decision regarding boarding and entry rests with the boarding officer and the security authorities at port of entry.</p>
+          <p style="text-align:right">القرار النهائي للصعود والدخول يقع على عاتق ضابط الجوازات و الجهات الأمنية في منفذ الدخول</p>
+        </div>
+
+        <div class="doc-foot">
+          <div class="co-name">
+            <img id="f_logo1">
+            <div class="t">
+              <b id="f_name_en">—</b>
+              <span id="f_name_ar">—</span>
+            </div>
+          </div>
+          <div class="rights"><b id="f_co_short">—</b> — All rights reserved <span id="f_year">2026</span> © جميع الحقوق محفوظة.</div>
+          <div class="serial">
+            <span>Serial No: <b id="f_serial">—</b></span>
+            <span>Document ID: <b id="f_docid">—</b></span>
+            <span>Hash: <b id="f_hash">—</b></span>
+            <span>Issued: <b id="f_issued">—</b></span>
+          </div>
+          <div class="warn">
+            ⚠ Reprinting, modifying, or altering this document after issuance is strictly prohibited and constitutes forgery.<br>
+            يُمنع منعاً باتاً إعادة طباعة هذه الوثيقة أو تعديلها أو تغيير أي من بياناتها بعد إصدارها — وأي تلاعب يعدّ تزويراً يعاقب عليه القانون.
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
-const sb=supabase.createClient(SB,SK);
-let company=null;
+const H={apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'};
+let company=null,lastDoc=null;
 
 function showStatus(html){document.getElementById('status').innerHTML='<div class="banner">'+html+'</div>'}
 function msg(id,type,t){var m=document.getElementById(id);m.className='msg '+type;m.textContent=t;setTimeout(()=>{m.style.display='none'},5000)}
 function fmt(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-GB')}catch(e){return d}}
+function toggleDigital(){const a=document.getElementById('approvalType').value;document.getElementById('digitalWrap').style.display=(a==='الرقمية')?'block':'none'}
+
+function sendWhatsApp(){
+  if(!lastDoc)return;
+  let phone=prompt('رقم الجوال (مع رمز الدولة بدون +):','218');
+  if(!phone)return;
+  phone=phone.replace(/[^0-9]/g,'');
+  const verifyUrl=location.origin+'/verify-board.html?t='+lastDoc.qr_token;
+  const msg=
+    '✈️ *وثيقة OK to Board صادرة*\n\n'+
+    'الراكب: '+lastDoc.passenger_name_en+'\n'+
+    'الجواز: '+lastDoc.passport_no+'\n'+
+    'الوجهة: '+(lastDoc.destination_country||'').split('|')[0].trim()+'\n'+
+    'رقم التحقق: '+lastDoc.verification_no+'\n'+
+    'نوع الموافقة: '+(lastDoc.approval_type||lastDoc.verification_type)+'\n\n'+
+    '🔎 للتحقق من الوثيقة:\n'+verifyUrl+'\n\n'+
+    'صادرة عن: '+company.name_ar;
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
 
 async function init(){
   const slug=new URLSearchParams(location.search).get('co');
   if(!slug)return showStatus('⚠ يجب تحديد الشركة: <code>?co=company-slug</code>');
 
-  const{data,error}=await sb.from('companies').select('*').eq('slug',slug).eq('active',true).maybeSingle();
-  if(error||!data)return showStatus('⚠ الشركة "'+slug+'" غير موجودة أو معطّلة');
+  const r=await fetch(SB+'/rest/v1/companies?slug=eq.'+encodeURIComponent(slug)+'&active=eq.true&select=*',{headers:H});
+  const arr=await r.json();
+  const data=arr&&arr[0];
+  if(!data)return showStatus('⚠ الشركة "'+slug+'" غير موجودة أو معطّلة');
 
   company=data;
   document.documentElement.style.setProperty('--c',data.primary_color||'#1a4d8f');
@@ -230,26 +305,40 @@ async function init(){
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('issue').value=today;
 
-  const{data:{session}}=await sb.auth.getSession();
-  if(session)document.getElementById('formPanel').style.display='block';
+  const saved=sessionStorage.getItem('co_auth_'+slug);
+  if(saved==='1'){document.getElementById('formPanel').style.display='block';loadCoStats();}
   else document.getElementById('loginPanel').style.display='block';
 }
 init();
 
-async function login(){
-  const{error}=await sb.auth.signInWithPassword({
-    email:document.getElementById('lEmail').value.trim(),
-    password:document.getElementById('lPass').value
-  });
-  if(error)return msg('lMsg','err',error.message);
+function login(){
+  const phone=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value.trim();
+  if(phone!==company.auth_phone||pass!==company.passcode){return msg('lMsg','err','رقم الدخول أو كلمة المرور غير صحيحة')}
+  sessionStorage.setItem('co_auth_'+company.slug,'1');
   document.getElementById('loginPanel').style.display='none';
   document.getElementById('formPanel').style.display='block';
+  loadCoStats();
+}
+
+async function loadCoStats(){
+  try{
+    const r=await fetch(SB+'/rest/v1/boarding_passes?company_id=eq.'+company.id+'&select=created_at',{headers:H});
+    const arr=await r.json();
+    const m=new Date();m.setDate(1);m.setHours(0,0,0,0);
+    const t=new Date();t.setHours(0,0,0,0);
+    document.getElementById('coTotal').textContent=arr.length;
+    document.getElementById('coMonth').textContent=arr.filter(x=>new Date(x.created_at)>=m).length;
+    document.getElementById('coToday').textContent=arr.filter(x=>new Date(x.created_at)>=t).length;
+    document.getElementById('coStats').style.display='flex';
+  }catch(e){}
 }
 
 async function generate(){
   const nameEn=document.getElementById('name_en').value.trim();
   const passport=document.getElementById('passport').value.trim();
   if(!nameEn||!passport)return msg('genMsg','err','الاسم الإنجليزي ورقم الجواز مطلوبان');
+  if(document.getElementById('approvalType').value==='الرقمية'&&!document.getElementById('digitalNo').value.trim())return msg('genMsg','err','رقم الرقمية مطلوب');
 
   const vno='OKB-'+Date.now().toString().slice(-9);
   const payload={
@@ -265,17 +354,24 @@ async function generate(){
     arrival_date:document.getElementById('arrival').value||null,
     destination_country:document.getElementById('dest').value.trim()||null,
     verification_type:document.getElementById('vtype').value,
+    approval_type:document.getElementById('approvalType').value,
+    digital_no:document.getElementById('approvalType').value==='الرقمية'?document.getElementById('digitalNo').value.trim()||null:null,
+    visa_number:document.getElementById('visaNumber').value.trim()||null,
     issue_date:document.getElementById('issue').value||new Date().toISOString().split('T')[0],
     valid_until:document.getElementById('valid').value||null
   };
-  const{data,error}=await sb.from('boarding_passes').insert(payload).select().single();
-  if(error)return msg('genMsg','err',error.message);
+  const r=await fetch(SB+'/rest/v1/boarding_passes',{method:'POST',headers:{...H,Prefer:'return=representation'},body:JSON.stringify(payload)});
+  if(!r.ok){const t=await r.text();return msg('genMsg','err','فشل: '+t)}
+  const arr=await r.json();
+  const data=arr[0];
 
   document.getElementById('d_date').textContent='Issued: '+fmt(data.issue_date);
   document.getElementById('d_vno').textContent=data.verification_no;
   document.getElementById('d_vno_top').textContent=data.verification_no;
   document.getElementById('d_issue').textContent=fmt(data.issue_date);
-  document.getElementById('d_vtype').textContent=data.verification_type;
+  document.getElementById('d_vtype').textContent=data.approval_type||data.verification_type;
+  if(data.approval_type==='الرقمية'&&data.digital_no){document.getElementById('d_digital_row').style.display='';document.getElementById('d_digital_no').textContent=data.digital_no;}else{document.getElementById('d_digital_row').style.display='none';}
+  if(data.visa_number){document.getElementById('d_visa_row').style.display='';document.getElementById('d_visa_no').textContent=data.visa_number;}else{document.getElementById('d_visa_row').style.display='none';}
   document.getElementById('d_valid').textContent=fmt(data.valid_until);
   document.getElementById('d_name').textContent=(data.passenger_name_ar?data.passenger_name_ar+' / ':'')+data.passenger_name_en;
   document.getElementById('d_passport').textContent=data.passport_no;
@@ -284,13 +380,27 @@ async function generate(){
   document.getElementById('d_airline').textContent=data.airline||'—';
   document.getElementById('d_flight').textContent=data.flight_no||'—';
   document.getElementById('d_arrival').textContent=fmt(data.arrival_date);
-  document.getElementById('d_wm').textContent=(data.destination_country||'').split('|')[0].trim().toUpperCase();
-
-  const verifyUrl=location.origin+location.pathname.replace('okboard.html','verify-board.html')+'?t='+data.qr_token;
-  QRCode.toCanvas(document.getElementById('qr'),verifyUrl,{width:110,margin:1});
+  document.getElementById('f_serial').textContent=data.verification_no;
+  document.getElementById('f_docid').textContent=data.id.split('-')[0].toUpperCase();
+  document.getElementById('f_hash').textContent=data.qr_token.substring(0,12).toUpperCase();
+  document.getElementById('f_issued').textContent=new Date().toLocaleString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  lastDoc=data;
+  document.getElementById('myDocsBtn').href='my-docs.html?co='+company.slug;
+  loadCoStats();
+  if(company.logo_url){document.getElementById('d_wm_img').src=company.logo_url;document.getElementById('f_logo1').src=company.logo_url;}
+  document.getElementById('f_name_en').textContent=(company.name_en||company.name_ar||'').toUpperCase();
+  document.getElementById('f_name_ar').textContent=company.name_ar||'';
+  document.getElementById('f_co_short').textContent=(company.name_en||company.name_ar||'').toUpperCase();
+  document.getElementById('f_year').textContent=new Date().getFullYear();
 
   document.getElementById('docWrap').style.display='flex';
   document.getElementById('printBtn').style.display='inline-block';
+  document.getElementById('waBtn').style.display='inline-block';
+  const verifyUrl=location.origin+location.pathname.replace('okboard.html','verify-board.html')+'?t='+data.qr_token;
+  try{
+    if(typeof QRCode!=='undefined'){QRCode.toCanvas(document.getElementById('qr'),verifyUrl,{width:110,margin:1})}
+    else{const img=document.createElement('img');img.src='https://api.qrserver.com/v1/create-qr-code/?size=110x110&data='+encodeURIComponent(verifyUrl);img.width=110;img.height=110;const qr=document.getElementById('qr');qr.replaceWith(img);img.id='qr';}
+  }catch(e){console.error('QR error',e)}
   msg('genMsg','ok','تم توليد الوثيقة. رقم: '+data.verification_no);
   document.getElementById('docWrap').scrollIntoView({behavior:'smooth'});
 }
