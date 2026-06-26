@@ -291,7 +291,7 @@ async function lookupPassenger(){
     ]);
     const prev=bp[0]||ev[0];
     if(!prev){hint.textContent='✨ مسافر جديد';hint.style.color='#666';return}
-    hint.innerHTML='✓ مسافر سابق — <a href="javascript:void(0)" onclick="fillPrev('+ "'"+prev.id+"'"+ ',\\''+(bp[0]?'bp':'ev')+'\\')" style="color:#198754;text-decoration:underline">تعبئة بياناته</a>';
+    hint.innerHTML='✓ مسافر سابق — <a href="javascript:void(0)" onclick="fillPrev()" style="color:#198754;text-decoration:underline">تعبئة بياناته</a>';
     hint.style.color='#198754';
     window._lastPrev=prev;
   }catch(e){hint.textContent=''}
