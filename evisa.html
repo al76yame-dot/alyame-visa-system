@@ -90,7 +90,7 @@ button{padding:10px 18px;border:0;border-radius:6px;cursor:pointer;font-family:'
         <div class="grid">
           <div><label>الاسم بالعربي</label><input id="nameAr"></div>
           <div><label>الاسم بالإنجليزي *</label><input id="nameEn" placeholder="JOHN SMITH"></div>
-          <div><label>رقم الجواز *</label><input id="passport"></div>
+          <div><label>رقم الجواز * <span id="passportHint" style="font-size:10px;color:#1a4d8f;font-weight:600"></span></label><input id="passport" onblur="lookupPassenger()"></div>
           <div><label>الجنسية</label><input id="nat"></div>
           <div><label>تاريخ الميلاد</label><input id="dob" type="date"></div>
           <div><label>الجنس</label><select id="gender"><option value="">—</option><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option></select></div>
@@ -170,6 +170,33 @@ const SB='https://wcknrzuedgkcyygeqmqw.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indja25yenVlZGdrY3l5Z2VxbXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MzkwNzAsImV4cCI6MjA5MTMxNTA3MH0.3gU4BYDVjYyl9FoafLGVjcWtv8YFcNRCSTmDtn9ep1Q';
 const H={apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'};
 let company=null,lastDoc=null;
+async function lookupPassenger(){
+  const p=document.getElementById('passport').value.trim();
+  const hint=document.getElementById('passportHint');
+  if(!p||p.length<3){hint.textContent='';return}
+  hint.textContent='⏳ بحث...';
+  try{
+    const [bp,ev]=await Promise.all([
+      fetch(SB+'/rest/v1/boarding_passes?passport_no=eq.'+encodeURIComponent(p)+'&order=created_at.desc&limit=1&select=*',{headers:H}).then(r=>r.json()),
+      fetch(SB+'/rest/v1/evisas?passport_no=eq.'+encodeURIComponent(p)+'&order=created_at.desc&limit=1&select=*',{headers:H}).then(r=>r.json())
+    ]);
+    const prev=ev[0]||bp[0];
+    if(!prev){hint.textContent='✨ مسافر جديد';hint.style.color='#666';return}
+    hint.innerHTML='✓ مسافر سابق — <a href="javascript:void(0)" onclick="fillPrev()" style="color:#198754;text-decoration:underline">تعبئة بياناته</a>';
+    hint.style.color='#198754';
+    window._lastPrev=prev;
+  }catch(e){hint.textContent=''}
+}
+function fillPrev(){
+  const p=window._lastPrev;if(!p)return;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v};
+  set('nameAr',p.passenger_name_ar);
+  set('nameEn',p.passenger_name_en);
+  set('nat',p.nationality);
+  set('dob',p.date_of_birth);
+  set('gender',p.gender);
+  document.getElementById('passportHint').innerHTML='✓ تم تعبئة بيانات المسافر';
+}
 function sendWhatsApp(){
   if(!lastDoc)return;
   let phone=prompt('رقم جوال العميل (مع رمز الدولة بدون +):','218');

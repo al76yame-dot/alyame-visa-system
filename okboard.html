@@ -100,7 +100,7 @@ table.doc-table td{border:1px solid #b9c2cc;padding:3px 6px;vertical-align:middl
         <div class="grid">
           <div><label>اسم المسافر (عربي)</label><input id="name_ar" placeholder="وسام الهمالي منصور محمد"></div>
           <div><label>Passenger Name (English) *</label><input id="name_en" placeholder="WISAM ALHAMALY..."></div>
-          <div><label>رقم جواز السفر *</label><input id="passport" placeholder="AC827160"></div>
+          <div><label>رقم جواز السفر * <span id="passportHint" style="font-size:10px;color:#1a4d8f;font-weight:600"></span></label><input id="passport" placeholder="AC827160" onblur="lookupPassenger()"></div>
           <div><label>تاريخ الميلاد</label><input id="birth" type="date"></div>
           <div><label>الجنسية</label><input id="nationality" value="ليبيا | Libya"></div>
         </div>
@@ -263,6 +263,34 @@ function showStatus(html){document.getElementById('status').innerHTML='<div clas
 function msg(id,type,t){var m=document.getElementById(id);m.className='msg '+type;m.textContent=t;setTimeout(()=>{m.style.display='none'},5000)}
 function fmt(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('en-GB')}catch(e){return d}}
 function toggleDigital(){const a=document.getElementById('approvalType').value;document.getElementById('digitalWrap').style.display=(a==='الرقمية')?'block':'none'}
+
+async function lookupPassenger(){
+  const p=document.getElementById('passport').value.trim();
+  const hint=document.getElementById('passportHint');
+  if(!p||p.length<3){hint.textContent='';return}
+  hint.textContent='⏳ بحث...';
+  try{
+    const [bp,ev]=await Promise.all([
+      fetch(SB+'/rest/v1/boarding_passes?passport_no=eq.'+encodeURIComponent(p)+'&order=created_at.desc&limit=1&select=*',{headers:H}).then(r=>r.json()),
+      fetch(SB+'/rest/v1/evisas?passport_no=eq.'+encodeURIComponent(p)+'&order=created_at.desc&limit=1&select=*',{headers:H}).then(r=>r.json())
+    ]);
+    const prev=bp[0]||ev[0];
+    if(!prev){hint.textContent='✨ مسافر جديد';hint.style.color='#666';return}
+    hint.innerHTML='✓ مسافر سابق — <a href="javascript:void(0)" onclick="fillPrev('+ "'"+prev.id+"'"+ ',\\''+(bp[0]?'bp':'ev')+'\\')" style="color:#198754;text-decoration:underline">تعبئة بياناته</a>';
+    hint.style.color='#198754';
+    window._lastPrev=prev;
+  }catch(e){hint.textContent=''}
+}
+
+function fillPrev(){
+  const p=window._lastPrev;if(!p)return;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v};
+  set('name_ar',p.passenger_name_ar);
+  set('name_en',p.passenger_name_en);
+  set('nationality',p.nationality);
+  set('birth',p.date_of_birth);
+  document.getElementById('passportHint').innerHTML='✓ تم تعبئة بيانات المسافر';
+}
 
 function sendWhatsApp(){
   if(!lastDoc)return;
