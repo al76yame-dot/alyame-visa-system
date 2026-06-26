@@ -313,11 +313,19 @@ function sendWhatsApp(){
 async function init(){
   const slug=new URLSearchParams(location.search).get('co');
   if(!slug)return showStatus('⚠ يجب تحديد الشركة: <code>?co=company-slug</code>');
+  showStatus('⏳ جاري التحميل... ('+slug+')');
 
-  const r=await fetch(SB+'/rest/v1/companies?slug=eq.'+encodeURIComponent(slug)+'&active=eq.true&select=*',{headers:H});
-  const arr=await r.json();
+  let arr;
+  try{
+    const ctrl=new AbortController();const tm=setTimeout(()=>ctrl.abort(),15000);
+    const r=await fetch(SB+'/rest/v1/companies?slug=eq.'+encodeURIComponent(slug)+'&active=eq.true&select=*',{headers:H,signal:ctrl.signal});
+    clearTimeout(tm);
+    if(!r.ok)return showStatus('⚠ فشل الاتصال بقاعدة البيانات: HTTP '+r.status);
+    arr=await r.json();
+  }catch(e){return showStatus('⚠ فشل الاتصال: '+e.message+'<br>تحقق من الإنترنت أو جرب VPN')}
   const data=arr&&arr[0];
   if(!data)return showStatus('⚠ الشركة "'+slug+'" غير موجودة أو معطّلة');
+  document.getElementById('status').innerHTML='';
 
   company=data;
   document.documentElement.style.setProperty('--c',data.primary_color||'#1a4d8f');
