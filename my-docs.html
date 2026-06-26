@@ -5,9 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>وثائقي السابقة</title>
 <script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(rs=>{
-    if(rs.length>0){rs.forEach(r=>r.unregister());caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>location.reload(true));}
+if('serviceWorker' in navigator && !sessionStorage.getItem('sw_cleaned')){
+  navigator.serviceWorker.getRegistrations().then(async rs=>{
+    if(rs.length>0){
+      sessionStorage.setItem('sw_cleaned','1');
+      for(const r of rs){await r.unregister()}
+      if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}
+      location.reload();
+    }
   });
 }
 </script>
