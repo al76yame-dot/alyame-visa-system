@@ -254,7 +254,7 @@
       <div class="pg" id="pg-visas">
         <div class="card">
           <div class="ch"><span class="ct">أنواع التأشيرات والأسعار</span><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn bg2 bsm" onclick="openAddVisa()">+ إضافة</button><button class="btn bo2 bsm" onclick="restoreDefaultVisas()">🔄 استعادة الافتراضي</button><button class="btn bs3 bsm" onclick="exportVisas()">⬇️ تنزيل JSON</button><label class="btn bs3 bsm" style="cursor:pointer">⬆️ رفع JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importVisas(this)"></label></div></div>
-          <div style="overflow-x:auto"><table><thead><tr><th>الجنسية</th><th>التأشيرة</th><th>نوعها</th><th>السعر</th><th>مدة الإنجاز</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="visa-tb"></tbody></table></div>
+          <div style="overflow-x:auto"><table class="visa-table"><thead><tr><th>التأشيرة / الجنسية</th><th>النوع</th><th>مدة الإنجاز</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="visa-tb"></tbody></table></div>
         </div>
       </div>
 
@@ -1054,7 +1054,7 @@
     <div class="fgrid">
       <div class="fg"><label>أيقونة</label><input type="text" id="v-icon" placeholder="✈️" style="font-size:22px;text-align:center"></div>
       <div class="fg"><label>السعر ($)</label><input type="number" id="v-price" placeholder="0" min="0" style="font-size:18px;font-weight:700;text-align:center"></div>
-      <div class="fg full"><label>اسم التأشيرة</label><input type="text" id="v-name" placeholder="مثال: تأشيرة سياحية"></div>
+      <div class="fg full"><label>التأشيرة / الجنسية</label><input type="text" id="v-name" placeholder="مثال: تأشيرة مصر · تأشيرة السعودية"></div>
       <div class="fg full"><label>وصف مختصر</label><input type="text" id="v-desc" placeholder="مثال: لجميع الدول"></div>
       <div class="fg full"><label>مدة الإنجاز</label><input type="text" id="v-duration" placeholder="مثال: 7-14 يوم عمل"></div>
       <div class="fg full"><label>أنواع التأشيرة المتاحة</label>

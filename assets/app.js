@@ -1136,19 +1136,17 @@ function renderVisas(){
   tb.innerHTML='';
   visas.forEach(function(v){
     var row=document.createElement('tr');
-    var typesStr=(v.types&&v.types.length)?v.types.join(' / '):'-';
-    var natsStr=(v.nationalities&&v.nationalities.length)?
-      (v.nationalities[0]==='جميع الجنسيات'?'<span class="badge ba2">الكل</span>':v.nationalities.slice(0,2).join('، ')+(v.nationalities.length>2?'...':'')):
-      '<span class="badge ba2">الكل</span>';
-    var durStr=v.duration||'-';
-    row.innerHTML='<td style="font-size:11px">'+natsStr+'</td>'
-      +'<td style="font-weight:600"><span style="font-size:18px;margin-left:4px">'+v.i+'</span>'+v.n+'<div style="font-size:10px;color:var(--text2)">'+( v.desc||'')+'</div></td>'
-      +'<td style="font-size:11px;color:var(--text2)">'+typesStr+'</td>'
-      +'<td><span style="background:var(--gold-l);color:var(--gold-d);border-radius:6px;padding:2px 9px;font-weight:700;font-size:12px">'+formatMoney(v.p)+'</span></td>'
-      +'<td style="font-size:11px;color:var(--blue)">⏱ '+durStr+'</td>'
-      +'<td><span class="badge '+(v.on?'ba2':'bx')+'">'+(v.on?'مفعّلة':'معطّلة')+'</span></td>'
+    var typesStr=(v.types&&v.types.length)?v.types.join(' · '):'—';
+    var isAll=!v.nationalities||!v.nationalities.length||v.nationalities[0]==='جميع الجنسيات';
+    var natLine=isAll?'<span class="badge ba2" style="font-size:11px">لجميع الجنسيات</span>':'<span style="font-size:11.5px;color:var(--text2)">👤 '+esc(v.nationalities.join('، '))+'</span>';
+    var durStr=v.duration||'—';
+    row.innerHTML='<td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:26px">'+v.i+'</span><div><div style="font-size:15px;font-weight:800;color:var(--navy)">'+esc(v.n)+'</div>'+(v.desc?'<div style="font-size:11px;color:var(--text3);margin-top:1px">'+esc(v.desc)+'</div>':'')+'<div style="margin-top:3px">'+natLine+'</div></div></div></td>'
+      +'<td style="font-size:13px;font-weight:600;color:var(--text)">'+esc(typesStr)+'</td>'
+      +'<td><span style="display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:700;color:var(--blue)">⏱ '+esc(durStr)+'</span></td>'
+      +'<td><span style="background:linear-gradient(135deg,var(--gold-l),#F9F1D8);color:var(--gold-d);border:1px solid rgba(201,162,39,.35);border-radius:8px;padding:5px 12px;font-weight:800;font-size:15px;white-space:nowrap">'+formatMoney(v.p)+'</span></td>'
+      +'<td><span class="badge '+(v.on?'ba2':'bx')+'" style="font-size:12px">'+(v.on?'مفعّلة':'معطّلة')+'</span></td>'
       +'<td></td>';
-    var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';
+    var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';td.style.flexWrap='wrap';
     var btnE=document.createElement('button');btnE.className='btn bg2 bsm';btnE.textContent='تعديل';btnE.addEventListener('click',function(){editVisa(v.id);});
     var btnT=document.createElement('button');btnT.className='btn '+(v.on?'bd2':'bs3')+' bsm';btnT.textContent=v.on?'تعطيل':'تفعيل';btnT.addEventListener('click',function(){toggleV(v.id);});
     var btnD=document.createElement('button');btnD.className='btn bo2 bsm';btnD.textContent='حذف';btnD.addEventListener('click',function(){delV(v.id);});
