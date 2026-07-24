@@ -1138,10 +1138,10 @@ function renderVisas(){
     var row=document.createElement('tr');
     var typesStr=(v.types&&v.types.length)?v.types.join(' · '):'—';
     var isAll=!v.nationalities||!v.nationalities.length||v.nationalities[0]==='جميع الجنسيات';
-    var natName=isAll?'جميع الجنسيات':esc(v.nationalities.join('، '));
+    var natSub=isAll?'':'<div style="font-size:11.5px;font-weight:500;color:var(--text3);margin-top:1px">'+esc(v.nationalities.join('، '))+'</div>';
     var durStr=v.duration||'—';
     var notesStr=v.desc?esc(v.desc):'—';
-    row.innerHTML='<td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:26px">'+v.i+'</span><div style="font-size:15px;font-weight:800;color:var(--navy)">'+esc(v.n)+'<div style="font-size:11.5px;font-weight:500;color:var(--text3);margin-top:1px">'+natName+'</div></div></div></td>'
+    row.innerHTML='<td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:26px">'+v.i+'</span><div style="font-size:15px;font-weight:800;color:var(--navy)">'+esc(v.n)+natSub+'</div></div></td>'
       +'<td style="font-size:13.5px;font-weight:600;color:var(--text)">'+esc(typesStr)+'</td>'
       +'<td><span style="display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:700;color:var(--blue)">⏱ '+esc(durStr)+'</span></td>'
       +'<td><span style="background:linear-gradient(135deg,var(--gold-l),#F9F1D8);color:var(--gold-d);border:1px solid rgba(201,162,39,.35);border-radius:8px;padding:5px 12px;font-weight:800;font-size:15px;white-space:nowrap">'+formatMoney(v.p)+'</span></td>'
