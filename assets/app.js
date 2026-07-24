@@ -1645,7 +1645,11 @@ function showUploadLocal(zone,file,key,zoneId,label){
 }
 
 // ===== OCR: قراءة بيانات الجواز تلقائياً =====
+function mrzToDigits(s){
+  return String(s||'').replace(/[OQDU]/g,'0').replace(/[ILTJ]/g,'1').replace(/Z/g,'2').replace(/A/g,'4').replace(/S/g,'5').replace(/[GC]/g,'6').replace(/[BR]/g,'8').replace(/[^0-9]/g,'');
+}
 function ymdFromMRZ(yymmdd,isExpiry){
+  yymmdd=mrzToDigits(yymmdd);
   if(!/^\d{6}$/.test(yymmdd))return '';
   var yy=parseInt(yymmdd.slice(0,2),10);
   var mm=yymmdd.slice(2,4);
@@ -1678,6 +1682,11 @@ function parseMRZ(text){
       if(!result.nationality)result.nationality=l2.slice(10,13).replace(/</g,'');
       result.dob=ymdFromMRZ(l2.slice(13,19),false);
       result.expiry=ymdFromMRZ(l2.slice(21,27),true);
+      // احتياطي: لو فشل الاستخراج بالمواضع الثابتة، جرّب بنمط مرن
+      if(!result.dob||!result.expiry){
+        var mm2=l2.match(/([A-Z<]{3})([0-9OQDUILTJZASGCBR<]{6})[0-9<]([MFX<])([0-9OQDUILTJZASGCBR<]{6})/);
+        if(mm2){if(!result.dob)result.dob=ymdFromMRZ(mm2[2],false);if(!result.expiry)result.expiry=ymdFromMRZ(mm2[4],true);}
+      }
       return result;
     }
   }
@@ -1703,17 +1712,36 @@ var AIRLINE_MAP=[
   [/QATAR|QR\b/,'القطرية'],[/EMIRATES|EK\b/,'طيران الإمارات'],[/ETIHAD|EY\b/,'الاتحاد'],[/FLYDUBAI|FZ\b/,'فلاي دبي'],
   [/ROYAL\s*JORDANIAN|JORDANIAN|RJ\b/,'الملكية الأردنية'],[/MIDDLE\s*EAST|MEA/,'طيران الشرق الأوسط']
 ];
-var MONTHS={JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12'};
+var MONTHS={JAN:'01',FEB:'02',MAR:'03',APR:'04',MAY:'05',JUN:'06',JUL:'07',AUG:'08',SEP:'09',OCT:'10',NOV:'11',DEC:'12',
+  JANUARY:'01',FEBRUARY:'02',MARCH:'03',APRIL:'04',JUNE:'06',JULY:'07',AUGUST:'08',SEPTEMBER:'09',SEPT:'09',OCTOBER:'10',NOVEMBER:'11',DECEMBER:'12'};
+// أسماء المدن (عربي/إنجليزي كامل) → عربي، احتياطي لو ما وُجدت أكواد المطارات
+var CITY_NAMES=[
+  [/TRIPOLI|طرابلس/,'طرابلس'],[/BENGHAZI|بنغازي/,'بنغازي'],[/MISRATA|MISURATA|مصراتة/,'مصراتة'],[/SEBHA|SABHA|سبها/,'سبها'],[/TOBRUK|طبرق/,'طبرق'],[/BAYDA|البيضاء/,'البيضاء'],
+  [/CAIRO|القاهرة/,'القاهرة'],[/ALEXANDRIA|الاسكندرية|الإسكندرية/,'الإسكندرية'],[/HURGHADA|الغردقة/,'الغردقة'],[/SHARM|شرم/,'شرم الشيخ'],
+  [/ISTANBUL|اسطنبول|إسطنبول/,'اسطنبول'],[/TUNIS|تونس/,'تونس'],[/JEDDAH|JIDDAH|جدة/,'جدة'],[/RIYADH|الرياض/,'الرياض'],[/MADINAH|MEDINA|المدينة/,'المدينة'],
+  [/DUBAI|دبي/,'دبي'],[/ABU\s*DHABI|أبوظبي|ابوظبي/,'أبوظبي'],[/DOHA|الدوحة/,'الدوحة'],[/KUWAIT|الكويت/,'الكويت'],[/AMMAN|عمان|عمّان/,'عمّان'],[/BEIRUT|بيروت/,'بيروت'],[/KHARTOUM|الخرطوم/,'الخرطوم'],[/ISTANBUL|LONDON|لندن/,'لندن']
+];
+function findCities(up){
+  var found=[];
+  CITY_NAMES.forEach(function(c){var m=up.match(c[0]);if(m)found.push({name:c[1],idx:m.index});});
+  found.sort(function(a,b){return a.idx-b.idx;});
+  var uniq=[];found.forEach(function(f){if(!uniq.some(function(u){return u.name===f.name;}))uniq.push(f);});
+  return uniq;
+}
 function parseTicketDate(text){
   var t=text.toUpperCase();
+  var MO='(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|SEPT|OCTOBER|NOVEMBER|DECEMBER|JAN|FEB|MAR|APR|JUN|JUL|AUG|SEP|OCT|NOV|DEC)';
   // 12 JAN 2026 / 12JAN26 / 12-JAN-2026
-  var m=t.match(/\b(\d{1,2})[\s\-\/]?(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)[\s\-\/]?(\d{2,4})\b/);
+  var m=t.match(new RegExp('\\b(\\d{1,2})[\\s\\-\\/.]?'+MO+'[\\s\\-\\/.]?(\\d{2,4})\\b'));
   if(m){var y=m[3].length===2?('20'+m[3]):m[3];return y+'-'+MONTHS[m[2]]+'-'+String(m[1]).padStart(2,'0');}
+  // JAN 12 2026 / MARCH 15, 2026
+  m=t.match(new RegExp('\\b'+MO+'[\\s\\-\\/.]?(\\d{1,2})[,\\s]+(\\d{2,4})\\b'));
+  if(m){var y2=m[3].length===2?('20'+m[3]):m[3];return y2+'-'+MONTHS[m[1]]+'-'+String(m[2]).padStart(2,'0');}
   // 2026-01-12
-  m=t.match(/\b(20\d{2})[\-\/](\d{1,2})[\-\/](\d{1,2})\b/);
+  m=t.match(/\b(20\d{2})[\-\/.](\d{1,2})[\-\/.](\d{1,2})\b/);
   if(m)return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');
-  // 12/01/2026 or 12-01-2026 (day first)
-  m=t.match(/\b(\d{1,2})[\-\/](\d{1,2})[\-\/](20\d{2}|\d{2})\b/);
+  // 12/01/2026 or 12-01-2026 or 12.01.2026 (day first)
+  m=t.match(/\b(\d{1,2})[\-\/.](\d{1,2})[\-\/.](20\d{2}|\d{2})\b/);
   if(m){var yy=m[3].length===2?('20'+m[3]):m[3];var mo=parseInt(m[2],10);if(mo>=1&&mo<=12)return yy+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');}
   return '';
 }
@@ -1733,6 +1761,12 @@ function parseTicket(text){
   // نمط route مثل TIP-CAI أو TIP/CAI
   var rt=up.match(/\b([A-Z]{3})\s?[\-\/>→]\s?([A-Z]{3})\b/);
   if(rt&&IATA_MAP[rt[1]]&&IATA_MAP[rt[2]]){res.from=IATA_MAP[rt[1]];res.to=IATA_MAP[rt[2]];}
+  // احتياطي: أسماء المدن بالكامل (عربي/إنجليزي) لو لم تُقرأ الأكواد
+  if(!res.from||!res.to){
+    var cities=findCities(up);
+    if(!res.from&&cities[0])res.from=cities[0].name;
+    if(!res.to&&cities[1])res.to=cities[1].name;
+  }
   // التاريخ
   res.date=parseTicketDate(up);
   // PNR / رقم الحجز: كلمة 6 خانات حروف وأرقام قرب كلمة مفتاحية
@@ -1750,6 +1784,24 @@ function parseTicket(text){
   return res;
 }
 function setIfEmpty(id,val){var e=document.getElementById(id);if(e&&val&&!e.value)e.value=val;}
+// استخراج الاسم العربي من نص OCR العربي للجواز (أفضل تخمين)
+function extractArabicName(text){
+  var exclude=/جواز|سفر|جنسي|تاريخ|ميلاد|الرقم|الوطن|مكان|النوع|الجنس|انتهاء|صلاح|مملك|جمهور|هيئة|اللقب|رقم|دولة|صدور|صدار|بلد|توقيع|سلطة|الحامل|جماهير|العربية|الليبية|الاشتراكية|العظمى|وزارة|داخلية/;
+  var raw=text.split(/\r?\n/);
+  function clean(l){return (l||'').replace(/[^؀-ۿ\s]/g,' ').replace(/\s+/g,' ').trim();}
+  function ok(l){var w=l.split(' ').filter(function(x){return x.length>=2;});return w.length>=2&&w.length<=4&&l.length>=6&&l.length<=34&&!exclude.test(l);}
+  // 1) السطر الذي يلي عنوان "الاسم/Name" أو نفس السطر بعد الكلمة
+  for(var i=0;i<raw.length;i++){
+    if(/الاسم|full\s*name|\bname\b|holder/i.test(raw[i])){
+      var same=clean(raw[i]);
+      if(ok(same))return same;
+      for(var j=i+1;j<Math.min(i+3,raw.length);j++){var nx=clean(raw[j]);if(ok(nx))return nx;}
+    }
+  }
+  // 2) خلاف ذلك: أول سطر عربي معقول من الأعلى
+  for(var k=0;k<raw.length;k++){var c=clean(raw[k]);if(ok(c))return c;}
+  return '';
+}
 
 async function triggerOCR(key,file,zoneId){
   if(key!=='up1'&&key!=='up2')return;
@@ -1781,8 +1833,18 @@ async function triggerOCR(key,file,zoneId){
         if(fullEn)document.getElementById('f-en').value=fullEn;
         var natEl=document.getElementById('f-nat');
         if(natEl&&parsed.nationality){natEl.value=NAT_MAP[parsed.nationality]||parsed.nationality;}
+        // قراءة الاسم العربي (تمريرة ثانية باللغة العربية)
+        var arEl=document.getElementById('f-ar');
+        if(arEl&&!arEl.value){
+          overlay.innerHTML='🔍 جاري قراءة الاسم بالعربي...';
+          try{
+            var arRes=await Tesseract.recognize(file,'ara');
+            var arName=extractArabicName(arRes.data.text||'');
+            if(arName)arEl.value=arName;
+          }catch(e2){}
+        }
         overlay.style.background='var(--green)';
-        overlay.innerHTML='✅ تم قراءة بيانات الجواز تلقائياً';
+        overlay.innerHTML='✅ تم قراءة بيانات الجواز'+(arEl&&arEl.value?' والاسم العربي':'');
         setTimeout(function(){if(overlay&&overlay.parentNode)overlay.parentNode.removeChild(overlay);},3500);
       } else {
         overlay.style.background='var(--amber)';
