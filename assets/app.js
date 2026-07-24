@@ -1138,12 +1138,14 @@ function renderVisas(){
     var row=document.createElement('tr');
     var typesStr=(v.types&&v.types.length)?v.types.join(' · '):'—';
     var isAll=!v.nationalities||!v.nationalities.length||v.nationalities[0]==='جميع الجنسيات';
-    var natLine=isAll?'<span class="badge ba2" style="font-size:11px">لجميع الجنسيات</span>':'<span style="font-size:11.5px;color:var(--text2)">👤 '+esc(v.nationalities.join('، '))+'</span>';
+    var natName=isAll?'جميع الجنسيات':esc(v.nationalities.join('، '));
     var durStr=v.duration||'—';
-    row.innerHTML='<td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:26px">'+v.i+'</span><div><div style="font-size:15px;font-weight:800;color:var(--navy)">'+esc(v.n)+'</div>'+(v.desc?'<div style="font-size:11px;color:var(--text3);margin-top:1px">'+esc(v.desc)+'</div>':'')+'<div style="margin-top:3px">'+natLine+'</div></div></div></td>'
-      +'<td style="font-size:13px;font-weight:600;color:var(--text)">'+esc(typesStr)+'</td>'
+    var notesStr=v.desc?esc(v.desc):'—';
+    row.innerHTML='<td><div style="display:flex;align-items:center;gap:9px"><span style="font-size:26px">'+v.i+'</span><div style="font-size:15px;font-weight:800;color:var(--navy)">'+esc(v.n)+'<div style="font-size:11.5px;font-weight:500;color:var(--text3);margin-top:1px">'+natName+'</div></div></div></td>'
+      +'<td style="font-size:13.5px;font-weight:600;color:var(--text)">'+esc(typesStr)+'</td>'
       +'<td><span style="display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:700;color:var(--blue)">⏱ '+esc(durStr)+'</span></td>'
       +'<td><span style="background:linear-gradient(135deg,var(--gold-l),#F9F1D8);color:var(--gold-d);border:1px solid rgba(201,162,39,.35);border-radius:8px;padding:5px 12px;font-weight:800;font-size:15px;white-space:nowrap">'+formatMoney(v.p)+'</span></td>'
+      +'<td style="font-size:12.5px;color:var(--text2);max-width:200px">'+notesStr+'</td>'
       +'<td><span class="badge '+(v.on?'ba2':'bx')+'" style="font-size:12px">'+(v.on?'مفعّلة':'معطّلة')+'</span></td>'
       +'<td></td>';
     var td=row.lastElementChild;td.style.display='flex';td.style.gap='4px';td.style.flexWrap='wrap';
