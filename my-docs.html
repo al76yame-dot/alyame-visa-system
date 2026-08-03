@@ -62,6 +62,19 @@ tr:hover{background:#fafafa}
 </style>
 </head>
 <body>
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:12px;padding:22px;max-width:650px;width:100%;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:2px solid #eee;padding-bottom:8px">
+      <h2 id="emTitle" style="color:#0D1B3E;font-size:16px">تعديل الوثيقة</h2>
+      <button onclick="closeEdit()" style="background:#dc3545;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;font-family:inherit">إغلاق</button>
+    </div>
+    <div id="emFields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px"></div>
+    <div style="margin-top:14px;text-align:left">
+      <button onclick="saveEdit()" style="background:var(--c,#1a4d8f);color:#fff;border:0;border-radius:8px;padding:11px 26px;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px">حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 <div id="status"></div>
 
@@ -194,6 +207,7 @@ function renderOkb(){
     <td>${fmtT(b.created_at)}</td>
     <td>
       <a class="btn btn-p" href="verify-board.html?t=${b.qr_token}" target="_blank">عرض</a>
+      <button class="btn" style="background:#fd7e14;color:#fff" onclick="editDoc('okb','${b.id}')">تعديل</button>
       <button class="btn btn-w" onclick='sendWA(${JSON.stringify({type:"okb",data:b})})'>WhatsApp</button>
     </td>
   </tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:30px;color:#999">لا توجد وثائق</td></tr>';
@@ -210,9 +224,71 @@ function renderEv(){
     <td>${fmtT(v.created_at)}</td>
     <td>
       <a class="btn btn-p" href="verify.html?t=${v.qr_token}" target="_blank">عرض</a>
+      <button class="btn" style="background:#fd7e14;color:#fff" onclick="editDoc('ev','${v.id}')">تعديل</button>
       <button class="btn btn-w" onclick='sendWA(${JSON.stringify({type:"ev",data:v})})'>WhatsApp</button>
     </td>
   </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;padding:30px;color:#999">لا توجد تأشيرات</td></tr>';
+}
+
+let editCtx=null;
+const EDIT_FIELDS={
+  okb:[
+    {k:'passenger_name_en',l:'الاسم بالإنجليزي *'},
+    {k:'passenger_name_ar',l:'الاسم بالعربي'},
+    {k:'passport_no',l:'رقم الجواز *'},
+    {k:'nationality',l:'الجنسية'},
+    {k:'date_of_birth',l:'تاريخ الميلاد',t:'date'},
+    {k:'airline',l:'شركة الطيران'},
+    {k:'flight_no',l:'رقم الرحلة'},
+    {k:'arrival_date',l:'تاريخ الوصول',t:'date'},
+    {k:'destination_country',l:'الوجهة'},
+    {k:'approval_type',l:'نوع الموافقة',t:'select',o:['تشريفات','موافقة أمنية','الرقمية']},
+    {k:'digital_no',l:'رقم الرقمية'},
+    {k:'visa_number',l:'رقم التأشيرة الرقمية'},
+    {k:'issue_date',l:'تاريخ الإصدار',t:'date'},
+    {k:'valid_until',l:'صالح حتى',t:'date'}
+  ],
+  ev:[
+    {k:'passenger_name_en',l:'الاسم بالإنجليزي *'},
+    {k:'passenger_name_ar',l:'الاسم بالعربي'},
+    {k:'passport_no',l:'رقم الجواز *'},
+    {k:'nationality',l:'الجنسية'},
+    {k:'date_of_birth',l:'تاريخ الميلاد',t:'date'},
+    {k:'destination',l:'الوجهة *'},
+    {k:'flight_no',l:'رقم الرحلة'},
+    {k:'flight_date',l:'تاريخ الرحلة',t:'date'},
+    {k:'departure_city',l:'مدينة المغادرة'},
+    {k:'arrival_city',l:'مدينة الوصول'},
+    {k:'expiry_date',l:'تاريخ الانتهاء',t:'date'}
+  ]
+};
+
+function editDoc(type,id){
+  const row=(type==='okb'?okbs:evs).find(x=>x.id===id);
+  if(!row)return alert('الوثيقة غير موجودة');
+  editCtx={type,id};
+  document.getElementById('emTitle').textContent='تعديل — '+(row.passenger_name_en||'');
+  document.getElementById('emFields').innerHTML=EDIT_FIELDS[type].map(f=>{
+    const val=row[f.k]==null?'':row[f.k];
+    if(f.t==='select')return '<div><label>'+f.l+'</label><select id="em_'+f.k+'">'+f.o.map(o=>'<option value="'+o+'" '+(o===val?'selected':'')+'>'+o+'</option>').join('')+'</select></div>';
+    return '<div><label>'+f.l+'</label><input id="em_'+f.k+'" type="'+(f.t||'text')+'" value="'+val+'"></div>';
+  }).join('');
+  document.getElementById('editModal').style.display='flex';
+}
+function closeEdit(){document.getElementById('editModal').style.display='none';editCtx=null}
+
+async function saveEdit(){
+  if(!editCtx)return;
+  const table=editCtx.type==='okb'?'boarding_passes':'evisas';
+  const payload={};
+  EDIT_FIELDS[editCtx.type].forEach(f=>{
+    const v=document.getElementById('em_'+f.k).value.trim();
+    payload[f.k]=v||null;
+  });
+  const r=await fetch(SB+'/rest/v1/'+table+'?id=eq.'+editCtx.id,{method:'PATCH',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!r.ok){alert('فشل الحفظ: '+await r.text());return}
+  closeEdit();
+  showApp();
 }
 
 function sendWA(item){
